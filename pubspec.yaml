@@ -27,10 +27,10 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   cached_network_image: ^2.0.0
-  flutter_plugin_pdf_viewer: 1.0.7
+  flutter_full_pdf_viewer: ^1.0.6
 
-  path_provider:
-  http:
+  path_provider: ^1.6.5
+  http: ^0.12.0+4
   font_awesome_flutter: ^8.4.0
   flutter_screenutil: ^1.0.2
   flutter_swiper: ^1.1.4
