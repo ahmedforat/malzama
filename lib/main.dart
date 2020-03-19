@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 
 import 'login.dart';
+import 'src/features/specify_user_type/specify_user_type.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +15,7 @@ void main() {
      return MaterialApp(
        debugShowCheckedModeBanner: false,
 
-       home: AuthThreePage(),
+       home: SpecifyUserTypeWidget(),
      );
    }
  }
