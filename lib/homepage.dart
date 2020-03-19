@@ -12,7 +12,7 @@ class SchoolList extends StatefulWidget {
 }
 
 class _SchoolListState extends State<SchoolList> {
-  final TextStyle dropdownMenuItem =
+  final TextStyle dropdownMenuItem  =
   TextStyle(color: Colors.black, fontSize: 18);
 
 
@@ -21,7 +21,7 @@ class _SchoolListState extends State<SchoolList> {
 
   final List<Map> schoolLists = [
     {
-      "name": "Edgewick Scchol",
+      "name": "ewick Scchol",
       "Doctor": "572 Statan NY, 12483",
       "type": "Higher Secondary School",
       "logoText":
