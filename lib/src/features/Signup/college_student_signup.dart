@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 
 
-
-class College_student_Login extends StatefulWidget {
+class CollegeStudent extends StatefulWidget {
   @override
-  _College_student_LoginState createState() => _College_student_LoginState();
+  _CollegeStudentState createState() => _CollegeStudentState();
 }
 
-class _College_student_LoginState extends State<College_student_Login> {
+class _CollegeStudentState extends State<CollegeStudent> {
   final _formKey = GlobalKey<FormState>();
   var name = TextEditingController();
 
-  String _name;
 
+  String _name;
 
   String _mySelection;
   String _mySelection1;
   String _mySelection2;
   String _mySelection3;
+  String _mySelection4;
   List<Map> _myJason = [
     {
       "id" : 0,
@@ -83,6 +82,29 @@ class _College_student_LoginState extends State<College_student_Login> {
       "id" : 1,
       "image":"assets/12.jpg",
       "name": "Female"
+    },
+
+  ];
+  List<Map> _myJason3 =[
+    {
+      "id" : 0,
+      "image":"assets/12.jpg",
+      "name": "level1"
+    },
+    {
+      "id" : 1,
+      "image":"assets/12.jpg",
+      "name": "level2"
+    },
+    {
+      "id" : 1,
+      "image":"assets/12.jpg",
+      "name": "level3"
+    },
+    {
+      "id" : 1,
+      "image":"assets/12.jpg",
+      "name": "level4"
     },
 
   ];
@@ -166,7 +188,7 @@ class _College_student_LoginState extends State<College_student_Login> {
                               alignedDropdown: true,
                               child: DropdownButton<String>(
                                 isDense: true,
-                                hint: new Text("select City"),
+                                hint: new Text("select university"),
                                 value: _mySelection,
                                 onChanged: (String newValue){
                                   setState(() {
@@ -212,7 +234,7 @@ class _College_student_LoginState extends State<College_student_Login> {
                               alignedDropdown: true,
                               child: DropdownButton<String>(
                                 isDense: true,
-                                hint: new Text("Type of study"),
+                                hint: new Text(" College Type"),
                                 value: _mySelection1,
                                 onChanged: (String newValue){
                                   setState(() {
@@ -264,14 +286,14 @@ class _College_student_LoginState extends State<College_student_Login> {
                               alignedDropdown: true,
                               child: DropdownButton<String>(
                                 isDense: true,
-                                hint: new Text("select school"),
-                                value: _mySelection3,
+                                hint: new Text("select section"),
+                                value: _mySelection2,
                                 onChanged: (String newValue){
                                   setState(() {
-                                    _mySelection3 = newValue;
+                                    _mySelection2 = newValue;
 
                                   });
-                                  print (_mySelection3);
+                                  print (_mySelection2);
                                 },
                                 items: _myJason1.map((Map map){
                                   return new DropdownMenuItem<String>(
@@ -316,14 +338,60 @@ class _College_student_LoginState extends State<College_student_Login> {
                               alignedDropdown: true,
                               child: DropdownButton<String>(
                                 isDense: true,
-                                hint: new Text("Gender"),
-                                value: _mySelection2,
+                                hint: new Text("select level"),
+                                value: _mySelection3,
                                 onChanged: (String newValue){
                                   setState(() {
-                                    _mySelection2 = newValue;
+                                    _mySelection3 = newValue;
 
                                   });
-                                  print (_mySelection2);
+                                  print (_mySelection3);
+                                },
+                                items: _myJason3.map((Map map){
+                                  return new DropdownMenuItem<String>(
+                                    value: map["name"].toString(),
+
+                                    child: Row (
+                                      children: <Widget>[
+                                        Image.asset(map[
+                                        "image"],width: 25,),
+                                        Container(
+                                          margin: EdgeInsets.only(left: 10),
+                                          child: Text(map["name"]),
+                                        ),
+
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+
+                              ),
+                            )))
+                          ],
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                            border: Border.all(width: 1,color: Colors.grey),
+                            borderRadius: BorderRadius.circular(10)
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Expanded(child: DropdownButtonHideUnderline(child: ButtonTheme(
+                              alignedDropdown: true,
+                              child: DropdownButton<String>(
+                                isDense: true,
+                                hint: new Text("Gender"),
+                                value: _mySelection4,
+                                onChanged: (String newValue){
+                                  setState(() {
+                                    _mySelection4 = newValue;
+
+                                  });
+                                  print (_mySelection4);
                                 },
                                 items: _myJason2.map((Map map){
                                   return new DropdownMenuItem<String>(

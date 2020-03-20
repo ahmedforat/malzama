@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'Cont.login.dart';
+
 
 class AuthThreePage extends StatefulWidget {
 
@@ -299,11 +299,7 @@ class SignupForm extends StatelessWidget {
             ),
             child: Text("Signup"),
             onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          ContLogin()));
+
             },
           ),
         ],
