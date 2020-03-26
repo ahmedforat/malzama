@@ -108,14 +108,13 @@ class _CollegeStudentState extends State<CollegeStudent> {
     },
 
   ];
+ 
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xff696b9e),
-        leading: IconButton(icon: Icon(Icons.arrow_back_ios), onPressed: (){
-          Navigator.pop(context);
-        }),
         title: Text("malzama"),
       ),
       body: SafeArea(child: Container(
