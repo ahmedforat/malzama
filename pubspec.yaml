@@ -34,6 +34,8 @@ dependencies:
   flutter_swiper: ^1.1.4
   flutter_custom_clippers: ^0.1.1
   provider: ^4.0.4
+  google_fonts: ^0.3.10
+  connectivity: ^0.4.8+2
 
 
 

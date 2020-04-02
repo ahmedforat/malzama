@@ -112,3 +112,14 @@ class NoInternetConnection implements SnackBarException {
   @override
   int get statusCode => 0;
 }
+
+class AlreadyReported implements SnackBarException{
+  String _message;
+  AlreadyReported({String message = 'Already reported'}):_message = message;
+  @override
+  String get message => _message;
+
+  @override
+  int get statusCode => 208;
+
+}

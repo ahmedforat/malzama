@@ -197,7 +197,7 @@ class _AuthThreePageState extends State<AuthThreePage> {
 
 class LoginForm extends StatelessWidget {
   const LoginForm({
-    resizeToAvoidBottomPadding: true,
+     resizeToAvoidBottomPadding: true,
     Key key,
   }) : super(key: key);
 
