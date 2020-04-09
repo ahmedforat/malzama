@@ -8,9 +8,11 @@ class Api {
 
   static const String _LOCALHOST_URL = 'http://10.0.2.2:3000';
   static const String _CLOUD_URL = 'https://tranquil-wave-65358.herokuapp.com';
+  static const String LOGOUT_URL = 'https://tranquil-wave-65358.herokuapp.com/api/v1/access/logout';
+  static const String LOGIN_URL = 'https://tranquil-wave-65358.herokuapp.com/api/v1/access/login';
 
 
-  static String getSuitableUrl({String accountType,bool fromCloud = false}) {
+  static String getSuitableUrl({String accountType,bool fromCloud = true}) {
     String path;
     switch (accountType) {
       case 'AccountType.COLLEGE_LECTURER':

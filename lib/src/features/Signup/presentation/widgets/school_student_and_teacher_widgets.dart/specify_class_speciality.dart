@@ -13,9 +13,9 @@ class SelectClassSpeciality extends StatelessWidget {
   Widget build(BuildContext context) {
     print('gender rebuilding');
     ScreenUtil.init(context);
-    SchoolStudentPostSignupState state = 
-        Provider.of<SchoolStudentPostSignupState>(context, listen: false);
-    return Selector<SchoolStudentPostSignupState, String>(
+    SchoolStudentPostSignUpState state = 
+        Provider.of<SchoolStudentPostSignUpState>(context, listen: false);
+    return Selector<SchoolStudentPostSignUpState, String>(
         selector: (context, stateProvider) => stateProvider.speciality,
         builder: (context, _, __) => Container(
               margin: EdgeInsets.only(top: ScreenUtil().setSp(50)),

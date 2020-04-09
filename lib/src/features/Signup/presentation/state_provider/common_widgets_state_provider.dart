@@ -5,9 +5,63 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/references/references.dart';
 
-
-
 class CommonWidgetsStateProvider with ChangeNotifier {
+  FocusNode _firstNameNode;
+  FocusNode _lastNameNode;
+  FocusNode _emailNode;
+  FocusNode _passwordNode;
+  FocusNode _phoneNode;
+
+  FocusNode get firstNameNode => _firstNameNode;
+  FocusNode get lastNameNode => _lastNameNode;
+  FocusNode get emailNode => _emailNode;
+  FocusNode get passwordNode => _passwordNode;
+  FocusNode get phoneNode => _phoneNode;
+
+  List<FocusNode> get listOfAllNodes =>[
+    _firstNameNode,
+    _lastNameNode,
+    _emailNode,
+    _passwordNode,
+    _phoneNode
+  ];
+
+  void fillTheFields(){
+    _firstName = 'Karrar';
+    _lastName = 'Mohammed';
+    _email = 'k.mohammed1133@gmail.com';
+    _password = '07718239773';
+    _phone = '07718239773';
+    notifyListeners();
+  }
+
+   void clearTheFields(){
+    _firstName = null;
+    _lastName = null;
+    _email = null;
+    _password = null;
+    _phone = null;
+    notifyListeners();
+  }
+
+
+  CommonWidgetsStateProvider(){
+    _firstNameNode = new FocusNode();
+    _lastNameNode = new FocusNode();
+    _emailNode = new FocusNode();
+    _passwordNode = new FocusNode();
+    _phoneNode = new FocusNode();
+  }
+  @override
+  void dispose() {
+    _firstNameNode.dispose();
+    _lastNameNode.dispose();
+    _emailNode.dispose();
+    _passwordNode.dispose();
+    _phoneNode.dispose();
+    print('Common State has been disposed');
+    super.dispose();
+  }
 
   String _firstName;
   String _lastName;
@@ -24,9 +78,7 @@ class CommonWidgetsStateProvider with ChangeNotifier {
   AccountType _accountType;
   List<String> _allCountries;
 
-  List<String> get  allCountries => _allCountries;
-
-
+  List<String> get allCountries => _allCountries;
 
   String get stage => _stage;
 
@@ -38,7 +90,6 @@ class CommonWidgetsStateProvider with ChangeNotifier {
   AccountType get accountType => _accountType;
 
   void setAccountTypeTo(AccountType type) => _accountType = type;
-
 
   String get firstName => _firstName;
 
@@ -55,10 +106,6 @@ class CommonWidgetsStateProvider with ChangeNotifier {
   String get phone => _phone;
 
   String get speciality => _speciality;
-
-
-
-
 
   void updateSpeciality({String update}) {
     if (_speciality != update) {
@@ -95,9 +142,6 @@ class CommonWidgetsStateProvider with ChangeNotifier {
     }
   }
 
-
-
-
   void updateFirstName({String update}) {
     _firstName = update;
   }
@@ -126,11 +170,10 @@ class CommonWidgetsStateProvider with ChangeNotifier {
   }
 
   void updateCity({String newProvince}) {
-    if(_province != newProvince){
+    if (_province != newProvince) {
       _province = newProvince;
       notifyListeners();
     }
-
   }
 
   void showState() {
@@ -143,20 +186,20 @@ class CommonWidgetsStateProvider with ChangeNotifier {
     print(_province);
   }
 
-  Map<String,String> fetchDataAsMap()
-   => {
-    'firstName':_firstName.trim(),
-     'lastName':_lastName.trim(),
-     'email':_email.trim(),
-     'phone':_phone.trim(),
-     'password':_password,
-     'gender':_gender,
-     'province':_province,
-     'account_type':_accountType.toString()
-   };
+  Map<String, String> fetchDataAsMap() => {
+        'firstName': _firstName.trim(),
+        'lastName': _lastName.trim(),
+        'email': _email.trim(),
+        'phone': _phone.trim(),
+        'password': _password,
+        'gender': _gender,
+        'province': _province,
+        'account_type': _accountType.toString()
+      };
 
-    Future<void> loadAllCountries()async{
-    String data = await rootBundle.loadString('assets/iraq_schools_and_unis/all_world_countries.json');
+  Future<void> loadAllCountries() async {
+    String data = await rootBundle
+        .loadString('assets/iraq_schools_and_unis/all_world_countries.json');
     _allCountries = List<String>.from(json.decode(data)['countries']);
   }
 }

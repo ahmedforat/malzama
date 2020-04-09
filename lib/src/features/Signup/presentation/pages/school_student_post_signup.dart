@@ -1,39 +1,77 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/core/api/contract_response.dart';
-import 'package:malzama/src/core/debugging/debugging_widgets.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/api/contract_response.dart';
+import '../../../../core/debugging/debugging_widgets.dart';
+import '../../../../core/platform/services/caching_services.dart';
+import '../../../../core/platform/services/file_system_services.dart';
 import '../../../../core/references/references.dart';
 import '../../usecases/signup_usecase.dart';
-import '../state_provider/common_widgets_state_provider.dart';
 import '../state_provider/school_student_state_provider.dart';
 import '../widgets/school_student_and_teacher_widgets.dart/select_baghdad_sub_region.dart';
 import '../widgets/school_student_and_teacher_widgets.dart/select_school_section_widget..dart';
 import '../widgets/school_student_and_teacher_widgets.dart/select_school_widgets.dart';
 import '../widgets/school_student_and_teacher_widgets.dart/specify_class_speciality.dart';
 
-class SchoolStudentPostSignUpWidget extends StatefulWidget {
-  @override
-  _SchoolStudentPostSignUpWidgetState createState() =>
-      _SchoolStudentPostSignUpWidgetState();
-}
+class SchoolStudentPostSignUpWidget extends StatelessWidget {
+  
+  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  String accountType;
+  Map<String,dynamic> commonState;
+  SchoolStudentPostSignUpState schoolState;
+  Future<bool> _loadData()async{
+    if(accountType != null && commonState != null && schoolState.isCompleted){
+      return true;
+    }else{
+      
+      if(accountType == null){
+        accountType = await CachingServices.getField(key: 'accountType');
+        
+      }
+      if(commonState == null){
+        String fetchedData = await CachingServices.getField(key: 'commonState');
+        commonState = json.decode(fetchedData);
+      }
+      if(!schoolState.isCompleted){
+        await schoolState.initialize();
+      }
+      return true;
+    }
 
-class _SchoolStudentPostSignUpWidgetState
-    extends State<SchoolStudentPostSignUpWidget> {
-  GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  }
 
   @override
   Widget build(BuildContext context) {
-    CommonWidgetsStateProvider commonState =
-        Provider.of<CommonWidgetsStateProvider>(context, listen: false);
+     schoolState =
+        Provider.of<SchoolStudentPostSignUpState>(context, listen: false);
     ScreenUtil.init(context);
-    return Scaffold(
+    return FutureBuilder(
+      future: _loadData(),
+      builder: (BuildContext context,AsyncSnapshot snapshot){
+        if(!snapshot.hasData){
+           return Container(
+            color: Colors.white,
+            child: Center(child: CircularProgressIndicator(),));
+        }else if(snapshot.hasError){
+          return Center(child: Text('an error has occured'),);
+        }else{
+          print('this is the account type $accountType');
+          return _buildSchoolPostSignUpPage(context,commonState);
+        }
+      },
+    );
+  }
+
+  Widget _buildSchoolPostSignUpPage(BuildContext context,Map commonState)
+  => Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
         backgroundColor: Color(0xff696b9e),
         title: Text(
-            ' ${References.accountTypeDictionary[commonState.accountType]}'),
+            ' ${References.accountTypeDictionary[accountType]}'),
       ),
       body: Container(
         padding: EdgeInsets.all(ScreenUtil().setSp(130)),
@@ -42,10 +80,10 @@ class _SchoolStudentPostSignUpWidgetState
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             SizedBox(height: ScreenUtil().setHeight(170)),
-            if (commonState.province == 'baghdad') SelectBaghdadSubRegion(),
-            SelectSchoolSectionWidget(),
+            if (commonState['province'] == 'baghdad') SelectBaghdadSubRegion(),
+            SelectSchoolSectionWidget(commonState: commonState,),
             SelectSchoolWidget(),
-            if (commonState.accountType == AccountType.SCHOOL_TEACHER)
+            if (accountType == AccountType.SCHOOL_TEACHER.toString())
               SelectClassSpeciality(),
             SizedBox(
               height: ScreenUtil().setHeight(100),
@@ -56,7 +94,7 @@ class _SchoolStudentPostSignUpWidgetState
                   onPressed: executionState.isLoading
                       ? null
                       : () async {
-                          _handleOnDone(scaffoldKey, context, commonState);
+                          _handleOnDone(scaffoldKey, context, commonState,accountType);
                         },
                   child: executionState.isLoading
                       ? CircularProgressIndicator()
@@ -69,14 +107,13 @@ class _SchoolStudentPostSignUpWidgetState
         ),
       ),
     );
-  }
 }
 
 void _handleOnDone(GlobalKey<ScaffoldState> key, BuildContext context,
-    CommonWidgetsStateProvider commonState) async {
-  SchoolStudentPostSignupState schoolState =
-      Provider.of<SchoolStudentPostSignupState>(context, listen: false);
-  if (commonState.province == 'baghdad' &&
+    Map commonState,String accountType) async {
+  SchoolStudentPostSignUpState schoolState =
+      Provider.of<SchoolStudentPostSignUpState>(context, listen: false);
+  if (commonState['province'] == 'baghdad' &&
       schoolState.baghdadSubRegion == null) {
     key.currentState.showSnackBar(_getSnackBar('please subRegion is required'));
   } else if (schoolState.schoolSection == null) {
@@ -84,15 +121,17 @@ void _handleOnDone(GlobalKey<ScaffoldState> key, BuildContext context,
         .showSnackBar(_getSnackBar('please your study section is required'));
   } else if (schoolState.school == null) {
     key.currentState.showSnackBar(_getSnackBar('please school is required'));
-  } else if (commonState.accountType == AccountType.SCHOOL_TEACHER &&
+  } else if (accountType == AccountType.SCHOOL_TEACHER.toString() &&
       schoolState.speciality == null) {
     key.currentState
         .showSnackBar(_getSnackBar('please speciality is required'));
   } else {
-    Map<String, String> user =
-        commonState.accountType == AccountType.SCHOOL_STUDENT
+    Map<String,dynamic> user =
+        accountType == AccountType.SCHOOL_STUDENT.toString()
             ? schoolState.fetchStudentData(commonState)
             : schoolState.fetchTechertData(commonState);
+    user['account_type'] = accountType.toString();
+    print(user);
 
     ExecutionState executionState =
         Provider.of<ExecutionState>(context, listen: false);
@@ -108,7 +147,16 @@ void _handleOnDone(GlobalKey<ScaffoldState> key, BuildContext context,
     } else if (response is NewBugException) {
         DebugTools.showErrorMessageWidget(context: context, message: response.message);
     } else {
-      DebugTools.showSuccessMessageWidget(context: context);
+        await FileSystemServices.saveUserData(
+          accountType == AccountType.SCHOOL_STUDENT.toString()
+          ? schoolState.fetchStudentData(commonState)
+          : schoolState.fetchTechertData(commonState)
+        );
+
+        await CachingServices.saveStringField(key: 'initial-page', value: '/validate-account-page');
+
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            '/validate-account-page', (Route route) => false);
     }
   }
 }

@@ -3,12 +3,12 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:malzama/src/core/platform/services/caching_services.dart';
+import 'package:malzama/src/core/platform/services/file_system_services.dart';
 
 import '../../../core/api/contract_response.dart';
-  
-
 import '../../../core/api/routes.dart';
-import '../../../core/platform/network_info.dart';
+import '../../../core/platform/services/network_info.dart';
 import '../../../core/references/references.dart';
 
 
@@ -25,7 +25,7 @@ class ExecutionState with ChangeNotifier {
 
 class SignUpNewUser {
   String _url;
-  Map<String, String> user;
+  Map<String, dynamic> user;
   Map<String, String> _header = {
     'content-type': 'application/json',
     'accept': 'application/json'
@@ -60,6 +60,9 @@ class SignUpNewUser {
           return InternalServerError();
           break;
         case 201:
+        await FileSystemServices.saveUserData(user);
+          await CachingServices.saveStringField(
+              key: 'initial-page', value: '/validate-account-page');
           return Success201(
               // created , 201
               message: 'your account has been created successfully');

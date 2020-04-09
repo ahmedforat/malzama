@@ -1,40 +1,37 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../core/validators/signup_login_validators.dart';
-class EmailWidget extends StatefulWidget {
-  final TextEditingController controller;
+import '../../state_provider/common_widgets_state_provider.dart';
+
+class EmailWidget extends StatelessWidget {
   final FocusNode focusNode;
   final List<FocusNode> otherFocusNodes;
 
-  EmailWidget({@required this.controller,@required this.focusNode,@required this.otherFocusNodes});
+  EmailWidget({@required this.focusNode, @required this.otherFocusNodes});
 
-  @override
-  _EmailWidgetState createState() => _EmailWidgetState();
-}
-
-
-class _EmailWidgetState extends State<EmailWidget> {
   Widget build(BuildContext context) {
-    print('rebuilding of email');
     ScreenUtil.init(context);
-
+    CommonWidgetsStateProvider state =
+        Provider.of<CommonWidgetsStateProvider>(context, listen: false);
     return Container(
       margin: EdgeInsets.only(
         bottom: ScreenUtil().setHeight(40),
       ),
       child: TextFormField(
-        onTap: (){
-          widget.otherFocusNodes.forEach((node){
+        onTap: () {
+          otherFocusNodes.forEach((node) {
             node.unfocus();
           });
         },
-        validator: (val){
-         return FieldsValidators.validateEmail(mail: widget.controller.text);
+        validator: (val) {
+          return FieldsValidators.validateEmail(mail: val);
         },
-        focusNode: widget.focusNode,
-        controller: widget.controller,
+        onChanged: (val) {
+          state.updateEmail(update: val);
+        },
+        focusNode: focusNode,
         keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
           labelText: 'Email',

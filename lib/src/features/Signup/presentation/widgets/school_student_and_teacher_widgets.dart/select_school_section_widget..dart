@@ -6,17 +6,18 @@ import '../../state_provider/common_widgets_state_provider.dart';
 import '../../state_provider/school_student_state_provider.dart';
 
 class SelectSchoolSectionWidget extends StatelessWidget {
+
+  final Map commonState;
+  SelectSchoolSectionWidget({this.commonState});
   @override
   Widget build(BuildContext context) {
-    SchoolStudentPostSignupState state =
-        Provider.of<SchoolStudentPostSignupState>(context, listen: false);
-
-    CommonWidgetsStateProvider commonWidgetsStateProvider =
-        Provider.of<CommonWidgetsStateProvider>(context, listen: false);
+    
+    SchoolStudentPostSignUpState state =
+        Provider.of<SchoolStudentPostSignUpState>(context, listen: false);
     print('city rebuilding');
     ScreenUtil.init(context);
 
-    return Selector<SchoolStudentPostSignupState, String>(
+    return Selector<SchoolStudentPostSignUpState, String>(
       selector: (context, stateObject) => stateObject.schoolSection,
       builder: (context, _, __) => Container(
         margin: EdgeInsets.only(top: ScreenUtil().setHeight(20)),
@@ -31,7 +32,7 @@ class SelectSchoolSectionWidget extends StatelessWidget {
                 groupValue: state.schoolSection,
                 onChanged: (val) async {
                   state.updateSchoolSection(update: val);
-                  _handleOnChanged(val, commonWidgetsStateProvider, state);
+                  _handleOnChanged(val, commonState, state);
                 },
               ),
             ),
@@ -42,7 +43,7 @@ class SelectSchoolSectionWidget extends StatelessWidget {
                 groupValue: state.schoolSection,
                 onChanged: (val) async {
                   state.updateSchoolSection(update: val);
-                  _handleOnChanged(val, commonWidgetsStateProvider, state);
+                  _handleOnChanged(val, commonState, state);
                 },
               ),
             ),
@@ -53,14 +54,14 @@ class SelectSchoolSectionWidget extends StatelessWidget {
   }
 }
 
-void _handleOnChanged(String val, CommonWidgetsStateProvider commonState,
-    SchoolStudentPostSignupState schoolState) {
-  if (commonState.province != 'baghdad') {
+void _handleOnChanged(String val, Map commonState,
+    SchoolStudentPostSignUpState schoolState) {
+  if (commonState['province'] != 'baghdad') {
     schoolState.updateSchoolList(
-        name: commonState.province, commonState: commonState);
+        name: commonState['province']);
   } else {
     if (schoolState.baghdadSubRegion != null)
       schoolState.updateSchoolList(
-          name: schoolState.baghdadSubRegion, commonState: commonState);
+          name: schoolState.baghdadSubRegion);
   }
 }

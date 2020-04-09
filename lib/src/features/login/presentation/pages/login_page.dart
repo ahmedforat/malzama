@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:malzama/src/core/api/contract_response.dart';
+import 'package:malzama/src/core/debugging/debugging_widgets.dart';
 import 'package:malzama/src/core/style/colors.dart';
+import 'package:malzama/src/features/home/usecases/log_out.dart';
+import 'package:malzama/src/features/signup/usecases/signup_usecase.dart';
+import 'package:malzama/src/features/verify_your_email/presentation/validate_your_account_msg.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/email_widget.dart';
 import '../widgets/forgot_password.dart';
@@ -55,27 +61,44 @@ class LoginPage extends StatelessWidget {
                   alignment: Alignment.center,
                   child: SizedBox(
                     width: ScreenUtil().setWidth(280),
-                    child: RaisedButton(
-                      onPressed: () {
-                        if (FocusScope.of(context).hasFocus) {
-                          FocusScope.of(context).unfocus();
-                        }
-                        if (formKey.currentState.validate()) {
-                          scaffoldKey.currentState.showSnackBar(SnackBar(
-                              backgroundColor: Colors.indigo,
-                              content: Text(
-                                'email:${EmailLoginWidget.email}\n'
-                                'password:${PasswordLoginWidget.password}',
-                                style: TextStyle(color: Colors.white),
-                              )));
-                        }
-                      },
-                      color: MalzamaColors.appBarColor,
-                      child: Text(
-                        'Done',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
+                    child: Consumer<ExecutionState>(
+                      builder: (context, state, _) => RaisedButton(
+                        onPressed: () async {
+                          if (FocusScope.of(context).hasFocus) {
+                            FocusScope.of(context).unfocus();
+                          }
+
+                          if (formKey.currentState.validate()) {
+                            state.setLoadingStateTo(true);
+                            print(EmailLoginWidget.email + '\n'+
+                            PasswordLoginWidget.password);
+                            ContractResponse response =
+                                await AccessManager.signIn(
+                                    email: EmailLoginWidget.email,
+                                    password: PasswordLoginWidget.password);
+                            state.setLoadingStateTo(false);
+                            print(response.statusCode);
+                            if(response is SnackBarException){
+                              scaffoldKey.currentState.showSnackBar(getSnackBar(response.message));
+                              if(response is NotValidated){
+                                Navigator.of(context).pushNamed('/validate-account-page');
+                              }
+                            }else if(response is Success){
+                              Navigator.of(context).pushNamedAndRemoveUntil('/home-page', (_)=>false);
+                            }else{
+                              DebugTools.showErrorMessageWidget(context: context, message: response.message);
+                            }
+                          }
+                        },
+                        color: MalzamaColors.appBarColor,
+                        child: state.isLoading
+                            ? CircularProgressIndicator()
+                            : Text(
+                                'Done',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ),

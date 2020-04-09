@@ -4,12 +4,23 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'common_widgets_state_provider.dart';
-
-
 class CollegePostSignUpState with ChangeNotifier {
+  bool _isCompleted = false;
 
+  bool get isCompleted => _isCompleted;
 
+  @override
+  void dispose() {
+    print('College State has been disposed');
+    super.dispose();
+  }
+
+  Future<void> initialize() async {
+    await this.loadAllUniversitiesAndColleges();
+    this.reset();
+    _isCompleted = true;
+    notifyListeners();
+  }
 
   final Map<int, String> _stageDictionary = {
     1: 'المرحلة الاولى',
@@ -127,6 +138,7 @@ class CollegePostSignUpState with ChangeNotifier {
           .loadString('assets/iraq_schools_and_unis/all_unis.json');
       _allUniversitiesAndCollege = json.decode(data);
     }
+    print(_allUniversitiesAndCollege.keys.toList());
   }
 
   void updateCollegeList({String name}) async {
@@ -150,8 +162,8 @@ class CollegePostSignUpState with ChangeNotifier {
     _collegeList = null;
   }
 
-  Map<String, String> fetchStudentData(CommonWidgetsStateProvider commonState) {
-    return commonState.fetchDataAsMap()
+  Map<String, dynamic> fetchStudentData(Map<String, dynamic> commonState) {
+    return commonState
       ..addAll({
         'university': _university,
         'college': _college,
@@ -163,14 +175,13 @@ class CollegePostSignUpState with ChangeNotifier {
       });
   }
 
-  Map<String, String> fetchLecturerData(
-      CommonWidgetsStateProvider commonState) {
-    return commonState.fetchDataAsMap()
+  Map<String, dynamic> fetchLecturerData(Map<String, dynamic> commonState) {
+    return commonState
       ..addAll({
         'university': _university,
         'college': _college,
         'speciality': _speciality,
-        'section':_section
+        'section': _section
       });
   }
 }

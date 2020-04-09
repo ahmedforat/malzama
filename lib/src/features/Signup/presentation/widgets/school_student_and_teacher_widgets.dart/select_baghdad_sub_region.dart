@@ -17,13 +17,12 @@ class SelectBaghdadSubRegion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SchoolStudentPostSignupState state =
-        Provider.of<SchoolStudentPostSignupState>(context,listen: false);
-        CommonWidgetsStateProvider commonState = Provider.of<CommonWidgetsStateProvider>(context,listen: false);
+    SchoolStudentPostSignUpState state =
+        Provider.of<SchoolStudentPostSignUpState>(context,listen: false);
     print('city rebuilding');
     ScreenUtil.init(context);
 
-    return Selector<SchoolStudentPostSignupState,String>(
+    return Selector<SchoolStudentPostSignUpState,String>(
           selector: (context,stateObject) => stateObject.baghdadSubRegion,
           builder: (context,stateProvider,child) => Container(
         margin: EdgeInsets.only(top: ScreenUtil().setHeight(20)),
@@ -44,7 +43,7 @@ class SelectBaghdadSubRegion extends StatelessWidget {
                             value: state.baghdadSubRegion,
                             onChanged: (String newValue){
                              if(state.schoolSection != null) {
-                               state.updateSchoolList(name: newValue,commonState:commonState );
+                               state.updateSchoolList(name: newValue);
                              }
                              state.updateBaghdadSubRegion(update: newValue);
                             },

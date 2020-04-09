@@ -1,11 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/platform/services/caching_services.dart';
 import '../../../../core/style/colors.dart';
-import '../../../specify_user_type/specify_user_type.dart';
 import '../state_provider/common_widgets_state_provider.dart';
 import '../widgets/common%20widgets/email.dart';
 import '../widgets/common%20widgets/name_widget.dart';
@@ -14,102 +16,21 @@ import '../widgets/common%20widgets/phone.dart';
 import '../widgets/common%20widgets/select_gender_widget.dart';
 import '../widgets/common%20widgets/select_province_widget.dart';
 
-class CommonSignupPage extends StatefulWidget {
-  @override
-  _CommonSignupPageState createState() => _CommonSignupPageState();
-}
-
-class _CommonSignupPageState extends State<CommonSignupPage> {
-  // controllers
-  TextEditingController firstNameController;
-  TextEditingController lastNameController;
-  TextEditingController emailController;
-  TextEditingController passwordController;
-  TextEditingController phoneController;
-
-// focusNodes
-
-  FocusNode firstNameNode;
-  FocusNode lastNameNode;
-  FocusNode emailNode;
-  FocusNode passwordNode;
-  FocusNode phoneNode;
-
-  GlobalKey<FormState> formKey;
-  GlobalKey<ScaffoldState> scaffoldKey;
-  List<FocusNode> allFocusNodes;
-
-  @override
-  void initState() {
-    formKey = new GlobalKey<FormState>();
-    scaffoldKey = new GlobalKey<ScaffoldState>();
-
-    firstNameController = new TextEditingController();
-    lastNameController = new TextEditingController();
-    emailController = new TextEditingController();
-    passwordController = new TextEditingController();
-    phoneController = new TextEditingController();
-
-    firstNameNode = new FocusNode();
-    lastNameNode = new FocusNode();
-    emailNode = new FocusNode();
-    passwordNode = new FocusNode();
-    phoneNode = new FocusNode();
-
-    allFocusNodes = [
-      firstNameNode,
-      lastNameNode,
-      emailNode,
-      passwordNode,
-      phoneNode
-    ];
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    print(
-        '***********************************************************************************this page has been disposed');
-    // dispose controllers
-    allFocusNodes = null;
-
-    firstNameController.dispose();
-    lastNameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    phoneController.dispose();
-
-    // dispose focusNodes
-    firstNameNode.dispose();
-    lastNameNode.dispose();
-    emailNode.dispose();
-    passwordNode.dispose();
-    phoneNode.dispose();
-
-    super.dispose();
-  }
-
-  void _filltheBlanks() {
-    firstNameController.text = 'Karrar';
-    lastNameController.text = 'Mohammed';
-    emailController.text = 'karrar@gmail.com';
-    passwordController.text = '07718239773';
-    phoneController.text = '07718239773';
-  }
-
-  void _clearFields() {
-    firstNameController.clear();
-    lastNameController.clear();
-    emailController.clear();
-    passwordController.clear();
-    phoneController.clear();
-  }
+class CommonSignupPage extends StatelessWidget {
+  final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
+    CommonWidgetsStateProvider commonState =
+        Provider.of<CommonWidgetsStateProvider>(context, listen: false);
+    print('building the entire page');
+    return _buildCommonSignUpPage(context, commonState);
+  }
 
+  Widget _buildCommonSignUpPage(
+      BuildContext context, CommonWidgetsStateProvider commonState) {
     return Scaffold(
       key: scaffoldKey,
       // floatingActionButton: FloatingActionButton(
@@ -121,7 +42,7 @@ class _CommonSignupPageState extends State<CommonSignupPage> {
       // ),
       body: SafeArea(
           child: GestureDetector(
-        onTap: _unfocusAllNodes,
+        onTap: () => _unfocusAllNodes(commonState),
         child: Container(
           color: Colors.white70,
           child: Padding(
@@ -161,22 +82,24 @@ class _CommonSignupPageState extends State<CommonSignupPage> {
                         Container(
                           padding: EdgeInsets.all(ScreenUtil().setSp(20)),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
-                              Expanded(
-                                child: SizedBox(),
-                              ),
+                             Expanded(
+                               child: SizedBox(),
+                             ),
                               SizedBox(
-                                width: ScreenUtil().setWidth(250),
-                                child: IconButton(
-                                  icon: Text('Fill Fields'),
-                                  onPressed: _filltheBlanks,
-                                ),
-                              ),
+                                  width: ScreenUtil().setWidth(300),
+                                  child: Text('Have an account?')),
                               SizedBox(
-                                width: ScreenUtil().setWidth(250),
+                                width: ScreenUtil().setWidth(180),
                                 child: IconButton(
-                                  icon: Text('clear Fields'),
-                                  onPressed: _clearFields,
+                                  icon: Text(
+                                    'Sign in',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  onPressed: (){
+                                    Navigator.of(context).pushNamed('/login-page');
+                                  },
                                   color: Colors.red,
                                 ),
                               ),
@@ -186,39 +109,73 @@ class _CommonSignupPageState extends State<CommonSignupPage> {
                         SizedBox(
                           height: ScreenUtil().setHeight(45),
                         ),
-                        NameWidget(
-                            text: 'FirstName',
-                            controller: firstNameController,
-                            focusNode: firstNameNode,
-                            otherFocusNodes: allFocusNodes
-                                .where((node) => node != firstNameNode)
-                                .toList()),
-                        NameWidget(
-                          text: 'LastName',
-                          controller: lastNameController,
-                          focusNode: lastNameNode,
-                          otherFocusNodes: allFocusNodes
-                              .where((node) => node != lastNameNode)
-                              .toList(),
+                        Selector<CommonWidgetsStateProvider, String>(
+                          selector: (context, stateProvider) =>
+                              stateProvider.firstName,
+                          builder: (context, _, __) {
+                            print('building the firstName');
+                            return NameWidget(
+                                text: 'FirstName',
+                                focusNode: commonState.firstNameNode,
+                                otherFocusNodes: commonState.listOfAllNodes
+                                    .where((node) =>
+                                        node != commonState.firstNameNode)
+                                    .toList());
+                          },
                         ),
-                        EmailWidget(
-                            controller: emailController,
-                            focusNode: emailNode,
-                            otherFocusNodes: allFocusNodes
-                                .where((node) => node != emailNode)
-                                .toList()),
-                        PhoneNumberWidget(
-                            controller: phoneController,
-                            focusNode: phoneNode,
-                            otherFocusNodes: allFocusNodes
-                                .where((node) => node != phoneNode)
-                                .toList()),
-                        PasswordWidget(
-                            controller: passwordController,
-                            focusNode: passwordNode,
-                            otherFocusNodes: allFocusNodes
-                                .where((node) => node != passwordNode)
-                                .toList()),
+                        Selector<CommonWidgetsStateProvider, String>(
+                          selector: (context, stateProvider) =>
+                              stateProvider.lastName,
+                          builder: (context, _, __) {
+                            print('building lastname');
+                            return NameWidget(
+                              text: 'LastName',
+                              focusNode: commonState.lastNameNode,
+                              otherFocusNodes: commonState.listOfAllNodes
+                                  .where((node) =>
+                                      node != commonState.lastNameNode)
+                                  .toList(),
+                            );
+                          },
+                        ),
+                        Selector<CommonWidgetsStateProvider, String>(
+                          selector: (context, stateProvider) =>
+                              stateProvider.email,
+                          builder: (context, _, __) {
+                            print('building email');
+                            return EmailWidget(
+                                focusNode: commonState.emailNode,
+                                otherFocusNodes: commonState.listOfAllNodes
+                                    .where(
+                                        (node) => node != commonState.emailNode)
+                                    .toList());
+                          },
+                        ),
+                        Selector<CommonWidgetsStateProvider, String>(
+                          selector: (context, stateProvider) =>
+                              stateProvider.phone,
+                          builder: (context, _, __) {
+                            print('building phone');
+                            return PhoneWidget(
+                                focusNode: commonState.phoneNode,
+                                otherFocusNodes: commonState.listOfAllNodes
+                                    .where(
+                                        (node) => node != commonState.phoneNode)
+                                    .toList());
+                          },
+                        ),
+                        Selector<CommonWidgetsStateProvider, String>(
+                            selector: (context, stateProvider) =>
+                                stateProvider.password,
+                            builder: (context, _, __) {
+                              print('building password');
+                              return PasswordWidget(
+                                  focusNode: commonState.passwordNode,
+                                  otherFocusNodes: commonState.listOfAllNodes
+                                      .where((node) =>
+                                          node != commonState.passwordNode)
+                                      .toList());
+                            }),
                         SelectCityWidget(),
                         SelectGenderWidget(),
                         SizedBox(
@@ -228,7 +185,13 @@ class _CommonSignupPageState extends State<CommonSignupPage> {
                           width: 140.0,
                           height: 40.0,
                           child: RaisedButton(
-                              onPressed: () => _onPressed(context),
+                              onPressed: () {
+                                CommonWidgetsStateProvider commonState =
+                                    Provider.of<CommonWidgetsStateProvider>(
+                                        context,
+                                        listen: false);
+                                _onPressed(context, commonState);
+                              },
                               child: Text(
                                 'Next',
                                 style: TextStyle(color: Colors.white),
@@ -247,25 +210,19 @@ class _CommonSignupPageState extends State<CommonSignupPage> {
   }
 
   void _navigateToSpecifyAccountType(BuildContext context) {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => SpecifyUserTypeWidget()));
+    Navigator.of(context).pushNamed('/specify-account-type');
   }
 
-  void _unfocusAllNodes() {
-    if (firstNameNode != null) firstNameNode.unfocus();
-
-    if (lastNameNode != null) lastNameNode.unfocus();
-
-    if (emailNode != null) emailNode.unfocus();
-
-    if (passwordNode != null) passwordNode.unfocus();
-
-    if (phoneNode != null) phoneNode.unfocus();
+  void _unfocusAllNodes(CommonWidgetsStateProvider commonState) {
+    if (commonState.firstNameNode != null) commonState.firstNameNode.unfocus();
+    if (commonState.lastNameNode != null) commonState.lastNameNode.unfocus();
+    if (commonState.emailNode != null) commonState.emailNode.unfocus();
+    if (commonState.passwordNode != null) commonState.passwordNode.unfocus();
+    if (commonState.phoneNode != null) commonState.phoneNode.unfocus();
   }
 
-  void _onPressed(BuildContext context) {
-    CommonWidgetsStateProvider commonState =
-        Provider.of<CommonWidgetsStateProvider>(context, listen: false);
+  void _onPressed(
+      BuildContext context, CommonWidgetsStateProvider commonState) {
     if (formKey.currentState.validate()) {
       if (commonState.gender == null || commonState.province == null) {
         scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -275,17 +232,23 @@ class _CommonSignupPageState extends State<CommonSignupPage> {
           duration: Duration(seconds: 3),
         ));
       } else {
-        updateState(state: commonState);
+        updateState(commonState: commonState);
         _navigateToSpecifyAccountType(context);
       }
     }
   }
 
-  void updateState({CommonWidgetsStateProvider state}) {
-    state.updateEmail(update: emailController.text);
-    state.updateFirstName(update: firstNameController.text);
-    state.updateLastName(update: lastNameController.text);
-    state.updatePassword(update: passwordController.text);
-    state.updatePhone(update: phoneController.text);
+  void updateState({CommonWidgetsStateProvider commonState}) {
+    CachingServices.saveStringField(
+        key: 'commonState',
+        value: json.encode({
+          'firstName': commonState.firstName,
+          'lastName': commonState.lastName,
+          'phone': commonState.phone,
+          'email': commonState.email,
+          'password': commonState.password,
+          'province': commonState.province,
+          'gender': commonState.gender
+        }));
   }
 }

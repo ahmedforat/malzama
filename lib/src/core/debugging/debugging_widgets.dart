@@ -12,12 +12,11 @@ class DebugTools {
             )));
   }
 
-  static void showSuccessMessageWidget({@required BuildContext context}) {
+  static void showSuccessMessageWidget({@required BuildContext context,String message}) {
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => _SuccessMessageWidget()));
+        .push(MaterialPageRoute(builder: (context) => _SuccessMessageWidget(message)));
   }
 }
-
 
 // show error message in a separate page
 class _ErrorMessageWidget extends StatelessWidget {
@@ -28,23 +27,45 @@ class _ErrorMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.blueAccent,
+        color: Colors.redAccent,
         padding: EdgeInsets.all(ScreenUtil().setSp(30)),
-        child: Text(
-          this.errorMessage,
-          style: TextStyle(fontSize: 14.0, color: Colors.white),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Oops!!',
+              style: TextStyle(fontSize: 14.0, color: Colors.white),
+            ),
+            Text(
+              this.errorMessage,
+              style: TextStyle(fontSize: 14.0, color: Colors.white),
+            )
+          ],
         ),
       ),
     );
   }
 }
 
-
 // show success message in a separate page
 class _SuccessMessageWidget extends StatelessWidget {
+
+  String message;
+  _SuccessMessageWidget(this.message);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            icon:Text('signup'),
+            onPressed: (){
+              Navigator.of(context).pushNamed('/landing-page');
+            },
+          )
+        ],
+      ),
       body: SafeArea(
         child: Container(
           color: Colors.green,
@@ -87,7 +108,7 @@ class _SuccessMessageWidget extends StatelessWidget {
               height: ScreenUtil().setHeight(50),
             ),
             Text(
-              'Your registration is done!',
+              message??'Your registration is done!',
               style: TextStyle(fontSize: 30.0, color: Colors.white),
             ),
           ]),
@@ -96,3 +117,5 @@ class _SuccessMessageWidget extends StatelessWidget {
     );
   }
 }
+
+

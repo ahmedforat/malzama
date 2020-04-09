@@ -7,12 +7,12 @@ import '../../state_provider/school_student_state_provider.dart';
 class SelectSchoolWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    SchoolStudentPostSignupState state =
-        Provider.of<SchoolStudentPostSignupState>(context);
+    SchoolStudentPostSignUpState state =
+        Provider.of<SchoolStudentPostSignUpState>(context);
     print('city rebuilding');
     ScreenUtil.init(context);
 
-    return Selector<SchoolStudentPostSignupState, String>(
+    return Selector<SchoolStudentPostSignUpState, String>(
       selector: (context, stateobject) => stateobject.school,
       builder: (context, _, __) => Container(
         margin: EdgeInsets.only(top: ScreenUtil().setHeight(20)),

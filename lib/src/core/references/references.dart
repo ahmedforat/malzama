@@ -12,11 +12,11 @@ class References{
 // the timeout duratio for any http request
 static final Duration timeout =  Duration(seconds: 12);
 
-  static final Map<AccountType, String> accountTypeDictionary = {
-    AccountType.COLLEGE_LECTURER: 'College Doctor',
-    AccountType.COLLEGE_STUDENT: 'College Student',
-    AccountType.SCHOOL_STUDENT: 'School Student',
-    AccountType.SCHOOL_TEACHER: 'School Teacher'
+  static final Map<String, String> accountTypeDictionary = {
+    'AccountType.COLLEGE_LECTURER': 'College Doctor',
+    'AccountType.COLLEGE_STUDENT': 'College Student',
+    'AccountType.SCHOOL_STUDENT': 'School Student',
+    'AccountType.SCHOOL_TEACHER': 'School Teacher'
   
   };
 

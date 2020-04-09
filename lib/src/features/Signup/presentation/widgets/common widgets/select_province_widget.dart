@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/platform/services/caching_services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/references/references.dart';
@@ -16,6 +17,8 @@ class SelectCityWidget extends StatelessWidget {
 
     print('city rebuilding');
     ScreenUtil.init(context);
+
+
 
     return Selector<CommonWidgetsStateProvider, String>(
       selector: (context, stateProvider) => stateProvider.province,
