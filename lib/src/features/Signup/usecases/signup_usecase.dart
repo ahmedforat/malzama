@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:malzama/quiz_app/demo.values.dart';
 import 'package:malzama/src/core/platform/services/caching_services.dart';
 import 'package:malzama/src/core/platform/services/file_system_services.dart';
 
@@ -35,7 +36,7 @@ class SignUpNewUser {
   var recievedData;
 
   SignUpNewUser({@required this.user}) {
-    _url = Api.getSuitableUrl(accountType: user['account_type'],fromCloud: false ) + '/signup';
+    _url = Api.getSuitableUrl(accountType: user['account_type'],fromCloud: true ) + '/signup';
   }
 
   Future<ContractResponse> execute() async {
@@ -60,7 +61,24 @@ class SignUpNewUser {
           return InternalServerError();
           break;
         case 201:
-        await FileSystemServices.saveUserData(user);
+          var newUser;
+          print('*********************** hhohhhhoh ****************************');
+          print(json.decode(response.body)['user']['saved_lectures'].runtimeType);
+          print('**************************hhohhhhoh*************************');
+
+          try{
+
+          newUser = References.specifyAccountType(json.decode(response.body)['user']);
+          print('***************************************************');
+          print(newUser.runtimeType.toString());
+          print('***************************************************');
+         }catch(err){
+           print(err);
+         }
+        if(newUser == null){
+          return InternalServerError();
+        }
+          await FileSystemServices.saveUserData(newUser.toJSON());
           await CachingServices.saveStringField(
               key: 'initial-page', value: '/validate-account-page');
           return Success201(

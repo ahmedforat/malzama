@@ -41,5 +41,20 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>app need to access the photo library so the user can upload and share photos inside the app</string>
+    <key>NSCameraUsageDescription</key>
+    <string>the app need to access camera so the user can pick a new photos and share them inside the app</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>the app need to access microphone so the user can record videos inside the app</string>
+	<key>UIBackgroundModes</key>
+	<array>
+  	 <string>fetch</string>
+   	 <string>remote-notification</string>
+	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>the app at some point need to access the photo library so the user can share photos via the app</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>the user at some point might need to share audio files via the app</string>
 </dict>
 </plist>

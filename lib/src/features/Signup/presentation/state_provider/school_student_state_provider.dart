@@ -60,16 +60,40 @@ class SchoolStudentPostSignUpState with ChangeNotifier {
   List<String> get sortedSchoolList => _sortedSchoolList;
 
   Future<void> updateSchoolList({String name}) async {
+    print('initial');
+    _allSchools.entries.forEach((item){
+      print(item.key);
+      print('-------------------');
+      print(item.value);
+      print('==================================');
+    });
     String data = await CachingServices.getField(key: 'commonState');
     String gender = json.decode(data)['gender'];
+    print('***************************this is gender' + ' $gender\n\n\n\n');
+
     _school = null;
     print('updating school list');
+    print('-----------------------------------------------');
+    print(name);
+    print(name.length);
+    print(name.trim().length);
+    print('-----------------------------------------------');
+    print('karbala' == name.trim());
     _schoolList = _allSchools[name.trim()];
+    print('this is school list \n\n\n\n\n');
     print(_schoolList);
+    print('***************************************** \n\n\n\n\n');
     _schoolList.removeWhere((k, v) => !v.contains(_schoolSection));
+    print('this is school list after first removing \n\n\n\n\n');
+    print(_schoolList);
+    print('*****************************************\n\n\n\n\n');
+
     _schoolList.removeWhere((k, v) => gender == 'female'
         ? !femaleSchool.hasMatch(k)
         : femaleSchool.hasMatch(k));
+    print('this is school list after second removing \n\n\n\n\n');
+    print(_schoolList);
+    print('*****************************************\n\n\n\n\n');
     _sortedSchoolList = _schoolList.keys.toList();
     _sortedSchoolList.sort();
 

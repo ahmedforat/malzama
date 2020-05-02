@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/fa_icon.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:malzama/src/core/references/references.dart';
 
 import '../../core/platform/services/caching_services.dart';
 
@@ -29,7 +30,7 @@ class SpecifyUserTypeWidget extends StatelessWidget {
               title: Text('استاذ جامعي'),
               onTap: () async {
                 await _navigateToCollegePostSignupPage(
-                    context, 'AccountType.COLLEGE_LECTURER');
+                    context, AccountType.uniteachers);
               },
             ),
             ListTile(
@@ -40,7 +41,7 @@ class SpecifyUserTypeWidget extends StatelessWidget {
               title: Text('طالب جامعي'),
               onTap: () async {
                 _navigateToCollegePostSignupPage(
-                    context, 'AccountType.COLLEGE_STUDENT');
+                    context, AccountType.unistudents);
               },
             ),
             ListTile(
@@ -51,7 +52,7 @@ class SpecifyUserTypeWidget extends StatelessWidget {
               title: Text('استاذ اعدادية'),
               onTap: () async {
                 await _navigateToSchoolPostSignUpPage(
-                    context, 'AccountType.SCHOOL_TEACHER');
+                    context, AccountType.schteachers);
               },
             ),
             ListTile(
@@ -62,7 +63,7 @@ class SpecifyUserTypeWidget extends StatelessWidget {
               title: Text('طالب اعدادي'),
               onTap: () async {
                 await _navigateToSchoolPostSignUpPage(
-                    context, 'AccountType.SCHOOL_STUDENT');
+                    context, AccountType.schstudents);
               },
             ),
           ],
@@ -75,7 +76,8 @@ class SpecifyUserTypeWidget extends StatelessWidget {
 // navigate to college post signup page with proper user type
 Future<void> _navigateToCollegePostSignupPage(
     BuildContext context, String accountType) async {
-
+        print('from inside the specify user type  ' +accountType);
+        print('below from insdide above ${AccountType.unistudents}');
   await CachingServices.saveStringField(
       key: 'accountType', value: '$accountType');
       print('after saving cache');
@@ -86,7 +88,7 @@ Future<void> _navigateToCollegePostSignupPage(
 //  navigate to school post signup page with proper user type
 Future<void> _navigateToSchoolPostSignUpPage(
     BuildContext context, String accountType) async {
-
+print('from inside the specify user type  ' +accountType);
   await CachingServices.saveStringField(
       key: 'accountType', value: '$accountType');
  print('after saving cache');

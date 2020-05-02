@@ -80,6 +80,7 @@ class LoginPage extends StatelessWidget {
                             print(response.statusCode);
                             if(response is SnackBarException){
                               scaffoldKey.currentState.showSnackBar(getSnackBar(response.message));
+                              await Future.delayed(Duration(seconds: 3));
                               if(response is NotValidated){
                                 Navigator.of(context).pushNamed('/validate-account-page');
                               }

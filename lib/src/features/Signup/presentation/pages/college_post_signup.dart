@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/references/references.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/api/contract_response.dart';
@@ -91,9 +92,9 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
                 SelectUniversityWidget(),
                 SelectCollegeWidget(),
                 SelectSectionWidget(),
-                if (accountType == 'AccountType.COLLEGE_STUDENT')
+                if (accountType == AccountType.unistudents)
                   SelectStageWidget(),
-                if (accountType == 'AccountType.COLLEGE_LECTURER')
+                if (accountType == AccountType.uniteachers)
                   Form(key: formKey, child: CollegeLecturerSpecialityWidget()),
                 SizedBox(
                   height: ScreenUtil().setHeight(100),
@@ -105,7 +106,7 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
                           ? null
                           : () {
                               if (accountType ==
-                                  'AccountType.COLLEGE_LECTURER') {
+                                  AccountType.uniteachers.toString()) {
                                 _handleCollegeLecturerDoneButton(
                                     scaffoldKey, collegeState, context);
                               } else {

@@ -15,7 +15,7 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-     _startLaunching();
+     Future.delayed(Duration(milliseconds: 2800),_startLaunching);
   }
 
   Future<void> _startLaunching() async {

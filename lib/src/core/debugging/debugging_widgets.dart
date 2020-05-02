@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/screenutil.dart';
 import 'package:font_awesome_flutter/fa_icon.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+
 class DebugTools {
   static void showErrorMessageWidget(
       {@required BuildContext context, @required String message}) {

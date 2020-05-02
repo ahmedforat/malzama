@@ -83,7 +83,7 @@ class SchoolStudentPostSignUpWidget extends StatelessWidget {
             if (commonState['province'] == 'baghdad') SelectBaghdadSubRegion(),
             SelectSchoolSectionWidget(commonState: commonState,),
             SelectSchoolWidget(),
-            if (accountType == AccountType.SCHOOL_TEACHER.toString())
+            if (accountType == AccountType.schteachers.toString())
               SelectClassSpeciality(),
             SizedBox(
               height: ScreenUtil().setHeight(100),
@@ -121,13 +121,13 @@ void _handleOnDone(GlobalKey<ScaffoldState> key, BuildContext context,
         .showSnackBar(_getSnackBar('please your study section is required'));
   } else if (schoolState.school == null) {
     key.currentState.showSnackBar(_getSnackBar('please school is required'));
-  } else if (accountType == AccountType.SCHOOL_TEACHER.toString() &&
+  } else if (accountType == AccountType.schteachers.toString() &&
       schoolState.speciality == null) {
     key.currentState
         .showSnackBar(_getSnackBar('please speciality is required'));
   } else {
     Map<String,dynamic> user =
-        accountType == AccountType.SCHOOL_STUDENT.toString()
+        accountType == AccountType.unistudents.toString()
             ? schoolState.fetchStudentData(commonState)
             : schoolState.fetchTechertData(commonState);
     user['account_type'] = accountType.toString();
@@ -148,7 +148,7 @@ void _handleOnDone(GlobalKey<ScaffoldState> key, BuildContext context,
         DebugTools.showErrorMessageWidget(context: context, message: response.message);
     } else {
         await FileSystemServices.saveUserData(
-          accountType == AccountType.SCHOOL_STUDENT.toString()
+          accountType == AccountType.schstudents.toString()
           ? schoolState.fetchStudentData(commonState)
           : schoolState.fetchTechertData(commonState)
         );

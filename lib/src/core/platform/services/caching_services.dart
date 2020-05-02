@@ -85,17 +85,7 @@ class CachingServices {
   }
 
 // clean the Cache
-  static Future<bool> removeAll() async {
-    try {
-      _preferences = await SharedPreferences.getInstance();
-      _preferences.getKeys().toList().forEach((key)async {
-        _preferences.remove(key);
-      });
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
+
 
   static Future<SharedPreferences> getInstance() async => await SharedPreferences.getInstance();
 

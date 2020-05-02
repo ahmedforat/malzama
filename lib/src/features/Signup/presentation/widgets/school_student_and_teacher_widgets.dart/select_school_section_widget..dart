@@ -57,11 +57,16 @@ class SelectSchoolSectionWidget extends StatelessWidget {
 void _handleOnChanged(String val, Map commonState,
     SchoolStudentPostSignUpState schoolState) {
   if (commonState['province'] != 'baghdad') {
+    print('this is the region which is not baghdad, it is  => ' + commonState['province']);
     schoolState.updateSchoolList(
         name: commonState['province']);
   } else {
-    if (schoolState.baghdadSubRegion != null)
+    if (schoolState.baghdadSubRegion != null){
+      print('this is the region which is within baghdad, it is  => ' + commonState['province']);
+      print(schoolState.baghdadSubRegion);
       schoolState.updateSchoolList(
           name: schoolState.baghdadSubRegion);
+    }
+
   }
 }

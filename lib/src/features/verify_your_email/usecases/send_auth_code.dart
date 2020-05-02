@@ -51,7 +51,7 @@ class ValidationAuthCode {
           CachingServices.removeAllAndSave(
               key: 'token', value: 'bearer ${data['token']}');
           _user['validated'] = true;
-          await FileSystemServices.saveUserData(_user);
+          await FileSystemServices.saveUserData(data['newUser']);
           return Success200();
           break;
 
@@ -66,7 +66,7 @@ class ValidationAuthCode {
           break;
 
         case 404:
-          await CachingServices.removeAll();
+          await CachingServices.clearAllCachedData();
           await FileSystemServices.deleteUserData();
           return NotFoundAndMustLeave(
               message: 'You are not authorized to access here!');
@@ -92,7 +92,7 @@ class ValidationAuthCode {
           break;
 
         case 404:
-          await CachingServices.removeAll();
+          await CachingServices.clearAllCachedData();
           await FileSystemServices.deleteUserData();
           return NotFoundAndMustLeave(message: 'You are not authorized to access here!');
           break;

@@ -15,11 +15,12 @@ import '../usecases/send_auth_code.dart';
 class ValidateYourAccountMessageWidget extends StatelessWidget {
   List<FocusNode> _listOfFocusNodes = List.generate(6, (i) => new FocusNode());
   final List<String> auth_code = new List<String>(6);
-  Map<String, dynamic> _user;
+  Map _user;
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
+    print('building validation page');
     ScreenUtil.init(context);
     return FutureBuilder(
       future: FileSystemServices.getUserData(),
@@ -96,7 +97,7 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
                       width: double.infinity,
                       alignment: Alignment.topLeft,
                       child: Text(
-                        'Dear ${_user['firstName'] ?? ''}',
+                        'Dear ${_user['firstName'] ?? 'user'}',
                         style: TextStyle(
                             fontSize: ScreenUtil().setSp(45),
                             fontWeight: FontWeight.bold),
