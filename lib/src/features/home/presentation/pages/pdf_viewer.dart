@@ -62,6 +62,13 @@ class _PDFViewerWidgetState extends State<PDFViewerWidget> {
                     children: <Widget>[
                       Positioned.fill(
                           child: PDFView(
+                            onError: (err){
+                              print('An error has been occured');
+                              print(err);
+                            },
+                            onPageError: (_,__){
+                              print('Hello World from inside onPageError');
+                            },
                         filePath: pdfViewState.pdfPath,
                         swipeHorizontal: true,
                         onViewCreated: (controller) async {

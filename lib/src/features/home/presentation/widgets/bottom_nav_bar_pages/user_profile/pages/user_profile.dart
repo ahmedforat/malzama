@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/drafts_displayer.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/drafts_icon_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../state_provider/profile_page_state_provider.dart';
@@ -48,6 +50,8 @@ class UserProfilePage extends StatelessWidget {
                       SizedBox(height: ScreenUtil().setHeight(50)),
                       
                       MaterialDisplayer(),
+                      SizedBox(height: ScreenUtil().setHeight(50)),
+                      DraftIconWidget()
                     ],
                   ),
                 ),

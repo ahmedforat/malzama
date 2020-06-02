@@ -8,7 +8,8 @@ import 'package:malzama/src/core/api/contract_response.dart';
 import 'package:malzama/src/core/platform/local_database/access_objects/teacher_access_object.dart';
 import 'package:malzama/src/core/platform/local_database/models/uploaded_pdf_and_video_model.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_provider.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/dialog_state_provider.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/school_uploads_state_provider.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/my_materials_state_provider.dart';
 import 'package:provider/provider.dart';
@@ -192,7 +193,9 @@ class UserProfileHeader2 extends StatelessWidget {
                 icon: Icon(Icons.ondemand_video),
                onPressed: ()async{
                   ContractResponse response = await Provider.of<SchoolUploadState>(context,listen: false).uploadNewVideo();
-
+                  if(response == null){
+                    return;
+                  }
                   if(response is Success){
                     await Provider.of<MyMaterialStateProvider>(context,listen: false).fetchMyVideosFromDB();
                     locator<DialogService>().showDialogOfSuccess(message: response.message);
@@ -209,6 +212,9 @@ class UserProfileHeader2 extends StatelessWidget {
                 icon: Icon(Icons.file_upload),
                   onPressed: ()async{
                     ContractResponse response = await Provider.of<SchoolUploadState>(context,listen: false).uploadNewLecture();
+                    if(response == null){
+                      return ;
+                    }
                     if(response is Success){
                       Provider.of<MyMaterialStateProvider>(context,listen: false).fetchMyPDFsFromDB();
                       locator<DialogService>().showDialogOfSuccess(message: response.message);
@@ -224,8 +230,7 @@ class UserProfileHeader2 extends StatelessWidget {
               child: IconButton(
                 icon: Icon(Icons.explore),
                 onPressed: ()async{
-                  var list = await TeacherAccessObject().fetchAllPDFS();
-                  print(list.last.key);
+                  Navigator.of(context).pushNamed('/quiz-uploader');
                 },
               ),
               top: ScreenUtil().setHeight(470),

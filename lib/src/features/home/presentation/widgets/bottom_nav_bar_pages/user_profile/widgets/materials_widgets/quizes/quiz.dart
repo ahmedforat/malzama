@@ -33,7 +33,7 @@ class _QuizWidgetState extends State<QuizWidget> {
         onPressed: () {
           print('WWWWWWWWWWWWWWWWWWWWWW'.length);
           print(
-              'indicate the drug, Which is rapidly and fully distributed into CNS and has a greater effect than most other antimuscarinic agents?'
+              'eater effect than most other antimuscarinic agents?'
                   .length);
         },
       ),
@@ -128,7 +128,7 @@ class _QuizBodyState extends State<QuizBody> {
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
     String text = 'Ophthalmic solutions should be formulated to include which of the following?';
-    String mainText = '$text $text $text $text $text $text $text $text' ;  
+    String mainText = '$text $text $text $text Ophthalmic solutions should be formulated to include which ' ;
     return Container(
       color: Colors.white,
       padding: EdgeInsets.all(ScreenUtil().setSp(10)),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:malzama/src/core/platform/local_database/access_objects/quiz_access_object.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../../core/platform/services/caching_services.dart';
@@ -56,9 +57,19 @@ class ProfilePageState with ChangeNotifier {
     print('constructuing new value');
     _onPageLaunch();
     _loadUserData();
+    updateQuizDraftsCount();
   }
 
- 
+ // this is special for the drafts of quiz just to get the numbers of quiz collections we have in the drafts
+
+  int _quizDraftsCount = 0;
+  int get quizDraftsCount => _quizDraftsCount;
+  void updateQuizDraftsCount()async{
+    var results = await QuizAccessObject().fetchAllDrafts();
+    _quizDraftsCount = results.length > 0 && results[0].containsKey('empty') ? 0 : results.length;
+    notifyListeners();
+  }
+
 
   
 

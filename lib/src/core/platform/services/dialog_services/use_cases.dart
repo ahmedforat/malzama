@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
 import 'package:mime/mime.dart';
 
 import '../../../api/contract_response.dart';
@@ -20,8 +21,7 @@ import 'dialog_service.dart';
 import 'service_locator.dart';
 
 class DialogManagerUseCases {
-  static Future<ContractResponse> updatePersonalInfo(
-      Map<String, String> updates) async {
+  static Future<ContractResponse> updatePersonalInfo(Map<String, String> updates) async {
     bool isConnected = await NetWorkInfo.checkConnection();
     if (!isConnected) {
       return NoInternetConnection();
@@ -40,7 +40,7 @@ class DialogManagerUseCases {
     try {
       response = await http
           .post(Uri.encodeFull(_url),
-              headers: _headers, body: json.encode(updates))
+          headers: _headers, body: json.encode(updates))
           .timeout(References.timeout);
       switch (response.statusCode) {
         case 500:
@@ -76,8 +76,7 @@ class DialogManagerUseCases {
   }
 
 // upload new lecture
-  static Future<ContractResponse> uploadNewLecture(
-      {@required Map<String, dynamic> lectureData}) async {
+  static Future<ContractResponse> uploadNewLecture({@required Map<String, dynamic> lectureData}) async {
     print(lectureData);
     bool isConnected = await NetWorkInfo.checkConnection();
     if (!isConnected) {
@@ -87,125 +86,132 @@ class DialogManagerUseCases {
 
     //http.Response response;
     String _url = Api.getSuitableUrl(
-            accountType: serviceLocator
-                .profilePageState.userData.commonFields.account_type) +
+        accountType: serviceLocator
+            .profilePageState.userData.commonFields.account_type) +
         '/upload-new-lecture';
     http.MultipartRequest multipartRequest =
-        new http.MultipartRequest('POST', Uri.parse(_url));
+    new http.MultipartRequest('POST', Uri.parse(_url));
     List<String> mimeType =
-        lookupMimeType(lectureData['src'].path, headerBytes: [0xFF, 0xD8])
-            .split('/');
+    lookupMimeType(lectureData['src'].path, headerBytes: [0xFF, 0xD8])
+        .split('/');
     multipartRequest.headers['authorization'] =
-        await CachingServices.getField(key: 'token');
+    await CachingServices.getField(key: 'token');
     multipartRequest.headers['Accept'] = 'application/json';
     multipartRequest.fields['title'] = lectureData['title'];
-    multipartRequest.fields['suggested_file_name'] =
-        DateTime.now().millisecond.toString() +
-            (lectureData['src'] as File).path.length.toString() +
-            (lectureData['src'] as File).path.split('.').last;
-    multipartRequest.fields['description'] = lectureData['description'];
-    multipartRequest.fields['stage'] =
-        (6 - References.schoolStages.indexOf(lectureData['stage'])).toString();
-    multipartRequest.fields['school_section'] = lectureData['school_section'];
-    multipartRequest.files.add(await http.MultipartFile.fromPath(
-        'thumbnail', lectureData['src'].path,
-        contentType: MediaType(mimeType[0], mimeType[1])));
+    String account_type = locator<DialogService>().profilePageState.userData.commonFields..account_type;
 
-    http.StreamedResponse streamedResponse;
+      multipartRequest.fields['description'] = lectureData['description'];
+    if(account_type == 'unistudents'){
+      multipartRequest.fields['stage'] = locator<DialogService>().profilePageState.userData.commonFields.stage.toString();
+    }else if (account_type == 'uniteachers'){
+      multipartRequest.fields['stage'] = lectureData['stage'];
+    }else{
+      multipartRequest.fields['stage'] =
+          (6 - References.schoolStages.indexOf(lectureData['stage'])).toString();
+      multipartRequest.fields['school_section'] = lectureData['school_section'];
+    }
 
-    try {
-      print('just before firing the http request');
-      print(multipartRequest.fields);
-      print(multipartRequest.headers);
-      streamedResponse =
-          await multipartRequest.send().timeout(Duration(seconds: 40));
-      switch (streamedResponse.statusCode) {
-        case 201:
-          var data = await streamedResponse.stream.bytesToString();
-          print(json.decode(data)['lecture']);
-          print(json.decode(data)['lecture']['_id']);
-          await TeacherAccessObject()
-              .insert(UploadedPDF.fromJSON(json.decode(data)['lecture']));
-          return Success201(message: 'Your lecture uploaded successfully');
-          break;
 
-        case 500:
-          return InternalServerError();
-          break;
+      multipartRequest.files.add(await http.MultipartFile.fromPath(
+          'thumbnail', lectureData['src'].path,
+          contentType: MediaType(mimeType[0], mimeType[1])));
 
-        case 403:
-          await FileSystemServices.deleteUserData();
-          await CachingServices.clearAllCachedData();
-          return ForbiddenAccess(message: 'You are not an authorized user');
-          break;
+      http.StreamedResponse streamedResponse;
 
-        default:
-          return NewBugException(
-              message: 'Unhandled statusCode ${streamedResponse.statusCode}');
-          break;
+      try {
+        print('just before firing the http request');
+        print(multipartRequest.fields);
+        print(multipartRequest.headers);
+        streamedResponse =
+        await multipartRequest.send().timeout(Duration(seconds: 40));
+        switch (streamedResponse.statusCode) {
+          case 201:
+            var data = await streamedResponse.stream.bytesToString();
+            print(json.decode(data)['lecture']);
+            print(json.decode(data)['lecture']['_id']);
+            await TeacherAccessObject()
+                .insert(UploadedPDF.fromJSON(json.decode(data)['lecture']));
+            return Success201(message: 'Your lecture uploaded successfully');
+            break;
+
+          case 500:
+            return InternalServerError();
+            break;
+
+          case 403:
+            await FileSystemServices.deleteUserData();
+            await CachingServices.clearAllCachedData();
+            return ForbiddenAccess(message: 'You are not an authorized user');
+            break;
+
+          default:
+            return NewBugException(
+                message: 'Unhandled statusCode ${streamedResponse.statusCode}');
+            break;
+        }
+      } on TimeoutException {
+        return ServerNotResponding();
+      } catch (err) {
+        print(err);
+        return NewBugException(message: err.toString());
       }
-    } on TimeoutException {
-      return ServerNotResponding();
-    } catch (err) {
-      print(err);
-      return NewBugException(message: err.toString());
+    }
+
+    static Future<ContractResponse> uploadNewVideo(Map<String, String> videoData) async {
+      bool isConnceted = await NetWorkInfo.checkConnection();
+
+      if (!isConnceted) {
+        return NoInternetConnection();
+      }
+      DialogService serviceLocator = locator.get<DialogService>();
+      http.Response response;
+      String _url = Api.getSuitableUrl(
+          accountType: serviceLocator
+              .profilePageState.userData.commonFields.account_type) +
+          '/upload-new-video';
+
+      Map<String, String> _headers = {
+        'authorization': await CachingServices.getField(key: 'token'),
+        'content-type': 'application/json',
+        'Accept': 'application/json'
+      };
+      Map<String, String> videoToUpload = videoData;
+      videoToUpload['stage'] = (6 - References.schoolStages.indexOf(videoData['stage'])).toString();
+      try {
+        response = await http.post(Uri.encodeFull(_url), headers: _headers, body: json.encode(videoToUpload)).timeout(References.timeout);
+        switch (response.statusCode) {
+          case 201:
+            var data = json.decode(response.body);
+            print(data['video']);
+            print(data['video']['_id']);
+            await TeacherAccessObject()
+                .insertVideo(UploadedVideo.fromJSON(data['video']));
+            return Success201(message: 'Your video uploaded successfully');
+            break;
+
+          case 500:
+            return InternalServerError();
+            break;
+
+          case 403:
+            await FileSystemServices.deleteUserData();
+            await CachingServices.clearAllCachedData();
+            return ForbiddenAccess(message: 'You are not an authorized user');
+            break;
+
+          default:
+            return NewBugException(
+                message: 'Unhandled statusCode ${response.statusCode}');
+            break;
+        }
+      }
+      on TimeoutException {
+        return ServerNotResponding();
+      }
+      catch (err) {
+        return new NewBugException(message: err.toString());
+      }
     }
   }
 
-  static Future<ContractResponse> uploadNewVideo(
-      Map<String, String> videoData) async {
-    bool isConnceted = await NetWorkInfo.checkConnection();
 
-    if (!isConnceted) {
-      return NoInternetConnection();
-    }
-    DialogService serviceLocator = locator.get<DialogService>();
-    http.Response response;
-    String _url = Api.getSuitableUrl(
-            accountType: serviceLocator
-                .profilePageState.userData.commonFields.account_type) +
-        '/upload-new-video';
-
-    Map<String, String> _headers = {
-      'authorization': await CachingServices.getField(key: 'token'),
-      'content-type': 'application/json',
-      'Accept': 'application/json'
-    };
-    Map<String,String> videoToUpload = videoData;
-    videoToUpload['stage'] = (6 - References.schoolStages.indexOf(videoData['stage'])).toString();
-    try{
-      response = await http.post(Uri.encodeFull(_url),headers: _headers,body: json.encode(videoToUpload)).timeout(References.timeout);
-       switch (response.statusCode) {
-        case 201:
-          var data = json.decode(response.body);
-          print(data['video']);
-          print(data['video']['_id']);
-          await TeacherAccessObject()
-              .insertVideo(UploadedVideo.fromJSON(data['video']));
-          return Success201(message: 'Your video uploaded successfully');
-          break;
-
-        case 500:
-          return InternalServerError();
-          break;
-
-        case 403:
-          await FileSystemServices.deleteUserData();
-          await CachingServices.clearAllCachedData();
-          return ForbiddenAccess(message: 'You are not an authorized user');
-          break;
-
-        default:
-          return NewBugException(
-              message: 'Unhandled statusCode ${response.statusCode}');
-          break;
-      }
-    }
-    on TimeoutException{
-      return ServerNotResponding();
-    }
-    catch(err){
-      return new NewBugException(message: err.toString());
-    }
-  }
-}

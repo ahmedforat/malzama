@@ -1,3 +1,7 @@
+import 'package:malzama/src/core/references/college_materials/dentist.dart';
+import 'package:malzama/src/core/references/college_materials/medicine.dart';
+import 'package:malzama/src/core/references/college_materials/pharmacy.dart';
+
 import '../../features/home/models/school_student.dart';
 import '../../features/home/models/school_teacher_model.dart';
 import '../../features/home/models/uni_student.dart';
@@ -177,6 +181,24 @@ static String validateYoutubeLink(String link) {
     && link.substring(0, TYPICAL_PREFIX.length) == TYPICAL_PREFIX ? null : 'Please enter a valid link';
 }
 
+
+static List<String> getSuitaleCollegeMaterialList(int stage,String college,{int semester}){
+  RegExp dentist = new RegExp(r'سنان');
+  RegExp pharmacy = new RegExp(r'صيدلة');
+  RegExp analysis = new RegExp(r'مرضية');
+  
+  if(dentist.hasMatch(college)){
+   return DentistrySyllabus.getByStage(stage);
+  }else if(pharmacy.hasMatch(college)){
+    return PharmacySyllabus.getByStageAndSemester(stage, semester);
+  }else if(analysis.hasMatch(college)){
+    return PharmacySyllabus.getByStageAndSemester(stage, semester);
+  }else{
+     return MedicineSyllabus.getByStageAndSemester(stage, semester);
+  }
+
+
+}
   // text.length <= 128  => ScreenUtil.setSp(65)
                  // 128 < text.length < 145  => ScreenUtil.setSp(60)
                  // 144 < text.length < 181  => ScreenUtil.setSp(55)

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:malzama/src/features/home/presentation/state_provider/my_materials_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/pdf_viewer_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploading_state_provider.dart';
 
 import '../../../../features/home/presentation/state_provider/profile_page_state_provider.dart';
 
@@ -18,6 +19,7 @@ class DialogService {
 
 
   ProfilePageState profilePageState;
+  QuizUploadingState quizUploadingState;
   MyMaterialStateProvider myMaterialStateProvider;
 
   // close tha dialog
@@ -98,17 +100,31 @@ class DialogService {
     _showDialogOfFailure(message:message);
     return _dialogCompleter.future;
   }
-  // show dialog of uploading new lecture
-  Function _showDialogOfUploadingNewLecture;
+  // show dialog of uploading new lecture for schools
+  Function _showDialogOfUploadingNewLectureForSchools;
 
-  void registerShowDialogOfUploadingLecture(Function listener) {
-    _showDialogOfUploadingNewLecture = listener;
+  void registerShowDialogOfUploadingLectureForSchools(Function listener) {
+    _showDialogOfUploadingNewLectureForSchools = listener;
   }
 
-  Future showDialogOfUploadingNewLecture() {
+  Future showDialogOfUploadingNewLectureForSchools() {
     _dialogCompleter = new Completer();
     _isDailogOpened = true;
-    _showDialogOfUploadingNewLecture();
+    _showDialogOfUploadingNewLectureForSchools();
+    return _dialogCompleter.future;
+  }
+
+
+  // show dialog of uploading new lecture for universities
+  Function _showDialogOfUploadingNewLectureForUniversities;
+
+  void registerShowDialogOfUploadingLectureForUniversities(Function listener) {
+    _showDialogOfUploadingNewLectureForUniversities = listener;
+  }
+  Future showDialogOfUploadingNewLectureForUniversities() {
+    _dialogCompleter = new Completer();
+    _isDailogOpened = true;
+    _showDialogOfUploadingNewLectureForUniversities();
     return _dialogCompleter.future;
   }
 

@@ -1,3 +1,4 @@
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_entity.dart';
 import 'package:sembast/sembast.dart';
 
 import '../app_database.dart';
@@ -9,8 +10,10 @@ class TeacherAccessObject {
   static const String MY_UPLOADED_PDFS = 'my_pdfs_uploads';
   static const String MY_UPLOADED_VIDEOS = 'my_video_uploads';
 
+
   final myPDFUploads = intMapStoreFactory.store(MY_UPLOADED_PDFS);
   final myVideoUploads = intMapStoreFactory.store(MY_UPLOADED_VIDEOS);
+
 
   Future<Database> get database async =>
       await LocalDatabase.getInstance().database;
@@ -73,4 +76,6 @@ class TeacherAccessObject {
 
     return videos;
   }
+
+
 }
