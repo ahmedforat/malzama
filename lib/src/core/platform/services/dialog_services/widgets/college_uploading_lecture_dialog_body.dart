@@ -14,8 +14,6 @@ import '../dialog_service.dart';
 import '../service_locator.dart';
 import '../dialog_state_providers/college_uploads_state_provider.dart';
 
-
-
 class UploadingLectureBodyForUniversities extends StatefulWidget {
   @override
   _UploadingLectureBodyForUniversitiesState createState() => _UploadingLectureBodyForUniversitiesState();
@@ -133,8 +131,8 @@ class _UploadingLectureBodyForUniversitiesState extends State<UploadingLectureBo
                               stateProvider.lectureToUpload == null
                                   ? 'Tap here to choose File'
                                   : stateProvider.lectureToUpload.path.split('/').last.length > 40
-                                  ? stateProvider.lectureToUpload.path.split('/').last.substring(0, 40)
-                                  : stateProvider.lectureToUpload.path.split('/').last,
+                                      ? stateProvider.lectureToUpload.path.split('/').last.substring(0, 40)
+                                      : stateProvider.lectureToUpload.path.split('/').last,
                               textAlign: TextAlign.center)),
                     ),
                   ),
@@ -162,8 +160,9 @@ class _UploadingLectureBodyForUniversitiesState extends State<UploadingLectureBo
                             final Map<String, dynamic> lectureData = {
                               'title': title,
                               'description': description,
-                              'stage': References.stagesMapper.entries.firstWhere((item) => item.value == collegeUploadingState.stage).value,
-                              'section': dialogService.profilePageState.userData.college,
+                              'stage': collegeUploadingState.stage,
+                              'section': dialogService.profilePageState.userData.section,
+                              'topic': collegeUploadingState.topic,
                               'src': collegeUploadingState.lectureToUpload
                             };
 
@@ -171,6 +170,7 @@ class _UploadingLectureBodyForUniversitiesState extends State<UploadingLectureBo
                               lectureData['semester'] = collegeUploadingState.semester;
                             }
 
+                            // close the dialog and complete the future with the lecture data provided by the user
                             dialogService.completeAndCloseDialog(lectureData);
                           } else {
                             print('invalid data');

@@ -26,8 +26,7 @@ class AccessManager {
 
     if (userdata == null) {
       await CachingServices.clearAllCachedData();
-      return NotFoundAndMustLeave(
-          message: 'You are not authorized to access here');
+      return NotFoundAndMustLeave(message: 'You are not authorized to access here');
     }
     Response response;
     Map<String, String> _headers = {
@@ -37,21 +36,16 @@ class AccessManager {
     };
 
     try {
-      response = await post(Uri.encodeFull(Api.LOGOUT_URL),
-              headers: _headers,
-              body: json.encode({'email': userdata['email']}))
-          .timeout(References.timeout);
+      response = await post(Uri.encodeFull(Api.LOGOUT_URL), headers: _headers, body: json.encode({'email': userdata['email']})).timeout(References.timeout);
 
-      print('this is the status code of the response' +
-          response.statusCode.toString());
+      print('this is the status code of the response' + response.statusCode.toString());
 
       switch (response.statusCode) {
         case 403:
           {
             await CachingServices.clearAllCachedData();
             await FileSystemServices.deleteUserData();
-            return ForbiddenAccess(
-                message: 'you are not authorized to access here');
+            return ForbiddenAccess(message: 'you are not authorized to access here');
           }
 
         case 500:
@@ -61,8 +55,7 @@ class AccessManager {
           {
             await CachingServices.clearAllCachedData();
             await FileSystemServices.deleteUserData();
-            return NotFoundAndMustLeave(
-                message: 'you are not authorized to access here');
+            return NotFoundAndMustLeave(message: 'you are not authorized to access here');
           }
 
         case 200:
@@ -75,8 +68,7 @@ class AccessManager {
           }
 
         default:
-          return NewBugException(
-              message: 'unhandled statusCode ${response.statusCode}');
+          return NewBugException(message: 'unhandled statusCode ${response.statusCode}');
       }
     } on TimeoutException {
       return ServerNotResponding();
@@ -85,8 +77,7 @@ class AccessManager {
     }
   }
 
-  static Future<ContractResponse> signIn(
-      {@required String email, @required String password}) async {
+  static Future<ContractResponse> signIn({@required String email, @required String password}) async {
     bool isConnected = await NetWorkInfo.checkConnection();
 
     if (!isConnected) {
@@ -94,17 +85,12 @@ class AccessManager {
     }
 
     Response response;
-    Map<String, String> _headers = {
-      'content-type': 'application/json',
-      'Accept': 'application/json'
-    };
+    Map<String, String> _headers = {'content-type': 'application/json', 'Accept': 'application/json'};
 
     Map<String, String> _body = {'email': email, 'password': password};
 
     try {
-      response = await post(Uri.encodeFull(Api.LOGIN_URL),
-              headers: _headers, body: json.encode(_body))
-          .timeout(References.timeout);
+      response = await post(Uri.encodeFull(Api.LOGIN_URL), headers: _headers, body: json.encode(_body)).timeout(References.timeout);
 
       switch (response.statusCode) {
         case 500:
@@ -112,8 +98,7 @@ class AccessManager {
           break;
 
         case 404:
-          return InternalServerError(
-              message: 'Incorrect email and /or password');
+          return InternalServerError(message: 'Incorrect email and /or password');
           break;
 
         case 400:
@@ -123,26 +108,21 @@ class AccessManager {
             await FileSystemServices.saveUserData(userdata);
             return NotValidated();
           } else if (responseBody.containsKey('incorrect')) {
-            return InternalServerError(
-                message: 'Incorrect email and /or password');
+            return InternalServerError(message: 'Incorrect email and /or password');
           } else {
-            return InternalServerError(
-                message: 'this user is already logged in!');
+            return InternalServerError(message: 'this user is already logged in!');
           }
           break;
 
         case 200:
           String token = json.decode(response.body)['token'];
-          await CachingServices.saveStringField(
-              key: 'token', value: 'bearer $token');
-          await FileSystemServices.saveUserData(
-              json.decode(response.body)['userdata']);
+          await CachingServices.saveStringField(key: 'token', value: 'bearer $token');
+          await FileSystemServices.saveUserData(json.decode(response.body)['userdata']);
           return Success200();
           break;
 
         default:
-          return NewBugException(
-              message: 'unhandled statusCode ${response.statusCode}');
+          return NewBugException(message: 'unhandled statusCode ${response.statusCode}');
       }
     } on TimeoutException {
       return ServerNotResponding();
@@ -151,5 +131,3 @@ class AccessManager {
     }
   }
 }
-
-

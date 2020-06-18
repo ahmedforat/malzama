@@ -272,7 +272,7 @@ class _QuizUploaderWidgetState extends State<QuizUploaderWidget> {
                                 height: ScreenUtil().setHeight(110),
                                 width: ScreenUtil().setWidth(360),
                               ),
-                            if (isPharmacyOrMedicine(profilePageState)) QuizSemesterWidget(),
+                            if (isPharmacyOrMedicine(profilePageState)) QuizSemesterWidget<QuizUploadingState>(),
                             if (isPharmacyOrMedicine(profilePageState))
                               SizedBox(
                                 height: ScreenUtil().setHeight(50),

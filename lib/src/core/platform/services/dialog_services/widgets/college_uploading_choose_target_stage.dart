@@ -37,7 +37,7 @@ class TargetCollegeStage extends StatelessWidget {
     CollegeUploadingState collegeUploadingState = Provider.of<CollegeUploadingState>(context, listen: false);
     ProfilePageState profilePageState = Provider.of<ProfilePageState>(context, listen: false);
     ScreenUtil.init(context);
-    return Selector<CollegeUploadingState, String>(
+    return Selector<CollegeUploadingState, int>(
       selector: (context, stateProvider) => stateProvider.stage,
       builder: (context, schoolStage, _) => GestureDetector(
         onTap: () => focusNodes.forEach((node) => node.unfocus()),
@@ -49,7 +49,7 @@ class TargetCollegeStage extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   padding: EdgeInsets.all(ScreenUtil().setSp(10)),
                   child: DropdownButtonHideUnderline(
-                      child: DropdownButtonFormField<String>(
+                      child: DropdownButtonFormField<int>(
                         validator: (data) {
                           if (data == null)
                             return 'this field is required';
@@ -57,12 +57,12 @@ class TargetCollegeStage extends StatelessWidget {
                             return null;
                         },
                         items: _getItems(profilePageState).map((String stage) {
-                          return DropdownMenuItem<String>(
+                          return DropdownMenuItem<int>(
                             child: Text(
                               '$stage  ',
                               //style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            value: stage,
+                            value: int.parse(References.stagesMapper.entries.firstWhere((item) => item.value == stage).key),
                           );
                         }).toList(),
                         onChanged: (update) {

@@ -10,8 +10,7 @@ import '../../../../../state_provider/profile_page_state_provider.dart';
 class SchoolStudentInfoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ProfilePageState profilePageState =
-        Provider.of<ProfilePageState>(context, listen: false);
+    ProfilePageState profilePageState = Provider.of<ProfilePageState>(context, listen: false);
     ScreenUtil.init(context);
     return Selector<ProfilePageState, dynamic>(
         selector: (context, stateProvider) => stateProvider.userData,
@@ -22,14 +21,10 @@ class SchoolStudentInfoWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: ScreenUtil().setSp(50),
-                      vertical: ScreenUtil().setSp(15)),
+                  padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setSp(50), vertical: ScreenUtil().setSp(15)),
                   child: Text(
                     'Info',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: ScreenUtil().setSp(80)),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: ScreenUtil().setSp(80)),
                   ),
                 ),
                 Container(
@@ -42,13 +37,7 @@ class SchoolStudentInfoWidget extends StatelessWidget {
                         leading: Icon(Icons.my_location),
                         title: Text('City'),
                         subtitle: Text(
-                          userData.commonFields.province
-                              .toString()
-                              .replaceFirst(
-                                  userData.commonFields.province[0],
-                                  userData.commonFields.province[0]
-                                      .toString()
-                                      .toUpperCase()),
+                          userData.commonFields.province.toString().replaceFirst(userData.commonFields.province[0], userData.commonFields.province[0].toString().toUpperCase()),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -62,8 +51,7 @@ class SchoolStudentInfoWidget extends StatelessWidget {
                           leading: Icon(Icons.my_location),
                           title: Text('SubRegion'),
                           subtitle: Text(
-                            References.getSuitableSubRegion(
-                                userData.commonFields.subRegion),
+                            References.getSuitableSubRegion(userData.commonFields.subRegion),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -75,8 +63,7 @@ class SchoolStudentInfoWidget extends StatelessWidget {
                         leading: Icon(Icons.school),
                         title: Text('Study Section'),
                         subtitle: Text(
-                          References.getSuitableSchholSection(
-                              userData.school_section),
+                          References.getSuitableSchholSection(userData.school_section),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

@@ -9,12 +9,13 @@ import 'package:provider/provider.dart';
 import '../../../../core/platform/services/caching_services.dart';
 import '../../../../core/style/colors.dart';
 import '../state_provider/common_widgets_state_provider.dart';
-import '../widgets/common%20widgets/email.dart';
-import '../widgets/common%20widgets/name_widget.dart';
-import '../widgets/common%20widgets/password.dart';
-import '../widgets/common%20widgets/phone.dart';
-import '../widgets/common%20widgets/select_gender_widget.dart';
-import '../widgets/common%20widgets/select_province_widget.dart';
+
+import '../widgets/common_widgets/email.dart';
+import '../widgets/common_widgets/name_widget.dart';
+import '../widgets/common_widgets/password.dart';
+import '../widgets/common_widgets/phone.dart';
+import '../widgets/common_widgets/select_gender_widget.dart';
+import '../widgets/common_widgets/select_province_widget.dart';
 
 class CommonSignupPage extends StatelessWidget {
   final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
@@ -84,9 +85,9 @@ class CommonSignupPage extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
-                             Expanded(
-                               child: SizedBox(),
-                             ),
+                              Expanded(
+                                child: SizedBox(),
+                              ),
                               SizedBox(
                                   width: ScreenUtil().setWidth(300),
                                   child: Text('Have an account?')),
@@ -95,10 +96,12 @@ class CommonSignupPage extends StatelessWidget {
                                 child: IconButton(
                                   icon: Text(
                                     'Sign in',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
-                                  onPressed: (){
-                                    Navigator.of(context).pushNamed('/login-page');
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .pushNamed('/login-page');
                                   },
                                   color: Colors.red,
                                 ),

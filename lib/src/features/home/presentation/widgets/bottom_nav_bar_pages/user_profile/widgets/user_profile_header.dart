@@ -5,10 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/fa_icon.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:malzama/src/core/api/contract_response.dart';
-import 'package:malzama/src/core/platform/local_database/access_objects/teacher_access_object.dart';
-import 'package:malzama/src/core/platform/local_database/models/uploaded_pdf_and_video_model.dart';
+
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/dialog_state_provider.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/school_uploads_state_provider.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/my_materials_state_provider.dart';
@@ -40,8 +38,7 @@ class UserProfileHeader2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    ProfilePageState profilePageState =
-        Provider.of<ProfilePageState>(context, listen: false);
+    ProfilePageState profilePageState = Provider.of<ProfilePageState>(context, listen: false);
 
     Widget coverPicture = InkWell(
       onTap: () async {
@@ -55,20 +52,13 @@ class UserProfileHeader2 extends StatelessWidget {
           builder: (context, coverPicture, _) => Container(
               width: ScreenUtil().setWidth(300),
               height: ScreenUtil().setHeight(300),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(ScreenUtil().setSp(15)),
-                  image: coverPicture == null
-                      ? null
-                      : DecorationImage(
-                          image: FileImage(coverPicture), fit: BoxFit.fill)),
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(ScreenUtil().setSp(15)), image: coverPicture == null ? null : DecorationImage(image: FileImage(coverPicture), fit: BoxFit.fill)),
               child: coverPicture == null
                   ? Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text('Add a cover photo'),
-                          Icon(Icons.add_a_photo)
-                        ],
+                        children: <Widget>[Text('Add a cover photo'), Icon(Icons.add_a_photo)],
                       ),
                     )
                   : null),
@@ -91,20 +81,13 @@ class UserProfileHeader2 extends StatelessWidget {
           width: ScreenUtil().setWidth(230),
           height: ScreenUtil().setHeight(200),
           decoration: BoxDecoration(
-              border: profilePageState.profilePicture != null
-                  ? Border.all(width: 2, color: Colors.black)
-                  : null,
-              borderRadius: BorderRadius.circular(ScreenUtil()
-                  .setSp(profilePageState.profilePicture == null ? 1100 : 15)),
+              border: profilePageState.profilePicture != null ? Border.all(width: 2, color: Colors.black) : null,
+              borderRadius: BorderRadius.circular(ScreenUtil().setSp(profilePageState.profilePicture == null ? 1100 : 15)),
               // shape: profilePageState.profilePicture != null ?BoxShape.circle:null,
               color: Colors.white,
               image: profilePageState.profilePicture == null
                   ? null
-                  : DecorationImage(
-                      image: profilePageState.profilePicture != null
-                          ? FileImage(profilePageState.profilePicture)
-                          : AssetImage('assets/kaka.jpg'),
-                      fit: BoxFit.fill)),
+                  : DecorationImage(image: profilePageState.profilePicture != null ? FileImage(profilePageState.profilePicture) : AssetImage('assets/kaka.jpg'), fit: BoxFit.fill)),
           child: profilePageState.profilePicture != null
               ? null
               : Icon(
@@ -128,16 +111,8 @@ class UserProfileHeader2 extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               SizedBox(width: ScreenUtil().setWidth(30)),
-              Text('${userData.commonFields.firstName} ',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: ScreenUtil().setSp(50),
-                      fontWeight: FontWeight.bold)),
-              Text('${userData.commonFields.lastName} ',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: ScreenUtil().setSp(50),
-                      fontWeight: FontWeight.bold)),
+              Text('${userData.commonFields.firstName} ', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: ScreenUtil().setSp(50), fontWeight: FontWeight.bold)),
+              Text('${userData.commonFields.lastName} ', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: ScreenUtil().setSp(50), fontWeight: FontWeight.bold)),
             ],
           ),
           SizedBox(height: ScreenUtil().setHeight(15)),
@@ -152,8 +127,7 @@ class UserProfileHeader2 extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(left: ScreenUtil().setWidth(30)),
             child: Text(
-              References
-                  .accountTypeDictionary[userData.commonFields.account_type],
+              References.accountTypeDictionary[userData.commonFields.account_type],
               overflow: TextOverflow.ellipsis,
             ),
           )
@@ -191,45 +165,44 @@ class UserProfileHeader2 extends StatelessWidget {
             Positioned(
               child: IconButton(
                 icon: Icon(Icons.ondemand_video),
-               onPressed: ()async{
-                  ContractResponse response = await Provider.of<SchoolUploadState>(context,listen: false).uploadNewVideo();
-                  if(response == null){
+                onPressed: () async {
+                  ContractResponse response = await Provider.of<SchoolUploadState>(context, listen: false).uploadNewVideo();
+                  if (response == null) {
                     return;
                   }
-                  if(response is Success){
-                    await Provider.of<MyMaterialStateProvider>(context,listen: false).fetchMyVideosFromDB();
+                  if (response is Success) {
+                    await Provider.of<MyMaterialStateProvider>(context, listen: false).fetchMyVideosFromDB();
                     locator<DialogService>().showDialogOfSuccess(message: response.message);
-                  }else{
+                  } else {
                     locator<DialogService>().showDialogOfFailure(message: response.message);
                   }
-               },
+                },
               ),
               top: ScreenUtil().setHeight(470),
               left: ScreenUtil().setWidth(700),
             ),
             Positioned(
               child: IconButton(
-                icon: Icon(Icons.file_upload),
-                  onPressed: ()async{
-                    ContractResponse response = await Provider.of<SchoolUploadState>(context,listen: false).uploadNewLecture();
-                    if(response == null){
-                      return ;
+                  icon: Icon(Icons.file_upload),
+                  onPressed: () async {
+                    ContractResponse response = await Provider.of<SchoolUploadState>(context, listen: false).uploadNewLecture();
+                    if (response == null) {
+                      return;
                     }
-                    if(response is Success){
-                      Provider.of<MyMaterialStateProvider>(context,listen: false).fetchMyPDFsFromDB();
+                    if (response is Success) {
+                      Provider.of<MyMaterialStateProvider>(context, listen: false).fetchMyPDFsFromDB();
                       locator<DialogService>().showDialogOfSuccess(message: response.message);
-                    }else{
+                    } else {
                       locator<DialogService>().showDialogOfFailure(message: response.message);
                     }
-                  }
-              ),
+                  }),
               top: ScreenUtil().setHeight(470),
               left: ScreenUtil().setWidth(500),
             ),
             Positioned(
               child: IconButton(
                 icon: Icon(Icons.explore),
-                onPressed: ()async{
+                onPressed: () async {
                   Navigator.of(context).pushNamed('/quiz-uploader');
                 },
               ),

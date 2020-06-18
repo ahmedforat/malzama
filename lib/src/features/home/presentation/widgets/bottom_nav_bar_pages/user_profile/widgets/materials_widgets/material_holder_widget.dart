@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/platform/local_database/models/school_uploads_models/school_uploaded_pdf_model.dart';
+import 'package:malzama/src/core/platform/local_database/models/school_uploads_models/school_uploaded_video_model.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/core/references/references.dart';
@@ -13,6 +15,7 @@ class VideoWidget extends StatelessWidget {
   final String type;
 
   VideoWidget(this.type);
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
@@ -62,18 +65,14 @@ class VideoWidget extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(left: ScreenUtil().setWidth(20)),
-            child: Text('Acute Coronary Syndrome',
-                style: TextStyle(
-                    fontSize: ScreenUtil().setSp(50),
-                    fontWeight: FontWeight.bold)),
+            child: Text('Acute Coronary Syndrome', style: TextStyle(fontSize: ScreenUtil().setSp(50), fontWeight: FontWeight.bold)),
           ),
           SizedBox(
             height: ScreenUtil().setHeight(5),
           ),
           Padding(
             padding: EdgeInsets.only(left: ScreenUtil().setWidth(30)),
-            child: Text('Date: 01/09/2020',
-                style: TextStyle(fontSize: ScreenUtil().setSp(28))),
+            child: Text('Date: 01/09/2020', style: TextStyle(fontSize: ScreenUtil().setSp(28))),
           ),
           SizedBox(
             height: ScreenUtil().setHeight(40),
@@ -95,28 +94,26 @@ class VideoWidget extends StatelessWidget {
 class SchoolMaterialWidget extends StatelessWidget {
   final int pos;
   final bool isVideo;
+
   SchoolMaterialWidget({@required this.pos, @required this.isVideo});
 
   @override
   Widget build(BuildContext context) {
-    ProfilePageState profilePageState =
-        Provider.of<ProfilePageState>(context, listen: false);
-    MyMaterialStateProvider materialStateProvider =
-        Provider.of<MyMaterialStateProvider>(context, listen: false);
+    ProfilePageState profilePageState = Provider.of<ProfilePageState>(context, listen: false);
+    MyMaterialStateProvider<SchoolUploadedPDF, SchoolUploadedVideo> materialStateProvider = Provider.of<MyMaterialStateProvider>(context, listen: false);
 
     return GestureDetector(
       onTap: () {
         DialogService serviceLocator = locator.get<DialogService>();
-        if(isVideo){
-          Navigator.of(context).pushNamed('/video-display-widget',arguments: materialStateProvider.myVideos[pos].videoId);
-        }else{
+        if (isVideo) {
+          Navigator.of(context).pushNamed('/video-display-widget', arguments: materialStateProvider.myVideos[pos].videoId);
+        } else {
           serviceLocator.pdfSize = materialStateProvider.myPDFs[pos].size;
           serviceLocator.pdfUrl = materialStateProvider.myPDFs[pos].path;
           serviceLocator.pdfSource = PDFSource.URL;
           print('before crash');
           Navigator.of(context).pushNamed('/pdf-viewer-widget');
         }
-
       },
       child: Container(
         margin: EdgeInsets.only(top: ScreenUtil().setHeight(30)),
@@ -142,7 +139,9 @@ class SchoolMaterialWidget extends StatelessWidget {
                         children: <Widget>[
                           Text(
                             'اعداد المدرس: ${profilePageState.userData.commonFields.firstName} ${profilePageState.userData.commonFields.lastName}',
-                            style: TextStyle(fontSize: ScreenUtil().setSp(25)),
+                            style: TextStyle(
+                              fontSize: ScreenUtil().setSp(25),
+                            ),
                           ),
                           Text(
                             '${profilePageState.userData.school}',
@@ -152,7 +151,9 @@ class SchoolMaterialWidget extends StatelessWidget {
                             isVideo
                                 ? '${References.stages[materialStateProvider.myVideos[pos].stage]} / ${materialStateProvider.myVideos[pos].school_section}'
                                 : '${References.stages[materialStateProvider.myPDFs[pos].stage]} / ${materialStateProvider.myPDFs[pos].school_section}',
-                            style: TextStyle(fontSize: ScreenUtil().setSp(28)),
+                            style: TextStyle(
+                              fontSize: ScreenUtil().setSp(28),
+                            ),
                           ),
                         ],
                       ),
@@ -170,12 +171,9 @@ class SchoolMaterialWidget extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(left: ScreenUtil().setWidth(20)),
               child: Text(
-                  isVideo
-                      ? materialStateProvider.myVideos[pos].title
-                      : materialStateProvider.myPDFs[pos].title,
-                  style: TextStyle(
-                      fontSize: ScreenUtil().setSp(50),
-                      fontWeight: FontWeight.bold)),
+                isVideo ? materialStateProvider.myVideos[pos].title : materialStateProvider.myPDFs[pos].title,
+                style: TextStyle(fontSize: ScreenUtil().setSp(50), fontWeight: FontWeight.bold),
+              ),
             ),
             SizedBox(
               height: ScreenUtil().setHeight(5),
@@ -183,12 +181,11 @@ class SchoolMaterialWidget extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(left: ScreenUtil().setWidth(30)),
               child: Text(
-                  isVideo
-                      ? materialStateProvider.myVideos[pos].post_date
-                          .substring(0, 10)
-                      : materialStateProvider.myPDFs[pos].post_date
-                          .substring(0, 10),
-                  style: TextStyle(fontSize: ScreenUtil().setSp(28))),
+                isVideo ? materialStateProvider.myVideos[pos].post_date.substring(0, 10) : materialStateProvider.myPDFs[pos].post_date.substring(0, 10),
+                style: TextStyle(
+                  fontSize: ScreenUtil().setSp(28),
+                ),
+              ),
             ),
             SizedBox(
               height: ScreenUtil().setHeight(40),
@@ -196,10 +193,11 @@ class SchoolMaterialWidget extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(left: ScreenUtil().setWidth(20)),
               child: Text(
-                  isVideo
-                      ? materialStateProvider.myVideos[pos].description
-                      : materialStateProvider.myPDFs[pos].description,
-                  style: TextStyle(fontSize: ScreenUtil().setSp(30))),
+                isVideo ? materialStateProvider.myVideos[pos].description : materialStateProvider.myPDFs[pos].description,
+                style: TextStyle(
+                  fontSize: ScreenUtil().setSp(30),
+                ),
+              ),
             ),
           ],
         ),

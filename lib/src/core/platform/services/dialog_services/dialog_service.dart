@@ -22,6 +22,32 @@ class DialogService {
   QuizUploadingState quizUploadingState;
   MyMaterialStateProvider myMaterialStateProvider;
 
+
+
+  // ********************************************** showing dialog template **********************************
+
+    Future showDialog(Function dialog){
+      _dialogCompleter = new Completer();
+      _isDailogOpened = true;
+      dialog();
+      return _dialogCompleter.future;
+    }
+
+  // *********************************************************************************************************
+
+
+  //******
+  //******
+  //******
+  //******
+  //******
+  //******
+  //******
+  //******
+  //******
+
+
+// ************************************** Closing the Dialog **************************************************
   // close tha dialog
   Function _dialogCloseListener;
 
@@ -29,21 +55,30 @@ class DialogService {
     _dialogCloseListener = listener;
   }
 
-// show dialog of uploading new video
-  Function _showDialogOfUploadingNewVideo;
 
-  void registerShowDialogOfUploadingVideo(Function listener) {
-    _showDialogOfUploadingNewVideo = listener;
+  void completeAndCloseDialog(value) {
+    print('dialog has ended and closed');
+    if (_dialogCompleter != null) _dialogCompleter.complete(value);
+    _isDailogOpened = false;
+    _dialogCompleter = null;
+    _dialogCloseListener();
+    print('closing dialog');
   }
-
-  Future showDialogOfUploadingNewVideo() {
-    _dialogCompleter = new Completer<Map<String,dynamic>>();
-    _isDailogOpened = true;
-    _showDialogOfUploadingNewVideo();
-    return _dialogCompleter.future;
-  }
+// *************************************************************************************************************
 
 
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+
+
+
+  //******************************************* Dialog of loading and uploading ****************************************
 // show dialog of uploading 
   Function _showDialogOfUploading;
 
@@ -51,13 +86,8 @@ class DialogService {
     _showDialogOfUploading = listener;
   }
 
-  Future showDialogOfUploading() {
-    _dialogCompleter = new Completer();
-    _isDailogOpened = true;
-    _showDialogOfUploading();
-    return _dialogCompleter.future;
-  }
-
+  Future showDialogOfUploading() => showDialog(_showDialogOfUploading);
+  // --------------------------------------
 
   // show dialog of loading PDF 
   Function _showDialogOfLoadingPDF;
@@ -66,14 +96,27 @@ class DialogService {
     _showDialogOfLoadingPDF = listener;
   }
 
-  Future showDialogOfLoadingPDF() {
-    _dialogCompleter = new Completer();
-    _isDailogOpened = true;
-    _showDialogOfLoadingPDF();
-    return _dialogCompleter.future;
-  }
+  Future showDialogOfLoadingPDF() => showDialog(_showDialogOfLoadingPDF);
 
-  // show dialog of success 
+  //****************************************************************************************************************
+
+
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+
+
+
+  // ************************************************* dialog of success & failure ***********************************
+
+
+  // Dialog of success  as a message
+
   Function _showDialogOfSuccess;
 
   void registerShowDialogOfSuccess(Function({String message}) listener) {
@@ -86,8 +129,9 @@ class DialogService {
     _showDialogOfSuccess(message:message);
     return _dialogCompleter.future;
   }
+  // --------------------------------------
 
- // show dialog of Failure
+ // show dialog of Failure as a message
   Function _showDialogOfFailure;
 
   void registerShowDialogOfFailure(Function({String message}) listener) {
@@ -100,6 +144,21 @@ class DialogService {
     _showDialogOfFailure(message:message);
     return _dialogCompleter.future;
   }
+  //****************************************************************************************************************
+
+
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+
+
+
+  // *************************************** uploading for schools **********************************************
   // show dialog of uploading new lecture for schools
   Function _showDialogOfUploadingNewLectureForSchools;
 
@@ -107,13 +166,36 @@ class DialogService {
     _showDialogOfUploadingNewLectureForSchools = listener;
   }
 
-  Future showDialogOfUploadingNewLectureForSchools() {
-    _dialogCompleter = new Completer();
-    _isDailogOpened = true;
-    _showDialogOfUploadingNewLectureForSchools();
-    return _dialogCompleter.future;
+  Future showDialogOfUploadingNewLectureForSchools()  => showDialog(_showDialogOfUploadingNewLectureForSchools);
+
+  // --------------------------------------
+
+  // show dialog of uploading new video for schools
+  Function _showDialogOfUploadingNewVideoForSchools;
+
+  void registerShowDialogOfUploadingVideoForSchools(Function listener) {
+    _showDialogOfUploadingNewVideoForSchools = listener;
   }
 
+  Future showDialogOfUploadingNewVideo() => showDialog(_showDialogOfUploadingNewVideoForSchools);
+
+
+  // ******************************************************************************************************
+
+
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+  //****
+
+
+
+  // *************************************** uploading for universities **********************************************
 
   // show dialog of uploading new lecture for universities
   Function _showDialogOfUploadingNewLectureForUniversities;
@@ -121,13 +203,34 @@ class DialogService {
   void registerShowDialogOfUploadingLectureForUniversities(Function listener) {
     _showDialogOfUploadingNewLectureForUniversities = listener;
   }
-  Future showDialogOfUploadingNewLectureForUniversities() {
-    _dialogCompleter = new Completer();
-    _isDailogOpened = true;
-    _showDialogOfUploadingNewLectureForUniversities();
-    return _dialogCompleter.future;
-  }
+  Future showDialogOfUploadingNewLectureForUniversities() => showDialog(_showDialogOfUploadingNewLectureForUniversities);
 
+  // -----------------------------
+
+
+  // show dialog of uploading new video for universities
+  Function _showDialogOfUploadingNewVideoForUniversities;
+
+  void registerShowDialogOfUploadingVideoForUniversities(Function listener) {
+    _showDialogOfUploadingNewVideoForUniversities = listener;
+  }
+  Future showDialogOfUploadingNewVideoForUniversities() => showDialog(_showDialogOfUploadingNewVideoForUniversities);
+
+// **************************************************************************************************************
+
+
+
+  //*****
+  //*****
+  //*****
+  //*****
+  //*****
+  //*****
+  //*****
+  //*****
+
+
+// ***************************************** Dialogs of Editing Profile info ********************************************
   // show dialog of editing info
   Function _showDialogOfEditingInfo;
 
@@ -135,15 +238,13 @@ class DialogService {
     _showDialogOfEditingInfo = listener;
   }
 
-  Future showDialogOfEditingInfo() {
-    _dialogCompleter = new Completer();
-    _isDailogOpened = true;
-    _showDialogOfEditingInfo();
-    return _dialogCompleter.future;
-  }
+  Future showDialogOfEditingInfo() => showDialog(_showDialogOfEditingInfo);
+
+
+  // *************************************  Profile Pictures Dialogs ****************************************
+
 
   // show dialog of choosing image source
-
   Function _showDialogOfChoosingImageSource;
   void registerShowDialogOfChoosingImageSource(Function listener) {
     _showDialogOfChoosingImageSource = listener;
@@ -154,6 +255,9 @@ class DialogService {
     _showDialogOfChoosingImageSource();
   }
 
+  // -------------------------------------
+
+
   // show dialog of editing and viewing profile picture
   Function _showDialogOfProfilePicture;
 
@@ -161,33 +265,21 @@ class DialogService {
     _showDialogOfProfilePicture = listener;
   }
 
-  Future<dynamic> showDialogOfProfilePicture() {
-    _dialogCompleter = new Completer();
-    _isDailogOpened = true;
-    _showDialogOfProfilePicture();
-    return _dialogCompleter.future;
-  }
+  Future<dynamic> showDialogOfProfilePicture() => showDialog(_showDialogOfProfilePicture);
 
-  // show dialog of cover picture
+  // ----------------------------------------
+
+// show dialog of editing and viewing cover picture
   Function() _showDialogOfCoverPicture;
 
   void registerShowDialogOfCoverPicture(Function listener) {
     _showDialogOfCoverPicture = listener;
   }
 
-  Future<dynamic> showDialogOfCoverPicture() {
-    _dialogCompleter = new Completer();
-    _isDailogOpened = true;
-    _showDialogOfCoverPicture();
-    return _dialogCompleter.future;
-  }
+  Future showDialogOfCoverPicture() => showDialog(_showDialogOfCoverPicture);
 
-  void completeAndCloseDialog(value) {
-    print('dialog has ended and closed');
-    if (_dialogCompleter != null) _dialogCompleter.complete(value);
-    _isDailogOpened = false;
-    _dialogCompleter = null;
-    _dialogCloseListener();
-    print('closing dialog');
-  }
+// ******************************************************************************************************
+
+
+
 }

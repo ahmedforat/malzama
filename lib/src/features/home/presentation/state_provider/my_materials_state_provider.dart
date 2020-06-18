@@ -1,19 +1,20 @@
 import 'package:flutter/cupertino.dart';
+import 'package:malzama/src/core/platform/local_database/models/base_model.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 
 import '../../../../core/platform/local_database/access_objects/teacher_access_object.dart';
-import '../../../../core/platform/local_database/models/uploaded_pdf_and_video_model.dart';
 
 
-class MyMaterialStateProvider with ChangeNotifier {
+
+class MyMaterialStateProvider<PDF extends BaseUploadingModel,VIDEO extends BaseUploadingModel> with ChangeNotifier {
 DialogService dialogService;
-  List<UploadedPDF> _myPDFs = [];
-  List<UploadedVideo> _myVideos = [];
+  List<PDF> _myPDFs = [];
+  List<VIDEO> _myVideos = [];
 
 
-  List<UploadedPDF> get myPDFs => _myPDFs;
-  List<UploadedVideo> get myVideos => _myVideos;
+  List<PDF> get myPDFs => _myPDFs;
+  List<VIDEO> get myVideos => _myVideos;
 
   MyMaterialStateProvider(){
     fetchMyPDFsFromDB();
@@ -24,7 +25,7 @@ DialogService dialogService;
 
   Future<void> fetchMyPDFsFromDB()async{
     print('fetching PDFS from local db');
-    _myPDFs = await TeacherAccessObject().fetchAllPDFS();
+    _myPDFs = await TeacherAccessObject().fetchAllPDFS<PDF>();
     if(_myPDFs == null){
       _myPDFs = [];
     }
@@ -32,7 +33,7 @@ DialogService dialogService;
     notifyListeners();
   }
 
-  Future<void> fetchMyVideosFromDB()async{
+  Future<void> fetchMyVideosFromDB<VIDEO>()async{
     print('fetching Videos from local db');
     _myVideos = await TeacherAccessObject().fetchAllVideos();
     if(_myVideos == null){

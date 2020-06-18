@@ -6,8 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:malzama/src/core/platform/local_database/access_objects/teacher_access_object.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/widgets/college_uploading_choose_target_stage.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/college_uploading_lecture_dialog_body.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/college_uploads_state_provider.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/widgets/college_uploading_video_dialog_body.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/widgets/school_uploading_choose_school_section.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/widgets/school_uploading_video_dialog_body.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/my_materials_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/pdf_viewer_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_uploader/quiz_semester_widget.dart';
@@ -24,6 +28,8 @@ import 'dialog_state_providers/school_uploads_state_provider.dart';
 import 'service_locator.dart';
 import 'use_cases.dart';
 import 'widgets/college_uploading_choose_topic.dart';
+import 'widgets/school_uploading_choose_school_stage.dart';
+import 'widgets/school_uploading_lecture_dialog_body.dart';
 
 class DialogManager extends StatefulWidget {
   final Widget child;
@@ -40,23 +46,101 @@ class _DialogManagerState extends State<DialogManager> {
   @override
   void initState() {
     print('initializing the service locator');
+
+    // ** register of closing dialog method
     dialogService.registerCloseDialogListner(_closeDialog);
+
+    // registration of dialogs for profile info **************************************************************
+
+    // register dialog for profile picture
     dialogService.registerShowDialogOfProfilePicture(_showDialogOfProfilePicture);
-    dialogService.registerShowDialogOfChoosingImageSource(_showDialogOfChoosingImageSource);
+
+    // register dialog for profile cover picture
     dialogService.registerShowDialogOfCoverPicture(_showDialogOfCoverPicture);
+
+    // register dialog for choosing image source
+    dialogService.registerShowDialogOfChoosingImageSource(_showDialogOfChoosingImageSource);
+
+    // register dialog for editing profile info
     dialogService.registerShowDialogOfEditingInfo(_showDialogeOfProfileEditingInfo);
 
-    dialogService.registerShowDialogOfUploadingVideo(_showDialogOfUploadingVideo);
+    //*******************************************************************************************************
 
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+
+    // registration of dialogs for schools ****************************************************************************
+
+    // ***** register dialog for uploading video for schools
+    dialogService.registerShowDialogOfUploadingVideoForSchools(_showDialogOfUploadingVideoForSchools);
+
+    // ***** register dialog for uploading lecture for schools
     dialogService.registerShowDialogOfUploadingLectureForSchools(_showDialogOfUploadingLectureForSchools);
 
+    //*********************************************************************************************************************
+
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+
+    // registration of dialogs for universities  ****************************************************************************
+
+    // ***** register dialog for uploading lecture for universities
     dialogService.registerShowDialogOfUploadingLectureForUniversities(_showDialogOfUploadingLectureForUniversities);
 
+    // ***** register dialog for uploading video for universities
+    dialogService.registerShowDialogOfUploadingVideoForUniversities(_showDialogOfUploadingVideoForUniversities);
+
+    //************************************************************************************************************************
+
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+
+    // registration of dialogs for universities  ****************************************************************************
+
+    // ***** register dialog for Success message
+    dialogService.registerShowDialogOfSuccess(showDialogOfSuccess);
+
+    // ***** register dialog for Failure message
+    dialogService.registerShowDialogOfFailure(showDialogOfFailure);
+
+    //***********************************************************************************************************************
+
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+    //***
+
+    // registration of loading and uploading **********************************************************************************
+
+    // register dialog for loading pdf
     dialogService.registerShowDialogOfLoadingPDF(showDialogOfLoadingPDF);
 
-    dialogService.registerShowDialogOfSuccess(showDialogOfSuccess);
+    // register dialog for uploading progress
     dialogService.registerShowDialogOfUploading(showDialogOfUploading);
-    dialogService.registerShowDialogOfFailure(showDialogOfFailure);
+
+    // ***********************************************************************************************************************
     super.initState();
   }
 
@@ -368,14 +452,15 @@ class _DialogManagerState extends State<DialogManager> {
             )));
   }
 
-  void _showDialogOfUploadingVideo() {
+  // show dialog of uploading video for schools
+  void _showDialogOfUploadingVideoForSchools() {
     showDialog(
       barrierDismissible: false,
       context: context,
       builder: (context) => dialogWrapper(
           closingCallback: () => dialogService.completeAndCloseDialog(null),
           child: Builder(
-            builder: (context) => UploadingVideoBody(),
+            builder: (context) => UploadingVideoBodyForSchools(),
           )),
     );
   }
@@ -393,7 +478,7 @@ class _DialogManagerState extends State<DialogManager> {
     );
   }
 
-  // show dialog of uploading lecture for schools
+  // show dialog of uploading lecture for universities
   void _showDialogOfUploadingLectureForUniversities() {
     showDialog(
       barrierDismissible: false,
@@ -402,6 +487,19 @@ class _DialogManagerState extends State<DialogManager> {
           closingCallback: () => dialogService.completeAndCloseDialog(null),
           child: Builder(
             builder: (context) => UploadingLectureBodyForUniversities(),
+          )),
+    );
+  }
+
+  // show dialog of uploading video for universities
+  void _showDialogOfUploadingVideoForUniversities() {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => dialogWrapper(
+          closingCallback: () => dialogService.completeAndCloseDialog(null),
+          child: Builder(
+            builder: (context) => UploadingVideoBodyForUniversities(),
           )),
     );
   }
@@ -555,178 +653,3 @@ class _DialogManagerState extends State<DialogManager> {
             )));
   }
 }
-
-
-
-
-
-
-
-class UploadingVideoBody extends StatefulWidget {
-  @override
-  _UploadingVideoBodyState createState() => _UploadingVideoBodyState();
-}
-
-class _UploadingVideoBodyState extends State<UploadingVideoBody> {
-  GlobalKey<FormState> _formKey;
-  String title, description, videoId;
-  DialogService dialogService;
-
-  FocusNode titleFocusNode;
-  FocusNode descriptionFocusNode;
-  FocusNode videoLinkFocusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    titleFocusNode = new FocusNode();
-    descriptionFocusNode = new FocusNode();
-    videoLinkFocusNode = new FocusNode();
-    _formKey = new GlobalKey<FormState>();
-    dialogService = locator.get<DialogService>();
-  }
-
-  @override
-  void dispose() {
-    titleFocusNode.dispose();
-    descriptionFocusNode.dispose();
-    videoLinkFocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ScreenUtil().setSp(20)),
-      ),
-      child: GestureDetector(
-        onTap: () {
-          titleFocusNode.unfocus();
-          descriptionFocusNode.unfocus();
-          videoLinkFocusNode.unfocus();
-          FocusScope.of(context).unfocus();
-        },
-        child: Form(
-          key: _formKey,
-          child: Container(
-            padding: EdgeInsets.all(ScreenUtil().setSp(70)),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  SizedBox(height: ScreenUtil().setHeight(20)),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Upload new video', style: TextStyle(fontWeight: FontWeight.bold, fontSize: ScreenUtil().setSp(60))),
-                  ),
-                  SizedBox(height: ScreenUtil().setHeight(50)),
-                  TextFormField(
-                    maxLength: 40,
-                    focusNode: titleFocusNode,
-                    decoration: InputDecoration(labelText: 'title'),
-                    validator: (val) {
-                      if (val.trim().isEmpty) {
-                        return 'this field is required';
-                      }
-                      return null;
-                    },
-                    onSaved: (val) => title = val,
-                    onTap: () {
-                      if (descriptionFocusNode.hasFocus) descriptionFocusNode.unfocus();
-                      if (videoLinkFocusNode.hasFocus) videoLinkFocusNode.unfocus();
-                    },
-                  ),
-                  TextFormField(
-                    maxLength: 300,
-                    maxLines: null,
-                    focusNode: descriptionFocusNode,
-                    decoration: InputDecoration(labelText: 'description'),
-                    validator: (val) {
-                      if (val.trim().isEmpty) {
-                        return 'this field is required';
-                      }
-                      return null;
-                    },
-                    onSaved: (val) => description = val,
-                    onTap: () {
-                      if (titleFocusNode.hasFocus) titleFocusNode.unfocus();
-                      if (videoLinkFocusNode.hasFocus) videoLinkFocusNode.unfocus();
-                    },
-                  ),
-                  SizedBox(
-                    height: ScreenUtil().setHeight(80),
-                  ),
-                  TargetSchoolStage(focusNodes: [titleFocusNode, descriptionFocusNode, videoLinkFocusNode]),
-                  TargetSchoolSection(focusNodes: [titleFocusNode, descriptionFocusNode, videoLinkFocusNode]),
-                  SizedBox(
-                    height: ScreenUtil().setHeight(80),
-                  ),
-                  TextFormField(
-                    focusNode: videoLinkFocusNode,
-                    decoration: InputDecoration(labelText: 'video link from youTube'),
-                    keyboardType: TextInputType.text,
-                    validator: (link) => References.validateYoutubeLink(link),
-                    onSaved: (link) => videoId = References.getVideoIDFrom(youTubeLink: link),
-                    onTap: () {
-                      if (titleFocusNode.hasFocus) titleFocusNode.unfocus();
-                      if (descriptionFocusNode.hasFocus) descriptionFocusNode.unfocus();
-                    },
-                  ),
-                  SizedBox(height: ScreenUtil().setHeight(100)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      RaisedButton(
-                        onPressed: () {
-                          Provider.of<SchoolUploadState>(context, listen: false).setAllFieldsToNull();
-                          dialogService.completeAndCloseDialog(null);
-                        },
-                        child: Text('Cancel'),
-                      ),
-                      SizedBox(width: ScreenUtil().setWidth(50)),
-                      RaisedButton(
-                        color: Colors.blueAccent,
-                        onPressed: () async {
-                          titleFocusNode.unfocus();
-                          descriptionFocusNode.unfocus();
-                          videoLinkFocusNode.unfocus();
-                          FocusScope.of(context).unfocus();
-
-                          if (!(_formKey.currentState.validate())) {
-                            // do nothing
-                            print('Enter a valid data');
-                          } else {
-                            print('Hello World');
-                            SchoolUploadState videoState = Provider.of<SchoolUploadState>(context, listen: false);
-                            _formKey.currentState.save();
-
-                            Map<String, String> videoData = {
-                              'title': title,
-                              'description': description,
-                              'videoId': videoId,
-                              'stage': videoState.targetStage,
-                              'school_section': videoState.targetSchoolSection,
-                            };
-
-                            print(videoData);
-                            dialogService.completeAndCloseDialog(videoData);
-                          }
-                        },
-                        child: Text(
-                          'upload',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
