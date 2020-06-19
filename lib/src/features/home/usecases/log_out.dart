@@ -24,10 +24,10 @@ class AccessManager {
       return InternalServerError();
     }
 
-    if (userdata == null) {
-      await CachingServices.clearAllCachedData();
-      return NotFoundAndMustLeave(message: 'You are not authorized to access here');
-    }
+//    if (userdata == null) {
+//      await CachingServices.clearAllCachedData();
+//      return NotFoundAndMustLeave(message: 'You are not authorized to access here');
+//    }
     Response response;
     Map<String, String> _headers = {
       'content-type': 'application/json',
@@ -36,7 +36,7 @@ class AccessManager {
     };
 
     try {
-      response = await post(Uri.encodeFull(Api.LOGOUT_URL), headers: _headers, body: json.encode({'email': userdata['email']})).timeout(References.timeout);
+      response = await post(Uri.encodeFull(Api.LOCALHOST_LOGOUT_URL), headers: _headers, body: json.encode({'email': userdata['email']})).timeout(References.timeout);
 
       print('this is the status code of the response' + response.statusCode.toString());
 
@@ -90,7 +90,7 @@ class AccessManager {
     Map<String, String> _body = {'email': email, 'password': password};
 
     try {
-      response = await post(Uri.encodeFull(Api.LOGIN_URL), headers: _headers, body: json.encode(_body)).timeout(References.timeout);
+      response = await post(Uri.encodeFull(Api.LOCALHOST_LOGIN_URL), headers: _headers, body: json.encode(_body)).timeout(References.timeout);
 
       switch (response.statusCode) {
         case 500:

@@ -34,8 +34,21 @@ class EmailWidget extends StatelessWidget {
         focusNode: focusNode,
         keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
+          suffixIcon: state.email == null
+              ? null
+              : FieldsValidators.validateEmail(mail: state.email) == null
+              ? Icon(
+            Icons.check,
+            color: Colors.green,
+          )
+              : Icon(
+            Icons.clear,
+            color: Colors.red,
+          ),
           labelText: 'Email',
-          labelStyle: TextStyle(color: Colors.black87),
+          helperText: state.email == null ? null : FieldsValidators.validateEmail(mail: state.email),
+
+
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(ScreenUtil().setSp(15))),
         ),

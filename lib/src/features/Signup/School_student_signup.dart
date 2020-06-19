@@ -7,7 +7,7 @@
 //import 'package:provider/provider.dart';
 //
 //import 'widgets/common widgets/name_widget.dart';
-//import 'widgets/common widgets/phone.dart';
+//import 'widgets/common widgets/confirm_password.dart';
 //
 //class SchoolStudent extends StatefulWidget {
 //  @override

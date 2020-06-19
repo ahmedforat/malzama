@@ -217,7 +217,6 @@ class DialogManagerUseCases {
     String _url = Api.getSuitableUrl(accountType: account_type) + '/upload-new-video';
 
     // setting headers
-
     Map<String, String> _headers = {'authorization': await CachingServices.getField(key: 'token'), 'content-type': 'application/json', 'Accept': 'application/json'};
     try {
       response = await http.post(Uri.encodeFull(_url), headers: _headers, body: json.encode(videoData)).timeout(References.timeout);

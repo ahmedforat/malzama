@@ -27,15 +27,14 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
     if (accountType != null && collegeState.isCompleted) {
       await Future.delayed(Duration(milliseconds: 1));
       return true;
-    }else{
+    } else {
       if (accountType == null) {
-         accountType = await CachingServices.getField(key: 'accountType');
-         
-    } 
-    if(!collegeState.isCompleted) {
-      await collegeState.initialize();
-    }
-    return true;
+        accountType = await CachingServices.getField(key: 'accountType');
+      }
+      if (!collegeState.isCompleted) {
+        await collegeState.initialize();
+      }
+      return true;
     }
   }
 
@@ -68,9 +67,7 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPostSignupPage(
-          BuildContext context, CollegePostSignUpState collegeState) =>
-      GestureDetector(
+  Widget _buildPostSignupPage(BuildContext context, CollegePostSignUpState collegeState) => GestureDetector(
         onTap: () {
           if (FocusScope.of(context).hasFocus) {
             FocusScope.of(context).unfocus();
@@ -92,10 +89,8 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
                 SelectUniversityWidget(),
                 SelectCollegeWidget(),
                 SelectSectionWidget(),
-                if (accountType == AccountType.unistudents)
-                  SelectStageWidget(),
-                if (accountType == AccountType.uniteachers)
-                  Form(key: formKey, child: CollegeLecturerSpecialityWidget()),
+                if (accountType == AccountType.unistudents) SelectStageWidget(),
+                if (accountType == AccountType.uniteachers) Form(key: formKey, child: CollegeLecturerSpecialityWidget()),
                 SizedBox(
                   height: ScreenUtil().setHeight(100),
                 ),
@@ -105,13 +100,10 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
                       onPressed: executionState.isLoading
                           ? null
                           : () {
-                              if (accountType ==
-                                  AccountType.uniteachers.toString()) {
-                                _handleCollegeLecturerDoneButton(
-                                    scaffoldKey, collegeState, context);
+                              if (accountType == AccountType.uniteachers.toString()) {
+                                _handleCollegeLecturerDoneButton(scaffoldKey, collegeState, context);
                               } else {
-                                _handleCollegeStudentDoneButton(
-                                    scaffoldKey, collegeState, context);
+                                _handleCollegeStudentDoneButton(scaffoldKey, collegeState, context);
                               }
                             },
                       child: executionState.isLoading
@@ -126,45 +118,37 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
           ),
         ),
       );
-  void _handleCollegeLecturerDoneButton(GlobalKey<ScaffoldState> key,
-      CollegePostSignUpState collegeState, BuildContext context) async {
+
+  void _handleCollegeLecturerDoneButton(GlobalKey<ScaffoldState> key, CollegePostSignUpState collegeState, BuildContext context) async {
     if (collegeState.university == null) {
-      key.currentState
-          .showSnackBar(getSnackBar('please university is required'));
+      key.currentState.showSnackBar(getSnackBar('please university is required'));
     } else if (collegeState.college == null) {
       key.currentState.showSnackBar(getSnackBar('please college is required'));
     } else {
       if (formKey.currentState.validate()) {
         //print(collegeState.fetchLecturerData(commonState));
-        ExecutionState executionState =
-            Provider.of<ExecutionState>(context, listen: false);
+        ExecutionState executionState = Provider.of<ExecutionState>(context, listen: false);
         executionState.setLoadingStateTo(true);
         String cachedData = await CachingServices.getField(key: 'commonState');
         var _user = collegeState.fetchLecturerData(json.decode(cachedData));
         _user['account_type'] = accountType.toString();
         print(collegeState.fetchLecturerData(json.decode(cachedData)));
-        ContractResponse response = await SignUpNewUser(
-                user: _user)
-            .execute();
+        ContractResponse response = await SignUpNewUser(user: _user).execute();
         executionState.setLoadingStateTo(false);
         if (response is SnackBarException) {
           key.currentState.showSnackBar(getSnackBar(response.message));
         } else if (response is NewBugException) {
-          DebugTools.showErrorMessageWidget(
-              context: context, message: response.message);
+          DebugTools.showErrorMessageWidget(context: context, message: response.message);
         } else {
-          Navigator.of(context).pushNamedAndRemoveUntil(
-              '/validate-account-page', ModalRoute.withName(null));
+          Navigator.of(context).pushNamedAndRemoveUntil('/validate-account-page', ModalRoute.withName(null));
         }
       }
     }
   }
 
-  void _handleCollegeStudentDoneButton(GlobalKey<ScaffoldState> key,
-      CollegePostSignUpState collegeState, BuildContext context) async {
+  void _handleCollegeStudentDoneButton(GlobalKey<ScaffoldState> key, CollegePostSignUpState collegeState, BuildContext context) async {
     if (collegeState.university == null) {
-      key.currentState
-          .showSnackBar(getSnackBar('please university is required'));
+      key.currentState.showSnackBar(getSnackBar('please university is required'));
     } else if (collegeState.college == null) {
       key.currentState.showSnackBar(getSnackBar('please college is required'));
     } else if (collegeState.section == null) {
@@ -172,25 +156,20 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
     } else if (collegeState.stage == null) {
       key.currentState.showSnackBar(getSnackBar('please stage is required'));
     } else {
-      ExecutionState executionState =
-          Provider.of<ExecutionState>(context, listen: false);
+      ExecutionState executionState = Provider.of<ExecutionState>(context, listen: false);
       executionState.setLoadingStateTo(true);
       String cachedData = await CachingServices.getField(key: 'commonState');
       print(collegeState.fetchStudentData(json.decode(cachedData)));
       var _user = collegeState.fetchStudentData(json.decode(cachedData));
       _user['account_type'] = accountType.toString();
-      ContractResponse response =
-          await SignUpNewUser(user:_user )
-              .execute();
+      ContractResponse response = await SignUpNewUser(user: _user).execute();
       executionState.setLoadingStateTo(false);
       if (response is SnackBarException) {
         key.currentState.showSnackBar(getSnackBar(response.message));
       } else if (response is NewBugException) {
-        DebugTools.showErrorMessageWidget(
-            context: context, message: response.message);
+        DebugTools.showErrorMessageWidget(context: context, message: response.message);
       } else {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-            '/validate-account-page', (Route route) => false);
+        Navigator.of(context).pushNamedAndRemoveUntil('/validate-account-page', (Route route) => false);
       }
     }
   }

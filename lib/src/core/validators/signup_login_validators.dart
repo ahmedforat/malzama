@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 class FieldsValidators {
   static final String _thisFieldIsRequired = 'هذا الحقل مطلوب';
   static String validateFirstAndLastName({String firstName}) {
-    if (firstName.isEmpty) return _thisFieldIsRequired;
+    if (firstName == null ||firstName.isEmpty) return _thisFieldIsRequired;
 
     RegExp firstNamePatternEn = new RegExp(r'^[A-Za-z]{3,12}$');
     RegExp firstNamePatternArabic = new RegExp(r'^[\u0621-\u064A]{3,12}$');
@@ -30,7 +30,7 @@ class FieldsValidators {
   }
 
   static String validateEmail({String mail}) {
-    if (mail.isEmpty) return _thisFieldIsRequired;
+    if (mail == null || mail.isEmpty) return _thisFieldIsRequired;
 
     RegExp mailPattern = new RegExp(r'^[A-Za-z]*[\w\W]*@[a-z]{2,}\.[a-z]{3,}$');
 
@@ -40,7 +40,7 @@ class FieldsValidators {
   }
 
   static String validatePassword({String password}) {
-    if (password.isEmpty) return _thisFieldIsRequired;
+    if (password == null || password.isEmpty) return _thisFieldIsRequired;
 
     if (password.length < 8) return 'يجب ان يكون طول كلمة المرور 8 على الاقل';
 

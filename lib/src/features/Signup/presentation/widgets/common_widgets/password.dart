@@ -13,34 +13,42 @@ class PasswordWidget extends StatelessWidget {
 
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    CommonWidgetsStateProvider state =
-        Provider.of<CommonWidgetsStateProvider>(context, listen: false);
+    CommonWidgetsStateProvider state = Provider.of<CommonWidgetsStateProvider>(context, listen: false);
     return Container(
-      margin: EdgeInsets.only(
-        bottom: ScreenUtil().setHeight(40),
-      ),
-      child: TextFormField(
-            onTap: () {
-              otherFocusNodes.forEach((node) {
-                node.unfocus();
-              });
-            },
-            validator: (val) {
-              return FieldsValidators.validatePassword(password: val);
-            },
-            onChanged: (val) {
-              state.updatePassword(update: val);
-            },
-            focusNode: focusNode,
-            obscureText: true,
-            keyboardType: TextInputType.text,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              labelStyle: TextStyle(color: Colors.black87),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(ScreenUtil().setSp(15))),
-            ),
-          )
-    );
+        margin: EdgeInsets.only(
+          bottom: ScreenUtil().setHeight(40),
+        ),
+        child: TextFormField(
+          onTap: () {
+            otherFocusNodes.forEach((node) {
+              node.unfocus();
+            });
+          },
+          validator: (val) {
+            return FieldsValidators.validatePassword(password: val);
+          },
+          onChanged: (val) {
+            state.updatePassword(update: val);
+          },
+          focusNode: focusNode,
+          obscureText: true,
+          keyboardType: TextInputType.text,
+          decoration: InputDecoration(
+            suffixIcon: state.password == null
+                ? null
+                : FieldsValidators.validatePassword(password: state.password) == null
+                    ? Icon(
+                        Icons.check,
+                        color: Colors.green,
+                      )
+                    : Icon(
+                        Icons.clear,
+                        color: Colors.red,
+                      ),
+            labelText: 'Password',
+            labelStyle: TextStyle(color: Colors.black87),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(ScreenUtil().setSp(15))),
+          ),
+        ));
   }
 }
