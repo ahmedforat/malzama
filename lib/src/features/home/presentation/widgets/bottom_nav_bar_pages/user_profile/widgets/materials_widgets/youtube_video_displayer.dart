@@ -30,7 +30,6 @@ class _VideoDisplayState extends State<VideoDisplay> {
         flags: YoutubePlayerFlags(
           autoPlay: true,
           hideThumbnail: true,
-          forceHideAnnotation: true,
         ));
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/school_uploads_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/quiz_drafts_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/drafts_displayer.dart';
 import 'package:provider/provider.dart';
@@ -59,6 +60,10 @@ class MyApp extends StatelessWidget {
           create: (context) => locator.get<MyMaterialStateProvider>(),
           lazy: true,
         ),
+        ChangeNotifierProvider<NotificationStateProvider>(
+          create: (context) => locator.get<NotificationStateProvider>(),
+          lazy: true,
+        )
       ],
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
