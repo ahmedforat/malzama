@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "363337490863",
+    "firebase_url": "https://malzama-platform.firebaseio.com",
+    "project_id": "malzama-platform",
+    "storage_bucket": "malzama-platform.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:363337490863:android:48d5528c0c46d7ce420f5a",
+        "android_client_info": {
+          "package_name": "com.example.malzama"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "363337490863-iobo50g12i94tv6edtrqn70f2h8gsv87.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0hYgu3YnKMdcaCGjT5b25iglw5kw-fj8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "363337490863-iobo50g12i94tv6edtrqn70f2h8gsv87.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
