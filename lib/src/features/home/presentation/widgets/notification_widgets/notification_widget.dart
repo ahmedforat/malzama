@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/core/general_models/customDate.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../../core/general_models/customDate.dart';
+import '../../state_provider/notifcation_state_provider.dart';
 
 class NotificationWidget extends StatelessWidget {
   final int pos;

@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
 import 'package:provider/provider.dart';
+
+import '../state_provider/notifcation_state_provider.dart';
 
 class BottomNavigationBarWidget extends StatelessWidget {
   final TabController _controller;
@@ -14,6 +15,11 @@ class BottomNavigationBarWidget extends StatelessWidget {
     NotificationStateProvider notificationStateProvider = Provider.of<NotificationStateProvider>(context, listen: false);
     ScreenUtil.init(context);
     return TabBar(
+      onTap: (index) {
+        if(index == 2){
+          notificationStateProvider.setNotificationCountToZero();
+        }
+      },
       controller: _controller,
       tabs: <Widget>[
         Tab(

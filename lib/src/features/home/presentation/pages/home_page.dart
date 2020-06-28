@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:malzama/src/core/Navigator/navigation_service.dart';
+import 'package:malzama/src/core/Navigator/navigator_services.dart';
 import 'package:malzama/src/core/api/contract_response.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/features/home/presentation/pages/notifications.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/widgets/pages_navigators/home_page_navigator/notifications_navigator/home_navigator.dart';
+import 'package:malzama/src/features/home/presentation/widgets/pages_navigators/notifications_navigator/notification_navigator.dart';
+import 'package:malzama/src/features/home/presentation/widgets/pages_navigators/profile_page_navigator/profile_navigator.dart';
 import 'package:malzama/src/features/home/usecases/log_out.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
@@ -32,16 +37,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   GlobalKey<ScaffoldState> scaffoldKey;
   TabController tabController;
-  PageController pageController;
-
-
-
-
-
-
+  List<GlobalKey<NavigatorState>> _pagesNavigators;
 
   @override
   void initState() {
+    _pagesNavigators = locator.get<NavigationService>().navigationKeys;
     tabController = new TabController(vsync: this, length: 4);
     scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -55,64 +55,97 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     //  var state = Provider.of<CommonWidgetsStateProvider>(context,listen:false);
-    return Scaffold(
-      key: scaffoldKey,
-      // appBar: AppBar(
-      //   actions: <Widget>[
-      //     SizedBox(
-      //         width: 100,
-      //         child: IconButton(
-      //             icon: Row(
-      //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //               children: <Widget>[
-      //                 Text('Sign out'),
-      //                 FaIcon(FontAwesomeIcons.signOutAlt)??Text('logOut')
-      //               ],
-      //             ),
-      //             onPressed: () async {
-      //               print('inside logout');
-      //               ContractResponse response = await AccessManager.signOut();
-      //                 print('this is the status code inside homepate'+response.statusCode.toString());
-      //               if (response is SnackBarException) {
-      //                 scaffoldKey.currentState.showSnackBar(SnackBar(
-      //                   content: Text(response.message),
-      //                   duration: Duration(seconds: 3),
-      //                 ));
-      //                 if(response is AuthorizationBreaking){
-      //                   print('inside authorization breaking');
-      //                   Future.delayed(Duration(seconds: 3));
-      //                   Navigator.of(context).pushNamedAndRemoveUntil('/signup-page', (_) => false);
-      //                 }
-      //               }else if(response is Success){
-      //                  Navigator.of(context).pushNamedAndRemoveUntil('/signup-page', (_) => false);
-      //               }else{
-      //                 print(response.message);
-      //                 DebugTools.showErrorMessageWidget(context: context, message: response.message);
-      //               }
-      //             })),
-      //   ],
-      // ),
-      body: Container(
-        child: TabBarView(
-          physics: AlwaysScrollableScrollPhysics(),
-          controller: tabController,
-          children: <Widget>[getFirstWidget(), getSecondWidget(), NotificationPage(), UserProfilePage()],
+    return WillPopScope(
+      onWillPop: () {
+        print(_pagesNavigators.length);
+        print(_pagesNavigators);
+        print(tabController.index);
+        try {
+          if (_pagesNavigators[tabController.index].currentState.canPop()) {
+            _pagesNavigators[tabController.index].currentState.pop();
+            return Future.value(false);
+          }
+          return Future.value(false);
+        } catch (err) {
+          print(err);
+        }
+      },
+      child: Scaffold(
+        key: scaffoldKey,
+        // appBar: AppBar(
+        //   actions: <Widget>[
+        //     SizedBox(
+        //         width: 100,
+        //         child: IconButton(
+        //             icon: Row(
+        //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //               children: <Widget>[
+        //                 Text('Sign out'),
+        //                 FaIcon(FontAwesomeIcons.signOutAlt)??Text('logOut')
+        //               ],
+        //             ),
+        //             onPressed: () async {
+        //               print('inside logout');
+        //               ContractResponse response = await AccessManager.signOut();
+        //                 print('this is the status code inside homepage'+response.statusCode.toString());
+        //               if (response is SnackBarException) {
+        //                 scaffoldKey.currentState.showSnackBar(SnackBar(
+        //                   content: Text(response.message),
+        //                   duration: Duration(seconds: 3),
+        //                 ));
+        //                 if(response is AuthorizationBreaking){
+        //                   print('inside authorization breaking');
+        //                   Future.delayed(Duration(seconds: 3));
+        //                   Navigator.of(context).pushNamedAndRemoveUntil('/signup-page', (_) => false);
+        //                 }
+        //               }else if(response is Success){
+        //                  Navigator.of(context).pushNamedAndRemoveUntil('/signup-page', (_) => false);
+        //               }else{
+        //                 print(response.message);
+        //                 DebugTools.showErrorMessageWidget(context: context, message: response.message);
+        //               }
+        //             })),
+        //   ],
+        // ),
+        body: Container(
+          child: TabBarView(
+            physics: AlwaysScrollableScrollPhysics(),
+            controller: tabController,
+            children: <Widget>[
+              Navigator(
+                key: locator.get<NavigationService>().messagesNavigatorKey,
+                onGenerateRoute: (settings) {
+                  return MaterialPageRoute(
+                      builder: (_) => Container(
+                            color: Colors.white,
+                            child: Center(
+                              child: Text('Messages'),
+                            ),
+                          ));
+                },
+              ),
+              NotificationsNavigator(),
+              HomePageNavigator(),
+              ProfileNavigator()
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBarWidget(
-        controller: tabController,
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.notifications),
-        onPressed: () async {
-            var list = Provider.of<NotificationStateProvider>(context,listen: false).notificationsList;
-            list.forEach((element) {print(element.asHashMap());});
+        bottomNavigationBar: BottomNavigationBarWidget(
+          controller: tabController,
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.notifications),
+          onPressed: () async {
+            var list = Provider.of<NotificationStateProvider>(context, listen: false).notificationsList;
+            list.forEach((element) {
+              print(element.asHashMap());
+            });
             print(list[0].id == list[1].id);
 //            var localNotification = LocalNotificationService.getInstance();
 //            localNotification.initialize();
 //            localNotification.showNotification(channelID: 0,title:'Hello World',body: 'Hello World body',payload: 'Hello World payload');
-
-        },
+          },
+        ),
       ),
     );
   }

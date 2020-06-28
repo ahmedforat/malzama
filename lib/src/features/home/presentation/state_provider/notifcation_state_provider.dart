@@ -20,7 +20,13 @@ class NotificationStateProvider with ChangeNotifier{
   // get the count of the notifications that have now viewed yet
   int get notOpenedNotificationsCount => _notOpenedNotificationsCount;
 
-
+  // set not Notification hint count to zero
+  void setNotificationCountToZero(){
+    if(_notOpenedNotificationsCount != 0){
+      _notOpenedNotificationsCount = 0;
+      notifyListeners();
+    }
+  }
   // append new notification to the list
   // called whenever a new notification is received
   void addToNotificationsList(Notification notification){

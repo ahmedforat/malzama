@@ -194,12 +194,12 @@ Route<dynamic> _onGenerateRoute(RouteSettings settings) {
           builder: (context) => VideoDisplay(videoId: _videoId));
       break;
 
-    case '/quiz-uploader':
-      return MaterialPageRoute(
-          builder: (_) => ChangeNotifierProvider(
-              create: (context) => QuizUploadingState(),
-              child: QuizUploaderWidget(false)));
-      break;
+    // case '/quiz-uploader':
+    //   return MaterialPageRoute(
+    //       builder: (_) => ChangeNotifierProvider(
+    //           create: (context) => QuizUploadingState(),
+    //           child: QuizUploaderWidget(false,)));
+    //   break;
     // case '/quiz':
     //   return MaterialPageRoute(builder: (context) => QuizWidget());
     //   break;

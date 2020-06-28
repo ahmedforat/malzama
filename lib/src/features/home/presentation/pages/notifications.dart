@@ -21,8 +21,8 @@ class NotificationPage extends StatelessWidget {
         ),
         body: Container(
           padding: EdgeInsets.all(ScreenUtil().setSp(20)),
-          child: notificationStateProvider.notificationsList.isEmpty
-              ? Center(child: Text('You have No Notifications Yet'))
+          child: notificationStateProvider.notificationsList.isEmpty? Center(child: Text('You have No Notifications Yet'))
+
               : Selector<NotificationStateProvider, int>(
                   selector: (context, stateProvider) => stateProvider.notificationsList.length,
                   builder: (context, notificationCount, child) => ListView.builder(
