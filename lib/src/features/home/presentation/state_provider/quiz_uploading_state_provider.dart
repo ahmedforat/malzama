@@ -17,7 +17,7 @@ import '../widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/q
 
 class StateProvider {
   int semester;
- void updateSemester(int update){
+  void updateSemester(int update){
 
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:malzama/src/core/platform/services/notifications_service/one_signal_notfication.dart';
 
 import '../../../../core/references/references.dart';
 
@@ -51,6 +52,8 @@ class CommonWidgetsStateProvider with ChangeNotifier {
     _emailNode = new FocusNode();
     _passwordNode = new FocusNode();
     _confirmPasswordNode = new FocusNode();
+   NotificationService notificationService =  NotificationService.getInstance();
+   notificationService.initialize();
   }
   @override
   void dispose() {

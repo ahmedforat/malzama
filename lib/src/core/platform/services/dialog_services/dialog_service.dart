@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:malzama/src/features/home/presentation/state_provider/my_materials_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/pdf_viewer_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploading_state_provider.dart';
 
@@ -20,9 +19,9 @@ class DialogService {
 
   ProfilePageState profilePageState;
   QuizUploadingState quizUploadingState;
-  MyMaterialStateProvider myMaterialStateProvider;
 
 
+  bool isCommentSheetVisible = false;
 
   // ********************************************** showing dialog template **********************************
 

@@ -51,24 +51,24 @@ class References {
     }
   }
 
-  static bool isTeacher(ProfilePageState profilePageState) {
-  return profilePageState.userData.commonFields.account_type == 'uniteachers' ||
-      profilePageState.userData.commonFields.account_type == 'schteachers';
+  static bool isTeacher(String account_type) {
+  return account_type == 'uniteachers' ||
+      account_type == 'schteachers';
 }
 
-static String getVideoLength(ProfilePageState profilePageState) {
-  return isTeacher(profilePageState)
-      ? profilePageState.userData.videos.length.toString()
-      : profilePageState.userData.saved_videos.length.toString();
+static String getVideoLength(Map<String,dynamic> userData) {
+  return isTeacher(userData['account_type'])
+      ? userData['videos'].length.toString()
+      : userData['saved_videos.'].length.toString();
 }
 
-static String getLectureLength(ProfilePageState profilePageState) {
-  return isTeacher(profilePageState)
-      ? profilePageState.userData.lectures.length.toString()
-      : profilePageState.userData.saved_lectures.length.toString();
+static String getLectureLength(Map<String,dynamic> userData) {
+  return isTeacher(userData['account_type'])
+      ? userData['lectures'].length.toString()
+      : userData['saved_lectures'].length.toString();
 }
 
-  static dynamic specifyAccountType(Map map) {
+  static dynamic specifyAccountType(Map<String,dynamic> map) {
 
     switch (map['account_type']) {
       case 'uniteachers':

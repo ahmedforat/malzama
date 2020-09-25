@@ -1,4 +1,4 @@
-class Notification {
+class NotificationInstance {
   String title;
   String body;
   bool isOpened = false;
@@ -6,7 +6,8 @@ class Notification {
   String id;
   Map<String, dynamic> data;
 
-  Notification({
+
+  NotificationInstance({
     this.title,
     this.body,
     this.sentAt,

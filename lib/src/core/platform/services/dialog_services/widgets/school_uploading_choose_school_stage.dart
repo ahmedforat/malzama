@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/school_uploads_state_provider.dart';
+import 'package:malzama/src/core/platform/services/material_uploading/school_uploads_state_provider.dart';
 import 'package:malzama/src/core/references/references.dart';
 import 'package:provider/provider.dart';
 class TargetSchoolStage extends StatelessWidget {

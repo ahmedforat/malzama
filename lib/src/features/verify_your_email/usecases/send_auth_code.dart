@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:malzama/src/core/platform/local_database/local_caches/cached_user_info.dart';
 
 import '../../../core/api/contract_response.dart';
 import '../../../core/api/routes.dart';
@@ -24,13 +25,19 @@ class ValidationAuthCode {
     print(user);
     _user =user;
     print('before any thing inside the constructor of the validation authcode');
-    _url = Api.getSuitableUrl(accountType: user['account_type']);
+    _url = Api.VERIFY_EMAIL_URL;
     print('after any thing inside the constructor of the validation authcode');
 
-    _body = {'email': user['email'], 'auth_code': user['auth_code']??''};
+    _body = {'account_type':user['account_type'],'email': user['email'], 'auth_code': user['auth_code']??''};
   }
 
+
   Future<ContractResponse> send() async {
+    print('jsut before fetching user data');
+    var data = await FileSystemServices.getUserData();
+    print(data['_id']);
+    print('jsut after fetching user data');
+    _body['_id'] = data['_id'];
     print('hello send');
     bool isConnected = await NetWorkInfo.checkConnection();
     if (!isConnected) {
@@ -41,17 +48,17 @@ class ValidationAuthCode {
     http.Response response;
     try {
       response = await http
-          .post(Uri.encodeFull(_url + '/check-validation'),
+          .post(Uri.encodeFull(_url),
               headers: _header, body: json.encode(_body))
           .timeout(References.timeout);
 
       switch (response.statusCode) {
         case 200:
           var data = json.decode(response.body);
+          await UserCachedInfo().saveStringKey('account_type', data['userData']['account_type']);
           CachingServices.removeAllAndSave(
               key: 'token', value: 'bearer ${data['token']}');
-          _user['validated'] = true;
-          await FileSystemServices.saveUserData(data['newUser']);
+          await FileSystemServices.saveUserData(data['userData']);
           return Success200();
           break;
 
@@ -60,6 +67,7 @@ class ValidationAuthCode {
           break;
 
         case 400:
+        case 422:
           return BadRequest(
               message: 'The Code you entered is incorrect\n'
                   'please check your email to get the code we\'ve sent you ');
@@ -84,7 +92,7 @@ class ValidationAuthCode {
   Future<ContractResponse> sendMeAnotherMail() async {
     try {
       http.Response response = await http
-          .post(Uri.encodeFull(_url + '/send-me-another-validation-code'),headers: _header,body: json.encode({'email':_body['email']}))
+          .post(Uri.encodeFull(Api.SEND_ANOTHER_AUTH_CODE_URL),headers: _header,body: json.encode({'email':_body['email']}))
           .timeout(References.timeout);
       switch (response.statusCode) {
         case 500:

@@ -3,12 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:malzama/src/core/api/contract_response.dart';
-
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/school_uploads_state_provider.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/my_materials_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../core/references/references.dart';
@@ -110,8 +104,16 @@ class UserProfileHeader2 extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               SizedBox(width: ScreenUtil().setWidth(30)),
-              Text('${userData.commonFields.firstName} ', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: ScreenUtil().setSp(50), fontWeight: FontWeight.bold)),
-              Text('${userData.commonFields.lastName} ', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: ScreenUtil().setSp(50), fontWeight: FontWeight.bold)),
+              Text(
+                '${userData.commonFields.firstName} ',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: ScreenUtil().setSp(50), fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '${userData.commonFields.lastName} ',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: ScreenUtil().setSp(50), fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           SizedBox(height: ScreenUtil().setHeight(15)),
@@ -161,43 +163,44 @@ class UserProfileHeader2 extends StatelessWidget {
               top: ScreenUtil().setHeight(470),
               left: ScreenUtil().setWidth(900),
             ),
-            Positioned(
-              child: IconButton(
-                icon: Icon(Icons.ondemand_video),
-                onPressed: () async {
-                  ContractResponse response = await Provider.of<SchoolUploadState>(context, listen: false).uploadNewVideo();
-                  if (response == null) {
-                    return;
-                  }
-                  if (response is Success) {
-                    await Provider.of<MyMaterialStateProvider>(context, listen: false).fetchMyVideosFromDB();
-                    locator<DialogService>().showDialogOfSuccess(message: response.message);
-                  } else {
-                    locator<DialogService>().showDialogOfFailure(message: response.message);
-                  }
-                },
-              ),
-              top: ScreenUtil().setHeight(470),
-              left: ScreenUtil().setWidth(700),
-            ),
-            Positioned(
-              child: IconButton(
-                  icon: Icon(Icons.file_upload),
-                  onPressed: () async {
-                    ContractResponse response = await Provider.of<SchoolUploadState>(context, listen: false).uploadNewLecture();
-                    if (response == null) {
-                      return;
-                    }
-                    if (response is Success) {
-                      Provider.of<MyMaterialStateProvider>(context, listen: false).fetchMyPDFsFromDB();
-                      locator<DialogService>().showDialogOfSuccess(message: response.message);
-                    } else {
-                      locator<DialogService>().showDialogOfFailure(message: response.message);
-                    }
-                  }),
-              top: ScreenUtil().setHeight(470),
-              left: ScreenUtil().setWidth(500),
-            ),
+            // Positioned(
+            //   child: IconButton(
+            //     icon: Icon(Icons.ondemand_video),
+            //     onPressed: () async {
+            //       print('Hello Video');
+            //       ContractResponse response = await Provider.of<SchoolUploadState>(context, listen: false).uploadNewVideo();
+            //       if (response == null) {
+            //         return;
+            //       }
+            //       if (response is Success) {
+            //         await Provider.of<MaterialStateProvider>(context, listen: false).fetchMyVideosFromDB();
+            //         locator<DialogService>().showDialogOfSuccess(message: response.message);
+            //       } else {
+            //         locator<DialogService>().showDialogOfFailure(message: response.message);
+            //       }
+            //     },
+            //   ),
+            //   top: ScreenUtil().setHeight(470),
+            //   left: ScreenUtil().setWidth(700),
+            // ),
+            // Positioned(
+            //   child: IconButton(
+            //       icon: Icon(Icons.file_upload),
+            //       onPressed: () async {
+            //         ContractResponse response = await Provider.of<SchoolUploadState>(context, listen: false).uploadNewLecture();
+            //         if (response == null) {
+            //           return;
+            //         }
+            //         if (response is Success) {
+            //           Provider.of<MaterialStateProvider>(context, listen: false).fetchMyPDFsFromDB();
+            //           locator<DialogService>().showDialogOfSuccess(message: response.message);
+            //         } else {
+            //           locator<DialogService>().showDialogOfFailure(message: response.message);
+            //         }
+            //       }),
+            //   top: ScreenUtil().setHeight(470),
+            //   left: ScreenUtil().setWidth(500),
+            // ),
             Positioned(
               child: IconButton(
                 icon: Icon(Icons.explore),

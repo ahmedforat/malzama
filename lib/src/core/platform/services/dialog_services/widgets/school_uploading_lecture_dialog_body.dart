@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/school_uploads_state_provider.dart';
+import 'package:malzama/src/core/platform/services/material_uploading/school_uploads_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../dialog_service.dart';

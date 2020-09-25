@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
-
+import '../../../Navigator/navigation_service.dart';
+import '../../../Navigator/routes_names.dart';
 import '../dialog_services/service_locator.dart';
+import 'package:flutter/material.dart';
 
 class LocalNotificationService {
   // private default constructor
@@ -24,15 +26,30 @@ class LocalNotificationService {
   NotificationDetails notificationDetails;
 
   // I don't know what is its useCase
-  Future<void> _onDidReceiveLocalNotification(int x, String y, String z, String zz) async{
+  Future<void> _onDidReceiveLocalNotification(int x, String y, String z, String zz) async {
     // related to iOS
-
   }
 
   // called whenever the notification is tapped on
   Future _onSelectNotification(String payload) async {
-    var stateProvider = locator.get<NotificationStateProvider>();
-    stateProvider.setAsOpenedByID(json.decode(payload)['id']);
+    print('**************************************************');
+    print('inside On select notificaiton');
+    print('**************************************************');
+    try {
+      var stateProvider = locator.get<NotificationStateProvider>();
+      stateProvider.setAsOpenedByID(json.decode(payload)['id']);
+
+      NavigationService service = NavigationService.getInstance();
+      print('********************************** this is the service $service');
+      print(NavigationService.navigationKeys);
+      print(service.currentIndex);
+      print(NavigationService.navigationKeys[service.currentIndex]);
+      NavigationService.navigationKeys[service.currentIndex].currentState.pushNamed(RouteNames.VIEW_LECTURE, arguments: json.decode(payload));
+    } catch (err) {
+      print('we have got an error');
+      print(err.toString());
+      throw err;
+    }
   }
 
   Future<void> initialize() async {
@@ -55,7 +72,7 @@ class LocalNotificationService {
   }
 
   // show notification
-  Future<void> showNotification({int channelID, String title, String body,String payload}) async {
-    await notificationsPlugin.show(channelID, title, body, notificationDetails,payload:payload );
+  Future<void> showNotification({int channelID, String title, String body, String payload}) async {
+    await notificationsPlugin.show(channelID, title, body, notificationDetails, payload: payload);
   }
 }

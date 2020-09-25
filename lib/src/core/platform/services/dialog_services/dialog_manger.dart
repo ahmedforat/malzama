@@ -8,11 +8,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:malzama/src/core/platform/local_database/access_objects/teacher_access_object.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/college_uploading_choose_target_stage.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/college_uploading_lecture_dialog_body.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/college_uploads_state_provider.dart';
+import 'package:malzama/src/core/platform/services/material_uploading/college_uploads_state_provider.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/college_uploading_video_dialog_body.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/school_uploading_choose_school_section.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/school_uploading_video_dialog_body.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/my_materials_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/pdf_viewer_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_uploader/quiz_semester_widget.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_uploader_widget.dart';
@@ -24,7 +23,7 @@ import '../../../api/contract_response.dart';
 import '../../../references/references.dart';
 import 'dialog_service.dart';
 import 'dialog_state_providers/dialog_state_provider.dart';
-import 'dialog_state_providers/school_uploads_state_provider.dart';
+import '../material_uploading/school_uploads_state_provider.dart';
 import 'service_locator.dart';
 import 'use_cases.dart';
 import 'widgets/college_uploading_choose_topic.dart';
@@ -507,6 +506,7 @@ class _DialogManagerState extends State<DialogManager> {
   Future<void> showDialogOfSuccess({String message}) {
     showDialog(
         context: context,
+        barrierDismissible: true,
         builder: (context) => dialogWrapper(
             closingCallback: () => dialogService.completeAndCloseDialog(null),
             child: AlertDialog(

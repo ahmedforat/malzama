@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:malzama/src/core/general_widgets/custom_selector.dart';
+import 'package:malzama/src/core/general_widgets/get_material_state_provider.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 import 'package:malzama/src/core/platform/local_database/access_objects/teacher_access_object.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/materialPage/material_state_provider..dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../core/references/references.dart';
-import '../../../../state_provider/my_materials_state_provider.dart';
 import '../../../../state_provider/profile_page_state_provider.dart';
 import '../widgets/materials_widgets/material_holder_widget.dart';
 
@@ -14,8 +18,7 @@ class ExploreMaterialPage extends StatefulWidget {
   _ExploreMaterialPageState createState() => _ExploreMaterialPageState();
 }
 
-class _ExploreMaterialPageState extends State<ExploreMaterialPage>
-    with SingleTickerProviderStateMixin {
+class _ExploreMaterialPageState extends State<ExploreMaterialPage> with SingleTickerProviderStateMixin {
   TabController _tabController;
 
   @override
@@ -26,8 +29,8 @@ class _ExploreMaterialPageState extends State<ExploreMaterialPage>
 
   @override
   Widget build(BuildContext context) {
-    ProfilePageState profilePageState =
-        Provider.of<ProfilePageState>(context, listen: false);
+    final String account_type = Provider.of<UserInfoStateProvider>(context, listen: false).account_type;
+    var materialStateProvider = getMaterialStateProvider(context, account_type: account_type);
     ScreenUtil.init(context);
     return SafeArea(
       child: Scaffold(
@@ -38,7 +41,7 @@ class _ExploreMaterialPageState extends State<ExploreMaterialPage>
               children: <Widget>[
                 Container(
                   height: ScreenUtil().setHeight(300),
-                  child: _upperPart(profilePageState),
+                  child: _upperPart(materialStateProvider.account_type),
                 ),
                 TabBar(controller: _tabController, tabs: [
                   Tab(
@@ -48,21 +51,23 @@ class _ExploreMaterialPageState extends State<ExploreMaterialPage>
                     ),
                   ),
                   Tab(
-                    icon: FaIcon(FontAwesomeIcons.filePdf,
-                        color: Colors.blueAccent),
+                    icon: FaIcon(FontAwesomeIcons.filePdf, color: Colors.blueAccent),
                   ),
                 ]),
                 SizedBox(
                   height: ScreenUtil().setHeight(1300),
                   child: TabBarView(
-                      physics: NeverScrollableScrollPhysics(),
-                      controller: _tabController,
-                      children: [
-                        Container(
-                          child: VideoListView(),
-                        ),
-                        Container(child: PDFListView())
-                      ]),
+                    physics: NeverScrollableScrollPhysics(),
+                    controller: _tabController,
+                    children: [
+                      Container(
+                        child: VideoListView(),
+                      ),
+                      Container(
+                        child: PDFListView(),
+                      )
+                    ],
+                  ),
                 ),
               ],
             )),
@@ -72,33 +77,29 @@ class _ExploreMaterialPageState extends State<ExploreMaterialPage>
             size: ScreenUtil().setSp(80),
           ),
           onPressed: () {
-            TeacherAccessObject().fetchAllVideos().then((videos){
+            TeacherAccessObject().fetchAllVideos().then((videos) {
               videos.forEach((f) => print(f.toJSON()));
             });
-
-
           },
         ),
       ),
     );
   }
 
-  Widget _upperPart(ProfilePageState profileState) {
-    return Selector<MyMaterialStateProvider, List<int>>(
-      selector: (context, stateProvider) =>
-          [stateProvider.myPDFs.length, stateProvider.myVideos.length],
+  Widget _upperPart(String account_type) {
+    final String account_type = Provider.of<UserInfoStateProvider>(context, listen: false).account_type;
+    final bool isAcademic = HelperFucntions.isAcademic(account_type);
+    return CustomSelectorWidget<List<int>>(
+      selector: (context, stateProvider) => [stateProvider.myPDFs.length, stateProvider.myVideos.length],
+      isAcademic: isAcademic,
       builder: (context, uploads, _) => Container(
         padding: EdgeInsets.all(ScreenUtil().setSp(30)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              References.isTeacher(profileState)
-                  ? 'My uploaded materials'
-                  : 'My saved materials',
-              style: TextStyle(
-                  fontSize: ScreenUtil().setSp(80),
-                  fontWeight: FontWeight.bold),
+              References.isTeacher(account_type) ? 'My uploaded materials' : 'My saved materials',
+              style: TextStyle(fontSize: ScreenUtil().setSp(80), fontWeight: FontWeight.bold),
             ),
             SizedBox(
               height: ScreenUtil().setHeight(20),
@@ -132,8 +133,8 @@ class _ExploreMaterialPageState extends State<ExploreMaterialPage>
 class PDFListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    MyMaterialStateProvider materialStateProvider =
-        Provider.of<MyMaterialStateProvider>(context);
+    final String account_type = Provider.of<UserInfoStateProvider>(context, listen: false).account_type;
+    var materialStateProvider = getMaterialStateProvider(context, account_type: account_type);
     return Material(
       color: Colors.grey[300],
       child: materialStateProvider.myPDFs == null
@@ -142,15 +143,20 @@ class PDFListView extends StatelessWidget {
             )
           : materialStateProvider.myPDFs.length == 0
               ? Center(
-                  child: Text('There are no lectures uploaded yet',
-                      style: TextStyle(fontSize: ScreenUtil().setSp(50))),
+                  child: Text(
+                    'There are no lectures uploaded yet',
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(50),
+                    ),
+                  ),
                 )
               : ListView.builder(
                   itemCount: materialStateProvider.myPDFs.length,
                   itemBuilder: (context, pos) => SchoolMaterialWidget(
-                        pos: pos,
-                        isVideo: false,
-                      )),
+                    pos: pos,
+                    isVideo: false,
+                  ),
+                ),
     );
   }
 }
@@ -158,8 +164,8 @@ class PDFListView extends StatelessWidget {
 class VideoListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    MyMaterialStateProvider materialStateProvider =
-        Provider.of<MyMaterialStateProvider>(context);
+    final String account_type = Provider.of<UserInfoStateProvider>(context, listen: false).account_type;
+    var materialStateProvider = getMaterialStateProvider(context, account_type: account_type);
     return Material(
       child: materialStateProvider.myVideos == null
           ? Center(
@@ -167,15 +173,20 @@ class VideoListView extends StatelessWidget {
             )
           : materialStateProvider.myVideos.length == 0
               ? Center(
-                  child: Text('There are no videos uploaded yet',
-                      style: TextStyle(fontSize: ScreenUtil().setSp(50))),
+                  child: Text(
+                    'There are no videos uploaded yet',
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(50),
+                    ),
+                  ),
                 )
               : ListView.builder(
                   itemCount: materialStateProvider.myVideos.length,
                   itemBuilder: (context, pos) => SchoolMaterialWidget(
-                        pos: pos,
-                        isVideo: true,
-                      )),
+                    pos: pos,
+                    isVideo: true,
+                  ),
+                ),
     );
   }
 }

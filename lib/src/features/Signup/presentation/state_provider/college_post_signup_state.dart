@@ -171,7 +171,6 @@ class CollegePostSignUpState with ChangeNotifier {
         'stage': _stageDictionary.entries
             .firstWhere((entry) => entry.value == _stage)
             .key
-            .toString()
       });
   }
 

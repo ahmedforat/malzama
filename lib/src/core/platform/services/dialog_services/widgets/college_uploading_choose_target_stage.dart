@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/college_uploads_state_provider.dart';
+import 'package:malzama/src/core/platform/services/material_uploading/college_uploads_state_provider.dart';
 import 'package:malzama/src/core/references/references.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +14,7 @@ class TargetCollegeStage extends StatelessWidget {
   // get the stages list according the the college of the user
   List<String> _getItems(ProfilePageState profilePageState) {
     String college = profilePageState.userData.college;
-    List<String> _items = References.stagesMapper.values.toList();
+    List<String> _items = References.stagesMapper.values.toList().map((e) => e.toString()).toList();
 
     RegExp pharmacyPattern = new RegExp(r'صيدلة');
     RegExp dentistPattern = new RegExp(r'سنان');

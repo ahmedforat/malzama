@@ -8,14 +8,14 @@ class NotificationStateProvider with ChangeNotifier{
     this._notificationsList = [];
   }
   // list of all notifications
-  List<Notification> _notificationsList;
+  List<NotificationInstance> _notificationsList;
 
   // count of the notifications that have now viewed yet
   int _notOpenedNotificationsCount = 0;
 
 
   // get the list of all notifications
-  List<Notification> get notificationsList => _notificationsList;
+  List<NotificationInstance> get notificationsList => _notificationsList;
 
   // get the count of the notifications that have now viewed yet
   int get notOpenedNotificationsCount => _notOpenedNotificationsCount;
@@ -25,15 +25,18 @@ class NotificationStateProvider with ChangeNotifier{
     if(_notOpenedNotificationsCount != 0){
       _notOpenedNotificationsCount = 0;
       notifyListeners();
+      print('not opened notifications is now Zero');
     }
   }
   // append new notification to the list
   // called whenever a new notification is received
-  void addToNotificationsList(Notification notification){
+  void addToNotificationsList(NotificationInstance notification){
     if(notification != null){
+
       _notificationsList.add(notification);
       _notOpenedNotificationsCount += 1;
       notifyListeners();
+      print('added to notification list and notifyListeners was called');
     }
   }
 
@@ -44,6 +47,7 @@ class NotificationStateProvider with ChangeNotifier{
     _notificationsList.elementAt(index).isOpened = true;
     _notOpenedNotificationsCount =  _notificationsList.where((element) => !element.isOpened).length;
     notifyListeners();
+    print('Notificaiton has beeen set as opened');
   }
 
 
@@ -55,5 +59,6 @@ class NotificationStateProvider with ChangeNotifier{
     _notificationsList.firstWhere((notification) => notification.id.compareTo(id) == 0).isOpened = true;
     _notOpenedNotificationsCount -= 1 ;
     notifyListeners();
+    print('Notificaiton has beeen set as opened');
   }
 }

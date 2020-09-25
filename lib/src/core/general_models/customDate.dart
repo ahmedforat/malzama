@@ -8,6 +8,13 @@ class CustomDate{
     this.year,this.month,this.day,this.hour,this.minute,this.second
   });
 
+  Map<String,dynamic> toJson() => {
+    'year':year,
+    'month':month,
+    'day':day,
+    'hour':hour,
+    'minute':minute
+  };
   CustomDate.fromDateTime(DateTime date):
         this.year = date.year,
         this.month = date.month,
@@ -18,12 +25,12 @@ class CustomDate{
 
     // this method get the difference between the current date and the passed date
    CustomDate  _getDateDifference(DateTime date){
-    DateTime now = DateTime.now();
+     DateTime now = DateTime.now();
     CustomDate customDate = new CustomDate();
     customDate.year = now.year - date.year;
     customDate.month = now.month - date.month;
     customDate.day = now.day - date.day;
-    customDate.hour = now.hour - date.hour;
+    customDate.hour = now.hour - date.hour -3;
     customDate.minute = now.minute - date.minute;
     customDate.second = now.second - date.second;
 
@@ -33,15 +40,18 @@ class CustomDate{
   // this method get the best representation of the posted at
   String getPostedAt(DateTime date){
     CustomDate myDate = _getDateDifference(date);
-    if(myDate.year != 0)
+    print('=============================================');
+    print(myDate.toJson());
+    print('================================================');
+    if(myDate.year >= 1)
       return '${myDate.year} ' + (myDate.year > 1 ? 'years':'year') + ' ago';
-    else if (myDate.month != 0)
+    else if (myDate.month >= 1)
       return '${myDate.month} ' + (myDate.month > 1 ? 'months':'month') + ' ago';
-    else if(myDate.day != 0)
+    else if(myDate.day >= 1)
       return '${myDate.day} ' + (myDate.day > 1 ? 'days':'day') + ' ago';
-    else if (myDate.hour != 0)
+    else if (myDate.hour >= 1)
       return '${myDate.hour} ' + (myDate.hour > 1 ? 'hours':'hour') + ' ago';
-    else if (myDate.minute != 0)
+    else if (myDate.minute >= 1)
       return '${myDate.minute} ' + (myDate.minute > 1 ? 'minutes':'minute') + ' ago';
     else return 'now';
   }

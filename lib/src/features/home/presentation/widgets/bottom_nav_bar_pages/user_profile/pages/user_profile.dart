@@ -5,7 +5,7 @@ import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pa
 import 'package:provider/provider.dart';
 
 import '../../../../state_provider/profile_page_state_provider.dart';
-import '../widgets/material_displayer.dart';
+import '../../materialPage/my_uploaded_material.dart';
 import '../widgets/user_info/sch_student_info.dart';
 import '../widgets/user_info/sch_teacher_info.dart';
 import '../widgets/user_info/uni_student_info.dart';
@@ -48,10 +48,8 @@ class UserProfilePage extends StatelessWidget {
                           profilePageState.userData.commonFields.account_type),
 
                       SizedBox(height: ScreenUtil().setHeight(50)),
-                      
-                      MaterialDisplayer(),
-                      SizedBox(height: ScreenUtil().setHeight(50)),
-                      DraftIconWidget()
+
+
                     ],
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploading_state_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -12,39 +13,52 @@ class QuizSemesterWidget<T extends StateProvider> extends StatelessWidget {
         selector: (context,stateProvider) => stateProvider.semester,
           builder:(context,_,__) => Padding(
         padding: EdgeInsets.only(right: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Container(
-              //color: Colors.blueAccent,
-              alignment: Alignment.center,
-              width: 130,
-              height: 50,
-              child: RadioListTile(
-                value: 1,
-                groupValue: uploadingState.semester,
-                onChanged: uploadingState.updateSemester,
-                title: Text(
-                  'First',
-                  style: TextStyle(color: Colors.black),
+            SizedBox(height: ScreenUtil().setHeight(30),),
+            Text('Semester',style: TextStyle(fontWeight: FontWeight.bold),),
+            SizedBox(height: ScreenUtil().setHeight(15),),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    //color: Colors.blueAccent,
+                    alignment: Alignment.center,
+                    width: 130,
+                    height: 50,
+                    child: RadioListTile(
+                      value: 1,
+                      groupValue: uploadingState.semester,
+                      onChanged: uploadingState.updateSemester,
+                      title: Text(
+                        'First',
+                        style: TextStyle(color: Colors.black,fontSize: ScreenUtil().setSp(30)),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Container(
-              alignment: Alignment.center,
-              width: 150,
-              height: 50,
-              child: RadioListTile(
-                value: 2,
-                groupValue: uploadingState.semester,
-                onChanged: uploadingState.updateSemester,
-                title: Text(
-                  'Second',
-                  style: TextStyle(color: Colors.black),
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.center,
+                    width: 150,
+                    height: 50,
+                    child: RadioListTile(
+                      value: 2,
+                      groupValue: uploadingState.semester,
+                      onChanged: uploadingState.updateSemester,
+                      title: Text(
+                        'Second',
+                        style: TextStyle(color: Colors.black,fontSize: ScreenUtil().setSp(30)),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              ],
+            )
           ],
         ),
       ),

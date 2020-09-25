@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class FileSystemServices {
-  static Future<bool> saveUserData(Map data) async {
+  static Future<bool> saveUserData(Map<String,dynamic> data) async {
     try {
       Directory directory = await getApplicationDocumentsDirectory();
       File file = new File(directory.path + '/userData.txt');

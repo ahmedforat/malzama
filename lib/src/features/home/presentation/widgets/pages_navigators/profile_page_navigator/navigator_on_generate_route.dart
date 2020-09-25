@@ -17,7 +17,12 @@ Route<dynamic> profileOnGenerateRoutes(RouteSettings settings) {
       break;
     // display a lecture in a single page
     case RouteNames.VIEW_LECTURE:
-      builder = (context) => throw UnimplementedError();
+      var args = settings.arguments as Map<String,dynamic>;
+      builder = (context) => Container(
+        child: Center(
+          child: Text(args['title'].toString()),
+        ),
+      );
       break;
 
     // display a video in a single page

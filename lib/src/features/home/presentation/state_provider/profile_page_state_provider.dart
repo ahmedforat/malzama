@@ -32,9 +32,11 @@ class ProfilePageState with ChangeNotifier {
 
   dynamic get userData => _userData;
   void updateUserData(update){
-    if(update != null)
-    _userData = update;
-    notifyListeners();
+    if(update != null){
+      _userData = update;
+      notifyListeners();
+    }
+
   } 
   bool _dataLoaded = false;
 
@@ -86,6 +88,7 @@ class ProfilePageState with ChangeNotifier {
     _dialogService.profilePageState = this;
     _directory = await getApplicationDocumentsDirectory();
 
+
     _userPhotosPath = '${_directory.path}/user_photos';
     _userCoverPath = '${_directory.path}/user_covers';
 
@@ -97,6 +100,7 @@ class ProfilePageState with ChangeNotifier {
 
     print('this is the profile path in the caching system');
     if (profilPicPath == null) {
+
       if (doesUserPhotoExist) {
         final userPhoto = Directory(_userPhotosPath);
         var allFiles = userPhoto.listSync();

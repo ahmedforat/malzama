@@ -25,7 +25,8 @@ import 'dialog_service.dart';
 import 'service_locator.dart';
 
 class DialogManagerUseCases {
-  static Future<ContractResponse> updatePersonalInfo(Map<String, String> updates) async {
+  static Future<ContractResponse> updatePersonalInfo(
+      Map<String, String> updates) async {
     bool isConnected = await NetWorkInfo.checkConnection();
     if (!isConnected) {
       return NoInternetConnection();
@@ -34,10 +35,18 @@ class DialogManagerUseCases {
     http.Response response;
     var data = await FileSystemServices.getUserData();
     String accountType = data['account_type'];
-    String _url = Api.getSuitableUrl(accountType: accountType) + '/update-personal-info';
-    Map<String, String> _headers = {'authorization': await CachingServices.getField(key: 'token'), 'content-type': 'application/json', 'accept': 'application/json'};
+    String _url =
+        Api.getSuitableUrl(accountType: accountType) + '/update-personal-info';
+    Map<String, String> _headers = {
+      'authorization': await CachingServices.getField(key: 'token'),
+      'content-type': 'application/json',
+      'accept': 'application/json'
+    };
     try {
-      response = await http.post(Uri.encodeFull(_url), headers: _headers, body: json.encode(updates)).timeout(References.timeout);
+      response = await http
+          .post(Uri.encodeFull(_url),
+              headers: _headers, body: json.encode(updates))
+          .timeout(References.timeout);
       switch (response.statusCode) {
         case 500:
           return InternalServerError();
@@ -51,15 +60,18 @@ class DialogManagerUseCases {
 
         case 200:
           var data = json.decode(response.body);
-          await CachingServices.saveStringField(key: 'token', value: 'bearer ${data['token']}');
+          await CachingServices.saveStringField(
+              key: 'token', value: 'bearer ${data['token']}');
           await FileSystemServices.saveUserData(data['userData']);
           var dialogService = locator.get<DialogService>();
-          dialogService.profilePageState.updateUserData(References.specifyAccountType(data['userData']));
+          dialogService.profilePageState
+              .updateUserData(References.specifyAccountType(data['userData']));
           return Success200();
           break;
 
         default:
-          return NewBugException(message: 'Unhandled statusCode ${response.statusCode}');
+          return NewBugException(
+              message: 'Unhandled statusCode ${response.statusCode}');
       }
     } on TimeoutException {
       return ServerNotResponding();
@@ -112,145 +124,94 @@ class DialogManagerUseCases {
 //  };
 
 // upload new lecture (for both universities and schools)
-  static Future<ContractResponse> uploadNewLecture({@required Map<String, dynamic> lectureData}) async {
-    print(lectureData);
-    bool isConnected = await NetWorkInfo.checkConnection();
-    if (!isConnected) {
-      return NoInternetConnection();
-    }
-    DialogService serviceLocator = locator.get<DialogService>();
-    String account_type = serviceLocator.profilePageState.userData.commonFields..account_type;
+  // static Future<ContractResponse> uploadNewLecture({@required Map<String, dynamic> lectureData}) async {
+  //   print(lectureData);
+  //   bool isConnected = await NetWorkInfo.checkConnection();
+  //   if (!isConnected) {
+  //     return NoInternetConnection();
+  //   }
+  //   DialogService serviceLocator = locator.get<DialogService>();
+  //   String account_type = serviceLocator.profilePageState.userData.commonFields..account_type;
 
-    //http.Response response;
+  //   //http.Response response;
 
-    // setting the suitable url
-    String _url = Api.getSuitableUrl(accountType: account_type) + '/upload-new-lecture';
+  //   // setting the suitable url
+  //   String _url = Api.getSuitableUrl(accountType: account_type) + '/upload-new-lecture';
 
-    // instantiation of the http multipart request
-    http.MultipartRequest multipartRequest = new http.MultipartRequest('POST', Uri.parse(_url));
-    List<String> mimeType = lookupMimeType(lectureData['src'].path, headerBytes: [0xFF, 0xD8]).split('/');
+  //   // instantiation of the http multipart request
+  //   http.MultipartRequest multipartRequest = new http.MultipartRequest('POST', Uri.parse(_url));
+  //   List<String> mimeType = lookupMimeType(lectureData['src'].path, headerBytes: [0xFF, 0xD8]).split('/');
 
-    // setting headers
-    multipartRequest.headers['authorization'] = await CachingServices.getField(key: 'token');
-    multipartRequest.headers['Accept'] = 'application/json';
+  //   // setting headers
+  //   multipartRequest.headers['authorization'] = await CachingServices.getField(key: 'token');
+  //   multipartRequest.headers['Accept'] = 'application/json';
 
-    // setting common request body fields
-    multipartRequest.fields['title'] = lectureData['title'];
-    multipartRequest.fields['description'] = lectureData['description'];
-    multipartRequest.files.add(await http.MultipartFile.fromPath('thumbnail', lectureData['src'].path, contentType: MediaType(mimeType[0], mimeType[1])));
+  //   // setting common request body fields
+  //   multipartRequest.fields['title'] = lectureData['title'];
+  //   multipartRequest.fields['description'] = lectureData['description'];
+  //   multipartRequest.files.add(await http.MultipartFile.fromPath('thumbnail', lectureData['src'].path, contentType: MediaType(mimeType[0], mimeType[1])));
 
-    // setting the field per account type
-    if (account_type != 'schteachers') {
-      multipartRequest.fields['university'] = serviceLocator.profilePageState.userData.university;
-      multipartRequest.fields['college'] = serviceLocator.profilePageState.userData.college;
-      multipartRequest.fields['section'] = lectureData['section'];
-      multipartRequest.fields['topic'] = lectureData['topic'];
-      multipartRequest.fields['stage'] = lectureData['stage'];
-      multipartRequest.fields['stage'] = lectureData['stage'];
-    } else {
-      multipartRequest.fields['stage'] = (6 - References.schoolStages.indexOf(lectureData['stage'])).toString();
-      multipartRequest.fields['school_section'] = lectureData['school_section'];
-      multipartRequest.fields['topic'] = serviceLocator.profilePageState.userData.speciality;
-    }
+  //   // setting the field per account type
+  //   if (account_type != 'schteachers') {
+  //     multipartRequest.fields['university'] = serviceLocator.profilePageState.userData.university;
+  //     multipartRequest.fields['college'] = serviceLocator.profilePageState.userData.college;
+  //     multipartRequest.fields['section'] = lectureData['section'];
+  //     multipartRequest.fields['topic'] = lectureData['topic'];
+  //     multipartRequest.fields['stage'] = lectureData['stage'];
+  //     multipartRequest.fields['stage'] = lectureData['stage'];
+  //   } else {
+  //     multipartRequest.fields['stage'] = (6 - References.schoolStages.indexOf(lectureData['stage'])).toString();
+  //     multipartRequest.fields['school_section'] = lectureData['school_section'];
+  //     multipartRequest.fields['topic'] = serviceLocator.profilePageState.userData.speciality;
+  //   }
 
-    http.StreamedResponse streamedResponse;
+  //   http.StreamedResponse streamedResponse;
 
-    try {
-      print('just before firing the http request');
-      print(multipartRequest.fields);
-      print(multipartRequest.headers);
-      streamedResponse = await multipartRequest.send().timeout(Duration(seconds: 40));
-      switch (streamedResponse.statusCode) {
-        case 201:
-          var data = await streamedResponse.stream.bytesToString();
-          print(json.decode(data)['lecture']);
-          print(json.decode(data)['lecture']['_id']);
+  //   try {
+  //     print('just before firing the http request');
+  //     print(multipartRequest.fields);
+  //     print(multipartRequest.headers);
+  //     streamedResponse = await multipartRequest.send().timeout(Duration(seconds: 40));
+  //     switch (streamedResponse.statusCode) {
+  //       case 201:
+  //         var data = await streamedResponse.stream.bytesToString();
+  //         print(json.decode(data)['lecture']);
+  //         print(json.decode(data)['lecture']['_id']);
 
-          BaseUploadingModel uploadingModel;
+  //         BaseUploadingModel uploadingModel;
 
-          if (account_type == 'schteachers') {
-            uploadingModel = SchoolUploadedPDF.fromJSON(json.decode(data)['lecture']);
-            await TeacherAccessObject().insert<SchoolUploadedPDF>(uploadingModel);
-          } else {
-            uploadingModel = CollegeUploadedPDF.fromJSON(json.decode(data)['lecture']);
-            await TeacherAccessObject().insert<CollegeUploadedPDF>(uploadingModel);
-          }
+  //         if (account_type == 'schteachers') {
+  //           uploadingModel = SchoolUploadedPDF.fromJSON(json.decode(data)['lecture']);
+  //           await TeacherAccessObject().insert<SchoolUploadedPDF>(uploadingModel);
+  //         } else {
+  //           uploadingModel = CollegeUploadedPDF.fromJSON(json.decode(data)['lecture']);
+  //           await TeacherAccessObject().insert<CollegeUploadedPDF>(uploadingModel);
+  //         }
 
-          return Success201(message: 'Your lecture uploaded successfully');
-          break;
+  //         return Success201(message: 'Your lecture uploaded successfully');
+  //         break;
 
-        case 500:
-          return InternalServerError();
-          break;
+  //       case 500:
+  //         return InternalServerError();
+  //         break;
 
-        case 403:
-          await FileSystemServices.deleteUserData();
-          await CachingServices.clearAllCachedData();
-          return ForbiddenAccess(message: 'You are not an authorized user');
-          break;
+  //       case 403:
+  //         await FileSystemServices.deleteUserData();
+  //         await CachingServices.clearAllCachedData();
+  //         return ForbiddenAccess(message: 'You are not an authorized user');
+  //         break;
 
-        default:
-          return NewBugException(message: 'Unhandled statusCode ${streamedResponse.statusCode}');
-          break;
-      }
-    } on TimeoutException {
-      return ServerNotResponding();
-    } catch (err) {
-      print(err);
-      return NewBugException(message: err.toString());
-    }
-  }
+  //       default:
+  //         return NewBugException(message: 'Unhandled statusCode ${streamedResponse.statusCode}');
+  //         break;
+  //     }
+  //   } on TimeoutException {
+  //     return ServerNotResponding();
+  //   } catch (err) {
+  //     print(err);
+  //     return NewBugException(message: err.toString());
+  //   }
+  // }
 
-  // upload new video  (for both universities and schools)
-  static Future<ContractResponse> uploadNewVideo(Map<String, String> videoData) async {
-    bool isConnceted = await NetWorkInfo.checkConnection();
-
-    if (!isConnceted) {
-      return NoInternetConnection();
-    }
-    DialogService serviceLocator = locator.get<DialogService>();
-    final String account_type = serviceLocator.profilePageState.userData.commonFields.account_type;
-
-    http.Response response;
-
-    // setting suitable url
-    String _url = Api.getSuitableUrl(accountType: account_type) + '/upload-new-video';
-
-    // setting headers
-    Map<String, String> _headers = {'authorization': await CachingServices.getField(key: 'token'), 'content-type': 'application/json', 'Accept': 'application/json'};
-    try {
-      response = await http.post(Uri.encodeFull(_url), headers: _headers, body: json.encode(videoData)).timeout(References.timeout);
-      switch (response.statusCode) {
-        case 201:
-          var data = json.decode(response.body);
-          print(data['video']);
-          print(data['video']['_id']);
-          if (account_type == 'schteachers') {
-            await TeacherAccessObject().insertVideo<SchoolUploadedVideo>(SchoolUploadedVideo.fromJSON(data['video']));
-          } else {
-            await TeacherAccessObject().insertVideo<CollegeUploadedVideo>(CollegeUploadedVideo.fromJSON(data['video']));
-          }
-          return Success201(message: 'Your video uploaded successfully');
-          break;
-
-        case 500:
-          return InternalServerError();
-          break;
-
-        case 403:
-          await FileSystemServices.deleteUserData();
-          await CachingServices.clearAllCachedData();
-          return ForbiddenAccess(message: 'You are not an authorized user');
-          break;
-
-        default:
-          return NewBugException(message: 'Unhandled statusCode ${response.statusCode}');
-          break;
-      }
-    } on TimeoutException {
-      return ServerNotResponding();
-    } catch (err) {
-      return new NewBugException(message: err.toString());
-    }
-  }
+  
 }

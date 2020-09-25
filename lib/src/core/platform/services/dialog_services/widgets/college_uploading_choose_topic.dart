@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_state_providers/college_uploads_state_provider.dart';
+import 'package:malzama/src/core/platform/services/material_uploading/college_uploads_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_uploader_widget.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +17,7 @@ class CollegeUploadingChooseTopic extends StatelessWidget {
     return Selector<CollegeUploadingState, List>(
       selector: (context, stateProvider) => [stateProvider.topicList, stateProvider.topic],
       builder: (context, _, __) => Padding(
-        padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setSp(70)),
+        padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setSp(5)),
         child: DropdownButtonHideUnderline(
           child: DropdownButtonFormField(
             items: !_enabled(profilePageState, collegeUploadingState)
@@ -26,7 +26,8 @@ class CollegeUploadingChooseTopic extends StatelessWidget {
                 .map((item) => DropdownMenuItem(
               child: Text(
                 item,
-                style: TextStyle(fontSize: ScreenUtil().setSp(37)),
+                style: TextStyle(fontSize: ScreenUtil().setSp(28)),
+                overflow: TextOverflow.ellipsis,
               ),
               value: item,
             ))

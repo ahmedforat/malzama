@@ -18,7 +18,6 @@ class QuizAccessObject {
     'my_quiz_uploads_drafts7',
     'my_quiz_uploads_drafts8',
     'my_quiz_uploads_drafts9',
-
   ];
 
   final String _AVAILABLE_STORES_INDEXES = 'available_stores_indexes';

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:malzama/src/core/Navigator/navigation_service.dart';
 import 'package:malzama/src/core/Navigator/routes_names.dart';
+import 'package:malzama/src/features/home/presentation/pages/home_page.dart';
 import 'package:malzama/src/features/home/presentation/pages/notifications.dart';
 
 // handle the routing inside the nested navigator of the notifications page
@@ -12,7 +14,12 @@ Route<dynamic> notificationsOnGenerateRoutes(RouteSettings settings) {
       break;
     // display a lecture in a single page
     case RouteNames.VIEW_LECTURE:
-      builder = (context) => throw UnimplementedError();
+    
+      Map<String,dynamic> args = settings.arguments;
+      builder = (context) => Container(
+
+        child: Text(args['title'].toString())
+      );
       break;
 
     // display a video in a single page

@@ -7,7 +7,6 @@ import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pa
 import 'package:provider/provider.dart';
 
 import '../../../../../../../core/references/references.dart';
-import '../../../../state_provider/my_materials_state_provider.dart';
 import '../../../../state_provider/profile_page_state_provider.dart';
 
 class DraftsDisplayer extends StatelessWidget {

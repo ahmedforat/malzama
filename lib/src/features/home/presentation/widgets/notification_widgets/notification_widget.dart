@@ -23,7 +23,7 @@ class NotificationWidget extends StatelessWidget {
         padding: EdgeInsets.all(ScreenUtil().setSp(30)),
         child: ListTile(
           leading: Icon(Icons.account_circle),
-          title: Text(notification.title),
+          title: Text(notification.title,),
           subtitle: Text(
             notification.body,
             maxLines: 3,

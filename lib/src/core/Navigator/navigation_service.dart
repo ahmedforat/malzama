@@ -1,14 +1,13 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class NavigationService {
 
+   int currentIndex;
+   TabController controller;
+
   // private constructor
-  NavigationService._(){
-    this._homePageNavigatorKey = new GlobalKey<NavigatorState>() ;
-    this._messagesNavigatorKey = new GlobalKey<NavigatorState>() ;
-    this._notificationsNavigatorKey = new GlobalKey<NavigatorState>() ;
-    this._profilePageNavigatorKey  = new GlobalKey<NavigatorState> ();
-  }
+  NavigationService._();
 
   // singleton object
   static NavigationService _instance;
@@ -21,26 +20,31 @@ class NavigationService {
     return _instance;
   }
 
-  GlobalKey<NavigatorState> _homePageNavigatorKey ;
-  GlobalKey<NavigatorState> _messagesNavigatorKey ;
-  GlobalKey<NavigatorState> _notificationsNavigatorKey ;
-  GlobalKey<NavigatorState> _profilePageNavigatorKey ;
+  static final GlobalKey<NavigatorState> _homePageNavigatorKey = new GlobalKey<NavigatorState>(debugLabel: '_homePageNavigatorKey') ;
+  static final GlobalKey<NavigatorState> _materialNavigatorKey  = new GlobalKey<NavigatorState>() ;
+  static final GlobalKey<NavigatorState> _notificationsNavigatorKey  = new GlobalKey<NavigatorState>(debugLabel:'_notificationsNavigatorKey' ) ;
+  static final GlobalKey<NavigatorState> _messagesNavigatorKey  = new GlobalKey<NavigatorState>(debugLabel: '_messagesNavigatorKey');
+  static final GlobalKey<NavigatorState> _profilePageNavigatorKey  = new GlobalKey<NavigatorState> (debugLabel: '_profilePageNavigatorKey');
 
-  List<GlobalKey<NavigatorState>> get navigationKeys => [
+  static List<GlobalKey<NavigatorState>> get navigationKeys => [
     _homePageNavigatorKey,
+    _materialNavigatorKey,
     _messagesNavigatorKey,
     _notificationsNavigatorKey,
     _profilePageNavigatorKey
   ];
 
-  GlobalKey<NavigatorState> get homePageNavigatorKey => _homePageNavigatorKey;
-  GlobalKey<NavigatorState> get messagesNavigatorKey => _messagesNavigatorKey;
-  GlobalKey<NavigatorState> get notificationsNavigatorKey => _notificationsNavigatorKey;
-  GlobalKey<NavigatorState> get profilePageNavigatorKey => _profilePageNavigatorKey;
+  static GlobalKey<NavigatorState> get homePageNavigatorKey => _homePageNavigatorKey;
+  static GlobalKey<NavigatorState> get materialNavigatorKey => _materialNavigatorKey;
+  static GlobalKey<NavigatorState> get notificationsNavigatorKey => _notificationsNavigatorKey;
+  static GlobalKey<NavigatorState> get profilePageNavigatorKey => _profilePageNavigatorKey;
+  static GlobalKey<NavigatorState> get messagesNavigatorKey => _messagesNavigatorKey;
 
-  NavigatorState get homePageNavigator => _homePageNavigatorKey.currentState;
-  NavigatorState get messagesNavigator => _messagesNavigatorKey.currentState;
-  NavigatorState get notificationsNavigator => _notificationsNavigatorKey.currentState;
-  NavigatorState get profilePageNavigator => _profilePageNavigatorKey.currentState;
+  static NavigatorState get homePageNavigator => _homePageNavigatorKey.currentState;
+  static NavigatorState get materialNavigator => _materialNavigatorKey.currentState;
+  static NavigatorState get notificationsNavigator => _notificationsNavigatorKey.currentState;
+  static NavigatorState get messagesNavigator => _messagesNavigatorKey.currentState;
+  static NavigatorState get profilePageNavigator => _profilePageNavigatorKey.currentState;
 
 }
+

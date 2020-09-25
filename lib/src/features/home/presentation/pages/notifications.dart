@@ -8,6 +8,7 @@ class NotificationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     NotificationStateProvider notificationStateProvider = Provider.of<NotificationStateProvider>(context, listen: false);
+    //notificationStateProvider.notificationsList.length;
     print('notification page created');
     ScreenUtil.init(context);
     return Scaffold(
@@ -15,23 +16,23 @@ class NotificationPage extends StatelessWidget {
           backgroundColor: Colors.white,
           title: Text(
             'Notifications',
-            style: TextStyle(color:Colors.black,fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(80)),
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: ScreenUtil().setSp(80)),
           ),
           elevation: 0.0,
         ),
         body: Container(
           padding: EdgeInsets.all(ScreenUtil().setSp(20)),
-          child: notificationStateProvider.notificationsList.isEmpty? Center(child: Text('You have No Notifications Yet'))
-
-              : Selector<NotificationStateProvider, int>(
-                  selector: (context, stateProvider) => stateProvider.notificationsList.length,
-                  builder: (context, notificationCount, child) => ListView.builder(
+          child: Selector<NotificationStateProvider, int>(
+            selector: (context, stateProvider) => stateProvider.notificationsList.length,
+            builder: (context, notificationCount, child) => notificationCount == 0
+                ? Center(child: Text('You have No Notifications Yet'))
+                : ListView.builder(
                     itemCount: notificationCount,
                     itemBuilder: (BuildContext context, int pos) => NotificationWidget(
                       pos: pos,
                     ),
                   ),
-                ),
+          ),
         ));
   }
 }

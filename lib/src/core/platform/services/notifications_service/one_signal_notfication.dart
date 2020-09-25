@@ -1,26 +1,36 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:malzama/src/core/general_models/notification.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
+import 'package:malzama/src/core/platform/services/caching_services.dart';
+import 'package:malzama/src/core/platform/services/file_system_services.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 import '../dialog_services/service_locator.dart';
-import 'local_notification.dart';
-import 'local_notification.dart';
+import 'local_notification_service.dart';
 
 class NotificationService {
   // private constructor
   NotificationService._();
 
   static int _channelID = -1;
-  bool isInitialized = false;
-  // singleton instance
-  static NotificationService _instance = NotificationService._();
+  bool _isInitialized = false;
 
-  factory NotificationService.getInstance() => _instance;
+  // singleton instance
+  static NotificationService _instance;
+
+  factory NotificationService.getInstance() {
+    if (_instance == null) {
+      _instance = NotificationService._();
+    }
+    return _instance;
+  }
 
   Future<void> initialize() async {
-    if(isInitialized){
+    if (_isInitialized) {
       return;
     }
     LocalNotificationService localNotificationService = LocalNotificationService.getInstance();
@@ -37,91 +47,74 @@ class NotificationService {
 // The promptForPushNotificationsWithUserResponse function will show the iOS push notification prompt. We recommend removing the following code and instead using an In-App Message to prompt for notification permission
     await OneSignal.shared.promptUserForPushNotificationPermission(fallbackToSettings: true);
 
+    // this will spawn an Isolate so in order not to block the main isolate
+    // but not now
+    _handleOneSignalRegistration('');
+
     OneSignal.shared.setNotificationReceivedHandler(
       (OSNotification notification) {
-        NotificationStateProvider notificationStateProvider = locator.get<NotificationStateProvider>();
-        Notification receivedNotification = new Notification(
-          title: notification.payload.title,
-          body: notification.payload.body,
-          id: notification.payload.notificationId,
-          sentAt: DateTime.fromMillisecondsSinceEpoch(notification.payload.rawPayload['google.sent_time'])
-        );
-        notificationStateProvider.addToNotificationsList(receivedNotification);
-
-        print('We recieved a new notificaitonn');
-        print(DateTime.fromMillisecondsSinceEpoch(notification.payload.rawPayload['google.sent_time']));
-
-        print('there is might be a problem');
-        print('additional data');
+        print('*******************************************************************');
+        print('new notification');
+        print('addintional Data');
         print(notification.payload.additionalData);
 
-        print('attachment');
-        print(notification.payload.attachments);
+        print('title  Data');
+        print(notification.payload.title);
 
-        print('badge');
-        print(notification.payload.badge);
-
-        print('badge increment');
-        print(notification.payload.badgeIncrement);
-
-        print('category');
-        print(notification.payload.category);
-
-        print('json representation');
-        print(notification.payload.jsonRepresentation());
-
-        print('from project number');
-        print(notification.payload.fromProjectNumber);
-
-        print('groupKey');
-        print(notification.payload.groupKey);
-
-        print('collapesd Id');
-        print(notification.payload.collapseId);
-
-        print('group Message');
-        print(notification.payload.groupMessage);
-
-        print('laucnUrl');
-        print(notification.payload.launchUrl);
-
-        print('notifcationId');
-        print(notification.payload.notificationId);
-
-        print('raw Payload');
-        print(notification.payload.rawPayload);
-
-        print('subtitle');
+        print('subtitle  Data');
         print(notification.payload.subtitle);
+        print('*******************************************************************');
 
-        print('templaate Id');
-        print(notification.payload.templateId);
-
-        print('priority');
-        print(notification.payload.priority);
-
-        print('mutable content');
-        print(notification.payload.mutableContent);
-        print('before encoding');
-        String payload;
-        try{
-           payload = json.encode(receivedNotification.asHashMap());
-        }catch(err){
-          print(err.toString());
-        }
-        print('after  encoding');
-
-        print('before show notification');
-        // do whatever the hell you wanna do in your life mother fucker
-        localNotificationService.showNotification(
-          channelID: ++_channelID,
-          title: notification.payload.title,
-          body: notification.payload.body,
-          payload: payload
-        );
-        print('after show notification');
+//        print(++_channelID);
+//        NotificationStateProvider notificationStateProvider = locator.get<NotificationStateProvider>();
+//        var receivedNotification;
+//        try {
+//          receivedNotification = new NotificationInstance(
+//            title: notification.payload.title,
+//            body: notification.payload.body,
+//            id: notification.payload.notificationId,
+//            sentAt: DateTime.fromMillisecondsSinceEpoch(notification.payload.rawPayload['google.sent_time']),
+//          );
+//          notificationStateProvider.addToNotificationsList(receivedNotification);
+//        } catch (err) {
+//          throw err;
+//        }
       },
     );
-    isInitialized = true;
+    _isInitialized = true;
+  }
+}
+
+Future _handleOneSignalRegistration(String d) async {
+  String userId;
+  while (userId == null) {
+    var data = await OneSignal.shared.getPermissionSubscriptionState();
+    userId = data.subscriptionStatus.userId;
+    if (userId != null) {
+      print('*******************************************************************');
+      print('we got it inside while loop => $userId');
+      await CachingServices.saveStringField(key: 'one_signal_id', value: userId);
+      print('************************************************************************');
+
+      print('===================================== fetching tags');
+      final Map<String, dynamic> myTags = await OneSignal.shared.getTags();
+      print(myTags.isEmpty);
+      print('===================================== End fetching tags');
+
+      if (myTags == null || !(myTags is Map<String, dynamic>) || myTags.isEmpty) {
+        final Map<String, dynamic> tags = await HelperFucntions.getUserTags();
+        if (tags != null) {
+          while (true) {
+            var res = await OneSignal.shared.sendTags(tags);
+            print('========================= tags send res');
+            print(res);
+            print('========================= tags send res');
+            if (res != null && res is Map<String, dynamic> && res.isNotEmpty) {
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 }

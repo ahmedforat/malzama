@@ -19,7 +19,7 @@ class TeacherAccessObject{
 
   // for lectures or PDFS
 
-  Future insert<PDF_TYPE extends BaseUploadingModel>(PDF_TYPE pdf) async {
+  Future insert(BaseUploadingModel pdf) async {
     await myPDFUploads.add(await this.database, pdf.toJSON());
   }
 
@@ -34,7 +34,7 @@ class TeacherAccessObject{
   Future<List<BaseUploadingModel>> fetchAllPDFS<PDF_TYPE extends BaseUploadingModel>() async {
     var data = await myPDFUploads.find(await this.database);
 
-    List<PDF_TYPE> pdfs = data.map((record) {
+    var pdfs = data.map((record) {
       if (PDF_TYPE == CollegeUploadedPDF) {
         return new CollegeUploadedPDF.fromJSON(record.value);
       } else {
@@ -43,11 +43,13 @@ class TeacherAccessObject{
     }).toList();
 
     return pdfs;
+
+
   }
 
   // for videos
 
-  Future insertVideo<VIDEO_TYPE extends BaseUploadingModel>(VIDEO_TYPE video) async {
+  Future insertVideo(BaseUploadingModel video) async {
     print('******************* just before saving in the database');
     print(video.toJSON());
     print('********************************************************');
@@ -65,13 +67,14 @@ class TeacherAccessObject{
   Future<List<BaseUploadingModel>> fetchAllVideos<VIDEO_TYPE extends BaseUploadingModel>() async {
     var data = await myVideoUploads.find(await this.database);
 
-    List<VIDEO_TYPE> videos = data.map((record) {
+    var videos = data.map((record) {
       if(VIDEO_TYPE == CollegeUploadedVideo){
         return CollegeUploadedVideo.fromJSON(record.value);
       }else{
         return SchoolUploadedVideo.fromJSON(record.value);
       }
     }).toList();
+
 
     return videos;
   }

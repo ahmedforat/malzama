@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/Signup/presentation/state_provider/execution_state.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/api/contract_response.dart';
@@ -147,14 +148,7 @@ void _handleOnDone(GlobalKey<ScaffoldState> key, BuildContext context,
     } else if (response is NewBugException) {
         DebugTools.showErrorMessageWidget(context: context, message: response.message);
     } else {
-        await FileSystemServices.saveUserData(
-          accountType == AccountType.schstudents.toString()
-          ? schoolState.fetchStudentData(commonState)
-          : schoolState.fetchTechertData(commonState)
-        );
-
-        await CachingServices.saveStringField(key: 'initial-page', value: '/validate-account-page');
-
+       // success
         Navigator.of(context).pushNamedAndRemoveUntil(
             '/validate-account-page', (Route route) => false);
     }
