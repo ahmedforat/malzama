@@ -3,6 +3,7 @@ import 'package:malzama/src/core/Navigator/navigation_service.dart';
 import 'package:malzama/src/core/Navigator/routes_names.dart';
 import 'package:malzama/src/features/home/presentation/pages/home_page.dart';
 import 'package:malzama/src/features/home/presentation/pages/notifications.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/replies/widgets/display_rators_page.dart';
 
 // handle the routing inside the nested navigator of the notifications page
 Route<dynamic> notificationsOnGenerateRoutes(RouteSettings settings) {
@@ -22,6 +23,9 @@ Route<dynamic> notificationsOnGenerateRoutes(RouteSettings settings) {
       );
       break;
 
+    // case RouteNames.DISPLAY_COMMENT_RATORS:
+    //   builder = (context) => DisplayRatorsPage();
+    //   break;
     // display a video in a single page
     case RouteNames.VIEW_VIDEO:
       builder = (context) => throw UnimplementedError();

@@ -8,6 +8,8 @@ class AddOrEditCommentWidgetStateProvider with ChangeNotifier {
     print('state provider for the bottom widget to add or edit comments created');
   }
 
+
+
   TextEditingController _textEditingController;
   FocusNode _focusNode;
 

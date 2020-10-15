@@ -9,7 +9,8 @@ import '../platform/local_database/models/college_uploads_models/college_uploade
 import '../platform/local_database/models/school_uploads_models/school_uploaded_pdf_model.dart';
 import '../platform/local_database/models/school_uploads_models/school_uploaded_video_model.dart';
 
-ChangeNotifierProvider<MaterialStateProvider<BaseUploadingModel, BaseUploadingModel>> generateMaterialStateProvider({@required bool isAcademic}) {
+ChangeNotifierProvider<MaterialStateProvider<BaseUploadingModel, BaseUploadingModel>> generateMaterialStateProvider(
+    {@required bool isAcademic}) {
   if (isAcademic) {
     return ChangeNotifierProvider<MaterialStateProvider<CollegeUploadedPDF, CollegeUploadedVideo>>(
       create: (context) => MaterialStateProvider<CollegeUploadedPDF, CollegeUploadedVideo>(),

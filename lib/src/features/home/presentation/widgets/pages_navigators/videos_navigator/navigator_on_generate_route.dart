@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:malzama/src/core/Navigator/routes_names.dart';
 import 'package:malzama/src/features/home/presentation/widgets/pages_navigators/videos_navigator/pages/display_videos_page.dart';
 import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/commentsPage.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/replies/widgets/display_rators_page.dart';
 import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/state_providers/add_comment_widget_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/view_college_material.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +37,9 @@ Route<dynamic> videosOnGenerateRoutes(RouteSettings settings) {
       );
       break;
 
+    case RouteNames.DISPLAY_COMMENT_RATORS:
+      builder = (context) => DisplayRatorsPage();
+      break;
     // display a quiz in a single page
     case RouteNames.VIEW_QUIZ:
       builder = (context) => throw UnimplementedError();

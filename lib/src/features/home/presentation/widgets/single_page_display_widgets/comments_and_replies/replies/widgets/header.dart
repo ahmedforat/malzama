@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/state_providers/add_comment_widget_state_provider.dart';
 
 import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/state_providers/comment_state_provider.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,7 @@ class RepliesDisplayPageHeader extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: (){
+                Provider.of<AddOrEditCommentWidgetStateProvider>(context,listen: false).resetWidget();
                 commentStateProvider.closeRepliesDisplayPage();
               },
             ),

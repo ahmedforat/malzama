@@ -44,6 +44,15 @@ class CommentStatusWidget extends StatelessWidget {
               ),
             );
             break;
+
+          case CommentStatus.DELETING:
+            return Text(
+              'deleting ...',
+              style: TextStyle(
+                fontSize: ScreenUtil().setSp(30),
+              ),
+            );
+            break;
           case CommentStatus.FAILED:
             return Row(
               children: <Widget>[

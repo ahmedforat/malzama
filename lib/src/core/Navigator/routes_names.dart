@@ -21,8 +21,14 @@ class RouteNames {
   // for college
   static const String UPLOAD_NEW_MATERIAL_COLLEGE = '/upload-new-material-college';
   static const String UPLOAD_NEW_MATERIAL_SCHOOL = '/upload-new-material-school';
+  static const String UPLOAD_NEW_QUIZ = '/upload-new-quiz';
+  static const String VIEW_QUIZ_DRAFTS = '/view-quiz-drafts';
+  static const String EDIT_QUIZ_DRAFT = '/edit-quiz-draft';
 
-  
+  // display comment rators
+static const String DISPLAY_COMMENT_RATORS = '/display-comment-rators';
+static const String VIEW_QUIZ_DISPLAYER =  '/view-quiz-displayer';
+  static const String TAKE_QUIZ_EXAM =  '/take-quiz-exam';
 
   
 }

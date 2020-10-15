@@ -1,5 +1,8 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 import 'package:malzama/src/core/platform/services/material_uploading/college_uploads_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_uploader_widget.dart';
@@ -56,8 +59,9 @@ bool _enabled(ProfilePageState profileState, CollegeUploadingState uploadingStat
   String account_type = profileState.userData.commonFields.account_type;
   String college = profileState.userData.college;
   if (account_type == 'unistudents') {
-    return new RegExp(r'سنان').hasMatch(college) || (isPharmacyOrMedicine(profileState) && uploadingState.semester != null);
+    return new RegExp(r'سنان').hasMatch(college) || (HelperFucntions.isPharmacyOrMedicine(profileState) && uploadingState.semester != null);
   } else {
-    return ((isPharmacyOrMedicine(profileState) && uploadingState.semester != null) || new RegExp(r'سنان').hasMatch(college)) && uploadingState.stage != null;
+    return ((HelperFucntions.isPharmacyOrMedicine(profileState) && uploadingState.semester != null) || new RegExp(r'سنان').hasMatch(college)) && uploadingState.stage != null;
   }
 }
+

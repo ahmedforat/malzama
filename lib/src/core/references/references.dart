@@ -10,8 +10,11 @@ import '../../features/home/presentation/state_provider/profile_page_state_provi
 
 class AccountType {
   static String get uniteachers => 'uniteachers';
+
   static String get unistudents => 'unistudents';
+
   static String get schteachers => 'schteachers';
+
   static String get schstudents => 'schstudents';
 }
 
@@ -52,24 +55,18 @@ class References {
   }
 
   static bool isTeacher(String account_type) {
-  return account_type == 'uniteachers' ||
-      account_type == 'schteachers';
-}
+    return account_type == 'uniteachers' || account_type == 'schteachers';
+  }
 
-static String getVideoLength(Map<String,dynamic> userData) {
-  return isTeacher(userData['account_type'])
-      ? userData['videos'].length.toString()
-      : userData['saved_videos.'].length.toString();
-}
+  static String getVideoLength(Map<String, dynamic> userData) {
+    return isTeacher(userData['account_type']) ? userData['videos'].length.toString() : userData['saved_videos.'].length.toString();
+  }
 
-static String getLectureLength(Map<String,dynamic> userData) {
-  return isTeacher(userData['account_type'])
-      ? userData['lectures'].length.toString()
-      : userData['saved_lectures'].length.toString();
-}
+  static String getLectureLength(Map<String, dynamic> userData) {
+    return isTeacher(userData['account_type']) ? userData['lectures'].length.toString() : userData['saved_lectures'].length.toString();
+  }
 
-  static dynamic specifyAccountType(Map<String,dynamic> map) {
-
+  static dynamic specifyAccountType(Map<String, dynamic> map) {
     switch (map['account_type']) {
       case 'uniteachers':
         return UniTeacher.fromJSON(map: map);
@@ -89,8 +86,7 @@ static String getLectureLength(Map<String,dynamic> userData) {
     }
   }
 
-  static String getSuitableSchholSection(String key) =>
-      key == 'bio' ? 'الفرع الاحيائي' : 'الفرع التطبيقي';
+  static String getSuitableSchholSection(String key) => key == 'bio' ? 'الفرع الاحيائي' : 'الفرع التطبيقي';
   static final Map<String, String> iraqProvinces = {
     'baghdad': 'بغداد',
     'anbar': 'الأنبار',
@@ -138,71 +134,67 @@ static String getLectureLength(Map<String,dynamic> userData) {
     'الاول متوسط',
   ];
 
+  static Map<int, String> stages = {
+    1: schoolStages[5],
+    2: schoolStages[4],
+    3: schoolStages[3],
+    4: schoolStages[2],
+    5: schoolStages[1],
+    6: schoolStages[0]
+  };
 
-  static Map<int,String> stages = {
-    1:schoolStages[5],
-    2:schoolStages[4],
-    3:schoolStages[3],
-    4:schoolStages[2],
-    5:schoolStages[1],
-    6:schoolStages[0]
-    
-};
+  static List<String> schoolSections = ['الفرع الاحيائي', 'الفرع التطبيقي', 'الاحيائي والتطبيقي'];
 
-  static List<String> schoolSections = [
-    'الفرع الاحيائي',
-    'الفرع التطبيقي',
-    'الاحيائي والتطبيقي'
-  ];
-
-  static double getProperFontSize(int textLength){
+  static double getProperFontSize(int textLength) {
     print('this is textlength' + textLength.toString());
-    if(textLength < 393) return 55.0; 
-    else if(textLength > 392 && textLength < 525) return 40.0;
-    else if(textLength > 392 && textLength < 525) return 40.0;
-    else return 35.0;
+    if (textLength < 393)
+      return 55.0;
+    else if (textLength > 392 && textLength < 525)
+      return 40.0;
+    else if (textLength > 392 && textLength < 525)
+      return 40.0;
+    else
+      return 35.0;
   }
 
-
-  static String getVideoIDFrom({String youTubeLink}){
+  static String getVideoIDFrom({String youTubeLink}) {
     const String TYPICAL_PREFIX = 'https://www.youtube.com/watch?v=';
-  int startIndex = TYPICAL_PREFIX.length;
-  int endIndex = youTubeLink.indexOf('&');
-  String videoID = endIndex == -1 
-    ? youTubeLink.substring(startIndex)
-    : youTubeLink.substring(startIndex,endIndex);
+    int startIndex = TYPICAL_PREFIX.length;
+    int endIndex = youTubeLink.indexOf('&');
+    String videoID = endIndex == -1 ? youTubeLink.substring(startIndex) : youTubeLink.substring(startIndex, endIndex);
     return videoID;
-}
-
-static String validateYoutubeLink(String link) {
-  const String TYPICAL_PREFIX = 'https://www.youtube.com/watch?v=';
-  return link.isEmpty ? 'this field is required' : link.contains('watch?v=') &&
-      link.substring(0, TYPICAL_PREFIX.length).compareTo(TYPICAL_PREFIX) == 0
-    && link.substring(0, TYPICAL_PREFIX.length) == TYPICAL_PREFIX ? null : 'Please enter a valid link';
-}
-
-
-static List<String> getSuitaleCollegeMaterialList(int stage,String college,{int semester}){
-  RegExp dentist = new RegExp(r'سنان');
-  RegExp pharmacy = new RegExp(r'صيدلة');
-  RegExp analysis = new RegExp(r'مرضية');
-  
-  if(dentist.hasMatch(college)){
-   return DentistrySyllabus.getByStage(stage);
-  }else if(pharmacy.hasMatch(college)){
-    return PharmacySyllabus.getByStageAndSemester(stage, semester);
-  }else if(analysis.hasMatch(college)){
-    return PharmacySyllabus.getByStageAndSemester(stage, semester);
-  }else{
-     return MedicineSyllabus.getByStageAndSemester(stage, semester);
   }
 
+  static String validateYoutubeLink(String link) {
+    const String TYPICAL_PREFIX = 'https://www.youtube.com/watch?v=';
+    return link.isEmpty
+        ? 'this field is required'
+        : link.contains('watch?v=') &&
+                link.substring(0, TYPICAL_PREFIX.length).compareTo(TYPICAL_PREFIX) == 0 &&
+                link.substring(0, TYPICAL_PREFIX.length) == TYPICAL_PREFIX
+            ? null
+            : 'Please enter a valid link';
+  }
 
-}
-  // text.length <= 128  => ScreenUtil.setSp(65)
-                 // 128 < text.length < 145  => ScreenUtil.setSp(60)
-                 // 144 < text.length < 181  => ScreenUtil.setSp(55)
-                 // 180 < text.length < 221  => ScreenUtil.setSp(50) 
-                 // 220 < text.length < 265 => ScreenUtil.setSp(45)
-                 // 264<   text.length < 352 => ScreenUtil.setSp(40)    
+  static List<String> getSuitaleCollegeMaterialList(int stage, String college, {int semester}) {
+    RegExp dentist = new RegExp(r'سنان');
+    RegExp pharmacy = new RegExp(r'صيدلة');
+    RegExp analysis = new RegExp(r'مرضية');
+
+    if (dentist.hasMatch(college)) {
+      return DentistrySyllabus.getByStage(stage);
+    } else if (pharmacy.hasMatch(college)) {
+      return PharmacySyllabus.getByStageAndSemester(stage, semester);
+    } else if (analysis.hasMatch(college)) {
+      return PharmacySyllabus.getByStageAndSemester(stage, semester);
+    } else {
+      return MedicineSyllabus.getByStageAndSemester(stage, semester);
+    }
+  }
+// text.length <= 128  => ScreenUtil.setSp(65)
+// 128 < text.length < 145  => ScreenUtil.setSp(60)
+// 144 < text.length < 181  => ScreenUtil.setSp(55)
+// 180 < text.length < 221  => ScreenUtil.setSp(50)
+// 220 < text.length < 265 => ScreenUtil.setSp(45)
+// 264<   text.length < 352 => ScreenUtil.setSp(40)
 }

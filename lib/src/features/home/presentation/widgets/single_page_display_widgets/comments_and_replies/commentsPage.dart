@@ -31,7 +31,11 @@ class CommentsPage extends StatelessWidget {
     });
     ScreenUtil.init(context);
     return GestureDetector(
-      onTap: () {},
+      onTap: (){
+        if (addOrEditStateProvider.focusNode.hasFocus) {
+          addOrEditStateProvider.focusNode.unfocus();
+        }
+      },
       child: PageView(
         physics: NeverScrollableScrollPhysics(),
         controller: commentStateProvider.pageController,
@@ -105,17 +109,8 @@ class CommentsPage extends StatelessWidget {
                                   physics: BouncingScrollPhysics(),
                                   itemCount: commentsCount,
                                   //separatorBuilder: (context, pos) => pos != dummyComments.length - 1 ? Divider() : Container(),
-                                  itemBuilder: (context, pos) => GestureDetector(
-                                    onTap: () {
-//                                    _pageController.animateToPage(
-//                                      1,
-//                                      duration: Duration(milliseconds: 400),
-//                                      curve: Curves.easeInOut,
-//                                    );
-                                    },
-                                    child: CommentWidget(
-                                      commentPos: pos,
-                                    ),
+                                  itemBuilder: (context, pos) => CommentWidget(
+                                    commentPos: pos,
                                   ),
                                 ),
                     ),

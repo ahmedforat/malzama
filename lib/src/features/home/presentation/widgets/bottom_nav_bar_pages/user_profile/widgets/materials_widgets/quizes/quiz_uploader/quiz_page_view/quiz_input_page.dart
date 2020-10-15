@@ -28,8 +28,7 @@ class _QuizEditBuilderState extends State<QuizEditBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    QuizUploadingState uploadingState =
-    Provider.of<QuizUploadingState>(context, listen: false);
+    QuizUploadingState uploadingState = Provider.of<QuizUploadingState>(context, listen: false);
 
     ScreenUtil.init(context);
     return Container(
@@ -41,15 +40,13 @@ class _QuizEditBuilderState extends State<QuizEditBuilder> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-
                   Flexible(
                     child: FlatButton(
                       child: Text('Save'),
                       onPressed: () {
                         if (_formKey.currentState.validate()) {
                           _formKey.currentState.save();
-                          uploadingState.saveCurrentQuizEntity(
-                              widget.pos, quizEntity);
+                          uploadingState.saveCurrentQuizEntity(widget.pos, quizEntity);
                           uploadingState.updateQuizViewMode(widget.pos);
                         }
                       },
@@ -57,20 +54,16 @@ class _QuizEditBuilderState extends State<QuizEditBuilder> {
                   ),
                   Text(
                     '${widget.pos + 1}',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: ScreenUtil().setSp(55)),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: ScreenUtil().setSp(55)),
                   ),
                   Flexible(
                     child: FlatButton(
                       child: Icon(Icons.cancel),
                       onPressed: () {
-                        uploadingState.quizList.removeAt(widget.pos);
-                        uploadingState.setState();
+                        uploadingState.removeQuizItemAt(widget.pos);
                       },
                     ),
                   ),
-
                 ],
               ),
               SizedBox(
@@ -83,21 +76,16 @@ class _QuizEditBuilderState extends State<QuizEditBuilder> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: ScreenUtil().setSp(20)),
+                        padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setSp(20)),
                         child: Container(
-                          constraints: BoxConstraints(
-                              maxHeight: ScreenUtil().setHeight(350)),
+                          constraints: BoxConstraints(maxHeight: ScreenUtil().setHeight(350)),
                           child: TextFormField(
-                            initialValue:
-                            uploadingState.quizList[widget.pos].question,
+                            initialValue: uploadingState.quizList[widget.pos].question,
                             maxLines: null,
                             decoration: InputDecoration(
                               hintText: 'Question text',
                               border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(
-                                      ScreenUtil().setSp(20))),
+                                  borderSide: BorderSide.none, borderRadius: BorderRadius.circular(ScreenUtil().setSp(20))),
                               filled: true,
                               fillColor: Colors.white,
                             ),
@@ -119,21 +107,15 @@ class _QuizEditBuilderState extends State<QuizEditBuilder> {
                       Padding(
                         padding: EdgeInsets.only(left: ScreenUtil().setSp(20)),
                         child: Container(
-                          constraints: BoxConstraints(
-                              maxHeight: ScreenUtil().setHeight(250)),
+                          constraints: BoxConstraints(maxHeight: ScreenUtil().setHeight(250)),
                           child: TextFormField(
-                            initialValue: uploadingState
-                                .quizList[widget.pos].options.isEmpty
-                                ? null
-                                : uploadingState
-                                .quizList[widget.pos].options[0],
+                            initialValue:
+                                uploadingState.quizList[widget.pos].options.isEmpty ? null : uploadingState.quizList[widget.pos].options[0],
                             maxLines: null,
                             decoration: InputDecoration(
                               hintText: 'Option A',
                               border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(
-                                      ScreenUtil().setSp(20))),
+                                  borderSide: BorderSide.none, borderRadius: BorderRadius.circular(ScreenUtil().setSp(20))),
                               filled: true,
                               fillColor: Colors.white,
                             ),
@@ -155,21 +137,15 @@ class _QuizEditBuilderState extends State<QuizEditBuilder> {
                       Padding(
                         padding: EdgeInsets.only(left: ScreenUtil().setSp(20)),
                         child: Container(
-                          constraints: BoxConstraints(
-                              maxHeight: ScreenUtil().setHeight(250)),
+                          constraints: BoxConstraints(maxHeight: ScreenUtil().setHeight(250)),
                           child: TextFormField(
-                            initialValue: uploadingState
-                                .quizList[widget.pos].options.isEmpty
-                                ? ''
-                                : uploadingState
-                                .quizList[widget.pos].options[1],
+                            initialValue:
+                                uploadingState.quizList[widget.pos].options.isEmpty ? '' : uploadingState.quizList[widget.pos].options[1],
                             maxLines: null,
                             decoration: InputDecoration(
                               hintText: 'Option B',
                               border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(
-                                      ScreenUtil().setSp(20))),
+                                  borderSide: BorderSide.none, borderRadius: BorderRadius.circular(ScreenUtil().setSp(20))),
                               filled: true,
                               fillColor: Colors.white,
                             ),
@@ -191,21 +167,15 @@ class _QuizEditBuilderState extends State<QuizEditBuilder> {
                       Padding(
                         padding: EdgeInsets.only(left: ScreenUtil().setSp(20)),
                         child: Container(
-                          constraints: BoxConstraints(
-                              maxHeight: ScreenUtil().setHeight(250)),
+                          constraints: BoxConstraints(maxHeight: ScreenUtil().setHeight(250)),
                           child: TextFormField(
-                            initialValue: uploadingState
-                                .quizList[widget.pos].options.isEmpty
-                                ? ''
-                                : uploadingState
-                                .quizList[widget.pos].options[2],
+                            initialValue:
+                                uploadingState.quizList[widget.pos].options.isEmpty ? '' : uploadingState.quizList[widget.pos].options[2],
                             maxLines: null,
                             decoration: InputDecoration(
                               hintText: 'Option C',
                               border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(
-                                      ScreenUtil().setSp(20))),
+                                  borderSide: BorderSide.none, borderRadius: BorderRadius.circular(ScreenUtil().setSp(20))),
                               filled: true,
                               fillColor: Colors.white,
                             ),
@@ -227,21 +197,15 @@ class _QuizEditBuilderState extends State<QuizEditBuilder> {
                       Padding(
                         padding: EdgeInsets.only(left: ScreenUtil().setSp(20)),
                         child: Container(
-                          constraints: BoxConstraints(
-                              maxHeight: ScreenUtil().setHeight(250)),
+                          constraints: BoxConstraints(maxHeight: ScreenUtil().setHeight(250)),
                           child: TextFormField(
-                            initialValue: uploadingState
-                                .quizList[widget.pos].options.isEmpty
-                                ? ''
-                                : uploadingState
-                                .quizList[widget.pos].options[3],
+                            initialValue:
+                                uploadingState.quizList[widget.pos].options.isEmpty ? '' : uploadingState.quizList[widget.pos].options[3],
                             maxLines: null,
                             decoration: InputDecoration(
                               hintText: 'Option D',
                               border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(
-                                      ScreenUtil().setSp(20))),
+                                  borderSide: BorderSide.none, borderRadius: BorderRadius.circular(ScreenUtil().setSp(20))),
                               filled: true,
                               fillColor: Colors.white,
                             ),

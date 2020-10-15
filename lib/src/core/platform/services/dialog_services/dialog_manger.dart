@@ -503,7 +503,7 @@ class _DialogManagerState extends State<DialogManager> {
     );
   }
 
-  Future<void> showDialogOfSuccess({String message}) {
+  Future<void> showDialogOfSuccess({@required String message}) {
     showDialog(
         context: context,
         barrierDismissible: true,

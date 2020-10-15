@@ -10,8 +10,11 @@
          <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
          <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
          <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!--    android:name="io.flutter.app.FlutterApplication"-->
+    <!-- the above line was on line 17 inside application tag -->
     <application
-        android:name="io.flutter.app.FlutterApplication"
+
         android:label="malzama"
         android:requestLegacyExternalStorage="true" 
         android:icon="@mipmap/ic_launcher">
@@ -29,9 +32,13 @@
                  until Flutter renders its first frame. It can be removed if
                  there is no splash screen (such as the default splash screen
                  defined in @style/LaunchTheme). -->
+<!--            <meta-data-->
+<!--                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"-->
+<!--                android:value="true" />-->
+
             <meta-data
-                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
-                android:value="true" />
+                    android:name="flutterEmbedding"
+                    android:value="2" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

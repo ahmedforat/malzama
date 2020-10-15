@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:malzama/src/core/api/contract_response.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 import 'package:malzama/src/core/platform/local_database/models/college_uploads_models/college_uploaded_pdf_model.dart';
 import 'package:malzama/src/core/platform/local_database/models/college_uploads_models/college_uploaded_video_model.dart';
 import 'package:malzama/src/core/platform/services/material_uploading/college_uploads_state_provider.dart';
@@ -135,8 +136,8 @@ class _UploadingVideoBodyForUniversitiesState extends State<UploadingVideoBodyFo
                       ),
                       if (dialogService.profilePageState.userData.commonFields.account_type != 'unistudents') TargetCollegeStage(
                           focusNodes: [titleFocusNode, descriptionFocusNode, videoLinkFocusNode]),
-                      if (isPharmacyOrMedicine(dialogService.profilePageState)) QuizSemesterWidget<CollegeUploadingState>(),
-                      if (isPharmacyOrMedicine(dialogService.profilePageState) || dialogService.profilePageState.userData.commonFields.account_type != 'unistudents')
+                      if (HelperFucntions.isPharmacyOrMedicine(dialogService.profilePageState)) QuizSemesterWidget<CollegeUploadingState>(),
+                      if (HelperFucntions.isPharmacyOrMedicine(dialogService.profilePageState) || dialogService.profilePageState.userData.commonFields.account_type != 'unistudents')
                         SizedBox(
                           height: ScreenUtil().setHeight(80),
                         ),

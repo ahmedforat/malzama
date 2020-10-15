@@ -14,6 +14,8 @@ class Comment {
   bool breakable;
   bool breaked;
   CommentStatus commentStatus;
+  bool hasReplies;
+  bool hasRatings;
 
   Comment({
     @required this.postDate,
@@ -24,6 +26,8 @@ class Comment {
     @required this.author,
     @required this.replies,
     @required this.ratings,
+    this.hasReplies,
+    this.hasRatings,
   });
 
   Comment.fromJSON(Map<String, dynamic> map)
@@ -36,7 +40,9 @@ class Comment {
         this.replies = map['replies'].map<CommentReply>((reply) => CommentReply.fromJSON(reply)).toList(),
         this.ratings = map['ratings'].map<CommentRating>((rating) => CommentRating.fromJSON(rating)).toList(),
         this.breakable = shouldBeBreaked(map['content']),
-        this.breaked = shouldBeBreaked(map['content']);
+        this.breaked = shouldBeBreaked(map['content']),
+        this.hasReplies = map['replies'].length > 0,
+        this.hasRatings = map['ratings'].length > 0;
 
   Map<String, dynamic> toJSON() => {
         'post_date': postDate,
@@ -48,8 +54,6 @@ class Comment {
         'replies': replies.map((reply) => reply.toJSON()).toList(),
         'ratings': ratings.map((rating) => rating.toJSON()).toList(),
       };
-
-
 }
 
 bool shouldBeBreaked(String text) {
@@ -63,6 +67,7 @@ bool shouldBeBreaked(String text) {
 
   return (breaksAddresses.length > 2 && hasSequentialBreaks(breaksAddresses)) || text.length > 200;
 }
+
 //  1  ,  2  , 4,  5 ,  7  ,8,9
 bool hasSequentialBreaks(List<int> breaks) {
   int indicator = 1;

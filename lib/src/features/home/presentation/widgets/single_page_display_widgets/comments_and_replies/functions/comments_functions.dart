@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:malzama/src/core/api/http_methods.dart';
 
 import '../../../../../../../core/api/contract_response.dart';
 import '../../../../../../../core/api/routes.dart';
@@ -46,7 +47,7 @@ class CommentFunctions {
 
     print(newComment);
 
-    return await executeHttpPostRequest(body: newComment, url: Api.UPLOAD_COMMENT);
+    return await HttpMethods.post(body: newComment, url: Api.UPLOAD_COMMENT);
   }
 
   // ========================================================================================
@@ -63,7 +64,7 @@ class CommentFunctions {
       'comment_id': commentId
     };
 
-    return await executeHttpPostRequest(body: body, url: Api.EDIT_COMMENT);
+    return await HttpMethods.post(body: body, url: Api.EDIT_COMMENT);
   }
 
   // ========================================================================================
@@ -77,7 +78,7 @@ class CommentFunctions {
   static Future<ContractResponse> fetchCommentsFromApi(state, List<String> ids) async {
     Map<String, dynamic> body = {'ids': ids, 'collection': state.comments_collection};
 
-    return await executeHttpPostRequest(body: body, url: Api.FETCH_COMMENTS_BY_IDS);
+    return await HttpMethods.post(body: body, url: Api.FETCH_COMMENTS_BY_IDS);
   }
 
   // ========================================================================================
@@ -90,59 +91,19 @@ class CommentFunctions {
       'material_id': materialInfo.material_id,
       'material_collection': materialInfo.material_collection
     };
-    return await executeHttpPostRequest(body: body, url: Api.DELETE_COMMENT);
+    return await HttpMethods.post(body: body, url: Api.DELETE_COMMENT);
   }
+
+// ========================================================================================
+// ========================================================================================
+
+
+
+
+
 
 // ========================================================================================
 // ========================================================================================
 
 }
 
-Future<ContractResponse> executeHttpPostRequest({
-  Map<String, String> headers,
-  @required Map<String, dynamic> body,
-  @required String url,
-  int timeoutInSeconds,
-}) async {
-  bool isConnected = await NetWorkInfo.checkConnection();
-  if (!isConnected) {
-    return NoInternetConnection();
-  }
-
-  Map<String, String> _headers = headers ?? {
-    'content-type': 'application/json',
-    'accept': 'application/json',
-  };
-  _headers['authorization'] = await CachingServices.getField(key: 'token');
-
-
-  http.Response response;
-
-  try {
-    response = await http
-        .post(
-          Uri.encodeFull(url),
-          headers: _headers,
-          body: json.encode(body),
-        )
-        .timeout(Duration(seconds: timeoutInSeconds ?? 20));
-
-    switch (response.statusCode) {
-      case 200:
-        return Success200(message: response.body);
-        break;
-
-      case 201:
-        return Success201(message: response.body);
-        break;
-
-      default:
-        return InternalServerError();
-    }
-  } on TimeoutException {
-    return ServerNotResponding();
-  } catch (err) {
-    print(err);
-    return NewBugException(message: err.toString());
-  }
-}

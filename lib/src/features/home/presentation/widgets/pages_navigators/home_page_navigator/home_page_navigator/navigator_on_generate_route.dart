@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:malzama/src/core/Navigator/routes_names.dart';
 import 'package:malzama/src/features/home/presentation/widgets/pages_navigators/home_page_navigator/home_page_navigator/pages/display_home_page.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/replies/widgets/display_rators_page.dart';
 import '../../../single_page_display_widgets/view_college_material.dart';
 import 'package:provider/provider.dart';
 import '../../../single_page_display_widgets/comments_and_replies/state_providers/comment_state_provider.dart';
@@ -21,6 +22,11 @@ Route<dynamic> homeOnGenerateRoutes(RouteSettings settings) {
           );
       break;
 
+    // case RouteNames.DISPLAY_COMMENT_RATORS:
+    //   print('we are naving to rators page from within home page');
+    //   print(settings.arguments);
+    //   builder = (context) => DisplayRatorsPage(ratingsList: settings.arguments);
+    //   break;
     // display a lecture in a single page
     case RouteNames.VIEW_LECTURE:
       try {

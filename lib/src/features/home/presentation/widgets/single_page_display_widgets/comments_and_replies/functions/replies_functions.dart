@@ -1,4 +1,5 @@
 import 'package:malzama/src/core/api/contract_response.dart';
+import 'package:malzama/src/core/api/http_methods.dart';
 import 'package:malzama/src/core/api/routes.dart';
 import 'package:malzama/src/core/platform/local_database/models/base_model.dart';
 import 'package:malzama/src/features/home/models/material_author.dart';
@@ -23,7 +24,7 @@ class RepliesFunctions {
     };
 
     print(body);
-    return await executeHttpPostRequest(body: body, url: Api.UPLOAD_NEW_REPLY);
+    return await HttpMethods.post(body: body, url: Api.UPLOAD_NEW_REPLY);
   }
 
   static Future<ContractResponse> editReply(
@@ -36,7 +37,7 @@ class RepliesFunctions {
 
     };
 
-    return await executeHttpPostRequest(body: body, url: Api.EDIT_REPLY);
+    return await HttpMethods.post(body: body, url: Api.EDIT_REPLY);
   }
 
   static Future<ContractResponse> deleteReply({BaseUploadingModel material, String replyId,String commentId}) async {
@@ -46,6 +47,6 @@ class RepliesFunctions {
       'comment_id': commentId,
     };
 
-    return await executeHttpPostRequest(body: body, url: Api.DELETE_REPLY);
+    return await HttpMethods.post(body: body, url: Api.DELETE_REPLY);
   }
 }

@@ -91,6 +91,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
               final UserInfoStateProvider userInfoStateProvider = Provider.of<UserInfoStateProvider>(context,listen: false);
 
+              
+
               if(!userInfoStateProvider.isBottomNavBarVisible){
                 userInfoStateProvider.bottomSheetController.close();
               }
@@ -115,10 +117,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       MaterialNavigator(
                         materialPageKey: _pagesNavigators[1],
                       ),
-                      GoogleMapDemo(),
-                      // VideosNavigator(
-                      //   videoPageKey: _pagesNavigators[2],
-                      // ),
+                      // GoogleMapDemo(),
+                      VideosNavigator(
+                        videoPageKey: _pagesNavigators[2],
+                      ),
                       NotificationsNavigator(
                         notificationPageKey: _pagesNavigators[3],
                       ),
@@ -168,6 +170,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
           );
   }
+  
 
 
   @override

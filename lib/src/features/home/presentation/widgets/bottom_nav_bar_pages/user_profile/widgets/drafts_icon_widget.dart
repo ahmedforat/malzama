@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/Navigator/routes_names.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../core/references/references.dart';
@@ -25,7 +26,9 @@ class DraftIconWidget extends StatelessWidget {
           ),
           trailing: RaisedButton(
             child: Text('Explore'),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, RouteNames.VIEW_QUIZ_DRAFTS);
+            },
           ),
         ),
       ),

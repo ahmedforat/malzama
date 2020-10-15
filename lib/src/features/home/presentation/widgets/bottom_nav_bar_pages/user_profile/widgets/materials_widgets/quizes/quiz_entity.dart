@@ -1,34 +1,38 @@
 import 'package:flutter/cupertino.dart';
 
 class QuizEntity {
+  String id;
   String question;
   List<String> options;
   List<int> answers;
-  String explanation;
+  String explain;
   bool inReviewMode = false;
 
-  QuizEntity({String question,  List<String>options , List<int> answers , String explanation}){
+  QuizEntity({this.id, String question, List<String> options, List<int> answers, String explanation}) {
     this.question = question;
-    this.options = options?? new List(4);
+    this.options = options ?? new List(4);
     this.answers = answers ?? new List();
-    this.explanation = explanation;
+    this.explain = explanation;
   }
 
-
   bool get isEmpty => this.question == null || this.question.isEmpty || this.options.length < 4;
+
   bool get hasAnswers => this.answers.length > 0;
 
   QuizEntity.fromJSON(Map map)
-      :this.question = map['question'],
+      : this.id = map['id'],
+        this.question = map['question'],
         this.options = List<String>.from(map['options']),
         this.answers = List<int>.from(map['answers']),
-        this.explanation = map['explanation'];
+        this.explain = map['explain'],
+        this.inReviewMode = map['inReviewMode'];
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
+        'id': this.id,
         'question': this.question,
         'options': this.options,
         'answers': this.answers,
-        'explanation': this.explanation
+        'explain': this.explain,
+        'inReviewMode': this.inReviewMode,
       };
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:malzama/src/core/Navigator/navigation_service.dart';
 import 'package:malzama/src/core/Navigator/routes_names.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/college_uploading_video_dialog_body.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/school_uploading_lecture_dialog_body.dart';
@@ -7,9 +6,19 @@ import 'package:malzama/src/core/platform/services/dialog_services/widgets/schoo
 import 'package:malzama/src/core/platform/services/material_uploading/college_uploads_state_provider.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/college_uploading_lecture_dialog_body.dart';
 import 'package:malzama/src/core/platform/services/material_uploading/school_uploads_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/quiz_drafts_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploading_state_provider.dart';
 
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/materialPage/material_page.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/pages/explore_material.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/drafts_displayer.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_collection_model.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_draft_model.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_list_displayer/quiz_displayer_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_list_displayer/quiz_list_displayer.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_player/quiz_player_page.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_player/quiz_player_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_uploader_widget.dart';
 import 'package:provider/provider.dart';
 
 // handle the routing inside the nested navigator of the notifications page
@@ -28,20 +37,70 @@ Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
 
     case RouteNames.UPLOAD_NEW_MATERIAL_COLLEGE:
       String materialType = settings.arguments;
-      return new MaterialPageRoute(
-        builder: (context) => ChangeNotifierProvider<CollegeUploadingState>(
-          create: (context) => CollegeUploadingState(),
-          builder: (context, _) => materialType == 'lecture' ? UploadingLectureBodyForUniversities() : UploadingVideoBodyForUniversities(),
-        ),
+
+      builder = (context) => ChangeNotifierProvider<CollegeUploadingState>(
+            create: (context) => CollegeUploadingState(),
+            builder: (context, _) =>
+                materialType == 'lecture' ? UploadingLectureBodyForUniversities() : UploadingVideoBodyForUniversities(),
+          );
+      break;
+
+    // case RouteNames.DISPLAY_COMMENT_RATORS:
+    //   builder = (context) => DisplayRatorsPage();
+    //   break;
+
+    case RouteNames.VIEW_QUIZ_DRAFTS:
+      builder = (context) => ChangeNotifierProvider<QuizDraftState>(
+            create: (context) => QuizDraftState(),
+            builder: (context, _) => DraftsDisplayer(),
+          );
+      break;
+
+    case RouteNames.VIEW_QUIZ_DISPLAYER:
+      builder = (context) => ChangeNotifierProvider<QuizDisplayerStateProvider>(
+            create: (context) => new QuizDisplayerStateProvider(),
+            builder: (context, _) => QuizListDisplayer(),
+          );
+      break;
+
+    case RouteNames.TAKE_QUIZ_EXAM:
+      QuizCollection payload = settings.arguments;
+      print('before navigating *************************');
+      print(payload.toJSON());
+      print('before navigating *************************');
+
+      builder = (context) => ChangeNotifierProvider<QuizPlayerStateProvider>(
+        create: (context) =>  QuizPlayerStateProvider(payload),
+        builder: (context, _) => QuizPlayer(),
       );
+      break;
 
     case RouteNames.UPLOAD_NEW_MATERIAL_SCHOOL:
       String materialType = settings.arguments;
-      return new MaterialPageRoute(
-        builder: (context) => ChangeNotifierProvider<SchoolUploadState>(
+      builder = (context) => ChangeNotifierProvider<SchoolUploadState>(
             create: (context) => SchoolUploadState(),
-            builder: (context, _) => materialType == 'lecture' ? UploadingLectureBodyForSchools() : UploadingVideoBodyForSchools()),
-      );
+            builder: (context, _) => materialType == 'lecture' ? UploadingLectureBodyForSchools() : UploadingVideoBodyForSchools(),
+          );
+      break;
+
+    case RouteNames.UPLOAD_NEW_QUIZ:
+      builder = (context) => ChangeNotifierProvider<QuizUploadingState>(
+            create: (context) => QuizUploadingState(false),
+            lazy: false,
+            builder: (context, _) => QuizUploaderWidget(false),
+          );
+      break;
+
+    case RouteNames.EDIT_QUIZ_DRAFT:
+      builder = (context) => ChangeNotifierProvider<QuizUploadingState>(
+            create: (context) => QuizUploadingState(true),
+            lazy: false,
+            builder: (context, _) => QuizUploaderWidget(
+              true,
+              payload: settings.arguments as QuizDraftEntity,
+            ),
+          );
+      break;
 
     // display a video in a single page
     case RouteNames.VIEW_VIDEO:
@@ -50,7 +109,7 @@ Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
 
     // display a quiz in a single page
     case RouteNames.VIEW_QUIZ:
-      builder = (context) => throw UnimplementedError();
+      builder = (context) => QuizUploaderWidget(false);
       break;
 
     // display a lecture with someone comment in a single page

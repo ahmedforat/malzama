@@ -3,8 +3,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:malzama/src/core/api/http_methods.dart';
+
+import 'package:malzama/src/core/api/routes.dart';
+import 'package:malzama/src/core/platform/services/caching_services.dart';
 import 'package:malzama/src/core/platform/services/file_system_services.dart';
 import 'package:malzama/src/features/home/models/material_author.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/comment_related_models/comment_rating_model.dart';
 import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/functions/replies_functions.dart';
 
 import '../../../../../../../../src/core/api/contract_response.dart';
@@ -23,9 +28,11 @@ import '../functions/comments_functions.dart';
     ),
  */
 
-enum CommentStatus { SENT, IN_PROGRESS, FAILED, UPDATING }
+enum CommentStatus { SENT, IN_PROGRESS, FAILED, UPDATING, DELETING }
 
 class CommentStateProvider with ChangeNotifier {
+
+
   PageController pageController;
 
   // ====================================================================================
@@ -115,6 +122,8 @@ class CommentStateProvider with ChangeNotifier {
 
   List<Comment> get comments => _comments;
 
+
+
   void sortComments() {
     _comments.sort(
       (a, b) => DateTime.parse(a.postDate).compareTo(DateTime.parse(b.postDate)),
@@ -171,7 +180,8 @@ class CommentStateProvider with ChangeNotifier {
     if (response is Success) {
       var fetchedComments = json.decode(response.message);
       print(fetchedComments);
-      List<Comment> newFetchedComments = fetchedComments.map<Comment>((fetchedComment) => new Comment.fromJSON(fetchedComment)).toList();
+      List<Comment> newFetchedComments = fetchedComments.map<Comment>((fetchedComment) => new Comment.fromJSON(fetchedComment))
+          .toList();
       _comments = [...newFetchedComments, ..._comments];
       _updateAnyMoreComment();
       sortComments();
@@ -202,6 +212,8 @@ class CommentStateProvider with ChangeNotifier {
         postDate: DateTime.now().toIso8601String(),
         ratings: [],
         replies: [],
+        hasRatings: false,
+        hasReplies: false
       )
         ..commentStatus = CommentStatus.IN_PROGRESS
         ..breaked = shouldBeBreaked(content)
@@ -257,9 +269,15 @@ class CommentStateProvider with ChangeNotifier {
     String comment_id,
     BaseUploadingModel materialInfo,
   }) async {
+    _comments.firstWhere((comment) => comment.id == comment_id).commentStatus = CommentStatus.DELETING;
+    notifyListeners();
     ContractResponse response = await CommentFunctions.deleteComment(materialInfo: materialInfo, comment_id: comment_id);
-
-    return response is Success ? 'comment deleted' : null;
+    if (response is! Success) {
+      _comments.firstWhere((comment) => comment.id == comment_id).commentStatus = CommentStatus.SENT;
+      notifyListeners();
+      return null;
+    }
+    return 'comment deleted';
   }
 
   Future<String> deleteReply({
@@ -267,8 +285,17 @@ class CommentStateProvider with ChangeNotifier {
     BaseUploadingModel baseUploadingModel,
     String replyID,
   }) async {
+    _comments.firstWhere((comment) => comment.id == commentID).replies.firstWhere((reply) => reply.id == replyID).commentStatus =
+        CommentStatus.DELETING;
+    notifyListeners();
     ContractResponse response = await RepliesFunctions.deleteReply(commentId: commentID, replyId: replyID, material: baseUploadingModel);
-    return response is Success ? 'reply deleted' : null;
+    if (response is! Success) {
+      _comments.firstWhere((comment) => comment.id == commentID).replies.firstWhere((reply) => reply.id == replyID).commentStatus =
+          CommentStatus.SENT;
+      notifyListeners();
+      return null;
+    }
+    return 'reply deleted';
   }
 
   Future<String> editComment(@required String newContent) async {
@@ -297,6 +324,50 @@ class CommentStateProvider with ChangeNotifier {
   }
 
   // ==================================================================================
+  /// comment rating
+  void setRatingOfCommentTo(
+      {int commentPos,
+      bool rating,
+      String myId,
+      CommentRating myRating,
+      Comment comment,
+      BaseStateProvider material,
+      MaterialAuthor materialAuthor}) async {
+    if (myRating != null) {
+      if (rating == myRating.ratingType) {
+        // remove the rating
+        _comments[commentPos].ratings.removeWhere((rating) => rating.author.id == myId);
+        _comments[commentPos].hasRatings = _comments[commentPos].ratings.length > 0;
+      } else {
+        // update the already existing rating
+        _comments[commentPos].ratings.firstWhere((rating) => rating.author.id == myId).ratingType = rating;
+      }
+    } else {
+      // append new rating
+      CommentRating newCommentRating = new CommentRating(ratingType: rating, author: materialAuthor, id: myId);
+      _comments[commentPos].ratings.add(newCommentRating);
+      _comments[commentPos].hasRatings = true;
+    }
+
+    notifyListeners();
+
+    final body = {
+      'comments_collection': comment.collectionName,
+      'comment_id': comment.id,
+      'newRating': rating,
+      'rating_id': myRating == null ? null : myRating.id,
+      'material_id': material.materialItems[currentMaterialPos].material_id,
+      'material_collection': material.materialItems[currentMaterialPos].material_collection,
+      'author_id': material.materialItems[currentMaterialPos].author['_id'],
+      'author_notifications_repo': material.materialItems[currentMaterialPos].author['notifications_repo'],
+      'author_one_signal_id': material.materialItems[currentMaterialPos].author['one_signal_id']
+    };
+
+    ContractResponse response = await HttpMethods.post(body: body, url: Api.RATE_COMMENT);
+    if (response is Success201) {
+      // TODO:implement sending the notifications body to the specific user
+    }
+  }
 
   // ===============================================================================
   /// this is to check whether we are inside a replies page or not
@@ -324,10 +395,11 @@ class CommentStateProvider with ChangeNotifier {
     updateRepliesRelevantCommentPos(commentPos);
     updateWhetherInsideRepliesPageOrNot(true);
     pageController.animateToPage(1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+
   }
 
-  /// cloes replies display page and head back to the comments display page
-  void closeRepliesDisplayPage() {
+  /// close replies display page and head back to the comments display page
+  closeRepliesDisplayPage() {
     updateWhetherInsideRepliesPageOrNot(false);
     pageController.animateToPage(0, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
   }

@@ -42,6 +42,9 @@ class Api {
   // upload comment
   static const String EDIT_COMMENT = _LOCALHOST_URL + '/comments/edit-comment';
 
+  // rate a comment
+  static const String RATE_COMMENT = _LOCALHOST_URL + '/comments/rate-comment';
+
   // =================================================================================
   /// Replies
 
@@ -56,8 +59,23 @@ class Api {
 
   // =================================================================================
 
+// =========================================================================
+  // quizes
 
-  static String fetchMaterialUrlFor({@required String accountType, @required String materialType,}) {
+// fetch headers
+  static const String FETCH_QUIZES_HEADERS = _LOCALHOST_URL + '/material-interactions/fetch-quiz-headers';
+
+  // fetch questions
+  static const String FETCH_QUIZES_QUESTIONS = _LOCALHOST_URL + '/material-interactions/fetch-quiz-questions';
+
+
+  // fetch quizes count
+  static const String FETCH_QUIZES_COUNT = _LOCALHOST_URL + '/material-interactions/fetch-quizes-count';
+// =========================================================================
+  static String fetchMaterialUrlFor({
+    @required String accountType,
+    @required String materialType,
+  }) {
     return _FETCH_MATERIALS + (HelperFucntions.isAcademic(accountType) ? 'uni' : 'sch') + materialType;
   }
 

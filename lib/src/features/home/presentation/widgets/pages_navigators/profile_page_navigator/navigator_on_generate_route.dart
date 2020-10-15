@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/replies/widgets/display_rators_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../core/Navigator/routes_names.dart';
@@ -25,6 +26,9 @@ Route<dynamic> profileOnGenerateRoutes(RouteSettings settings) {
       );
       break;
 
+    // case RouteNames.DISPLAY_COMMENT_RATORS:
+    //   builder = (context) => DisplayRatorsPage();
+    //   break;
     // display a video in a single page
     case RouteNames.VIEW_VIDEO:
       builder = (context) => throw UnimplementedError();

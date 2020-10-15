@@ -108,7 +108,7 @@ void onUploadingNewReply(BuildContext context) async {
     print('====================================');
     print(responseBody);
     print('====================================');
-
+    commentStateProvider.comments[commentStateProvider.repliesRelevantCommentPos].hasReplies = true;
     commentStateProvider.comments[commentStateProvider.repliesRelevantCommentPos].replies.firstWhere((reply) => reply.content == replyText)
     ..postDate = DateTime.fromMillisecondsSinceEpoch(responseBody['newReply']['post_date']).toIso8601String()
     ..id = responseBody['newReply']['_id']

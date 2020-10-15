@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:malzama/src/core/general_widgets/custom_change_notifier.dart';
 import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 import 'package:malzama/src/core/platform/local_database/local_caches/cached_user_info.dart';
+import 'package:malzama/src/core/platform/services/file_system_services.dart';
 import 'package:malzama/src/core/platform/services/material_uploading/college_uploads_state_provider.dart';
 import 'package:malzama/src/core/platform/services/material_uploading/school_uploads_state_provider.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/widgets/college_uploading_lecture_dialog_body.dart';
@@ -44,28 +45,27 @@ import 'src/features/verify_your_email/presentation/validate_your_account_msg.da
 import './src//features/home/presentation/widgets/bottom_nav_bar_pages/materialPage/material_state_provider..dart';
 import './src/features/home/presentation/state_provider/user_info_provider.dart';
 
-
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  var data = await FileSystemServices.getUserData();
   setup();
   bool isAcademic = HelperFucntions.isAcademic(await UserCachedInfo().getRecord('account_type'));
-  runApp(MyApp(isAcademic));
+  runApp(MyApp(isAcademic, data));
 }
 
 class MyApp extends StatelessWidget {
   final bool isAcademic;
+  final Map<String, dynamic> data;
 
-  MyApp(this.isAcademic);
+  MyApp(this.isAcademic, this.data);
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<UserInfoStateProvider>(
-          create: (context) => UserInfoStateProvider(),
+          create: (context) => UserInfoStateProvider(data),
+          lazy: false,
         ),
         ChangeNotifierProvider<ProfilePageState>(
           create: (context) => ProfilePageState(),
@@ -94,10 +94,10 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         // builder: (context,widget) => Navigator(onGenerateRoute: (settings) => MaterialPageRoute(builder: (context) => WrapperWidget(child:widget)),),
         //home: ImageCompressorWidget() //ChangeNotifierProvider(
-         //  create: (context) => QuizUploadingState(),
+        //  create: (context) => QuizUploadingState(),
         //   child: QuizUploaderWidget())
-      initialRoute: '/',
-     onGenerateRoute: _onGenerateRoute,
+        initialRoute: '/',
+        onGenerateRoute: _onGenerateRoute,
       ),
     );
   }
@@ -227,11 +227,11 @@ Route<dynamic> _onGenerateRoute(RouteSettings settings) {
       );
       break;
 
-    case '/explore-my-material':
-      return MaterialPageRoute(
-        builder: (context) => ExploreMaterialPage(),
-      );
-      break;
+    // case '/explore-my-material':
+    //   return MaterialPageRoute(
+    //     builder: (context) => ExploreMaterialPage(),
+    //   );
+    //   break;
 
     case '/display-profile-picture':
       return MaterialPageRoute(
@@ -273,30 +273,14 @@ Route<dynamic> _onGenerateRoute(RouteSettings settings) {
               ));
       break;
 
-    case '/explore-my-drafts':
-      return MaterialPageRoute(
-        builder: (context) => ChangeNotifierProvider<QuizDraftState>(
-          create: (context) => QuizDraftState(),
-          child: DraftsDisplayer(),
-        ),
-      );
-
     ///edit-quiz-draft
 
-    case '/edit-quiz-draft':
+    default:
       return MaterialPageRoute(
-          builder: (context) => ChangeNotifierProvider<QuizUploadingState>(
-              create: (context) => QuizUploadingState(),
-              child: QuizUploaderWidget(
-                true,
-                payload: settings.arguments,
-              )));
-
-    // default:
-    //   return MaterialPageRoute(
-    //       builder: (context) => UnknownRoute(
-    //             routeName: settings.name,
-    //           ));
+        builder: (context) => UnknownRoute(
+          routeName: settings.name,
+        ),
+      );
   }
 }
 

@@ -1,14 +1,25 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:malzama/src/core/api/http_methods.dart';
 import 'package:malzama/src/core/api/routes.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
+import 'package:malzama/src/core/platform/local_database/access_objects/general_variables.dart';
 import 'package:malzama/src/core/platform/local_database/access_objects/quiz_access_object.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/core/references/references.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
+import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_draft_model.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_uploader_widget.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/functions/comments_functions.dart';
 
 import '../../../../core/api/contract_response.dart';
 import '../../../../core/platform/services/caching_services.dart';
@@ -17,12 +28,97 @@ import '../widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/q
 
 class StateProvider {
   int semester;
-  void updateSemester(int update){
 
-  }
+  void updateSemester(int update) {}
 }
 
 class QuizUploadingState extends StateProvider with ChangeNotifier {
+  bool _isCheckBoxChecked = false;
+
+  bool get isCheckBoxChecked => _isCheckBoxChecked;
+
+  void setIsCheckBoxChecked(bool update) {
+    if (update != null) {
+      _isCheckBoxChecked = update;
+      notifyListeners();
+    }
+  }
+
+  // =========================================================================
+  // this is for schools
+  String _schoolSection;
+
+  String get schoolSection => _schoolSection;
+
+  void updateSchoolSection(String update) {
+    if (update != null) {
+      _schoolSection = update;
+      notifyListeners();
+    }
+  }
+
+  // =========================================================================
+
+  // =================================================================
+  // SnackBar status (to tell if the SnackBar is already open or not)
+
+  bool _isSnackBarActive = false;
+
+  bool get isSnackBarActive => _isSnackBarActive;
+
+  void setIsSnackBarActiveTo(bool update) {
+    if (update != null) {
+      _isSnackBarActive = update;
+    }
+  }
+
+  // ====================================================================
+  // ==========================================
+  // this for making time to fetch whether we show the quiz welcome message or not
+  // from the local database
+  bool _isLoading = false;
+
+  bool get isLoading => _isLoading;
+
+  bool showQuizWelcomeMessage = true;
+
+  void setIsLoadingTo(bool update) {
+    if (update != null) {
+      _isLoading = update;
+      notifyListeners();
+    }
+  }
+
+  // ==========================================
+
+  void _fabAppearanceListener() {
+    if (scrollController.offset > scrollController.position.maxScrollExtent * 0.9) {
+      locator<DialogService>().quizUploadingState.setFabVisibilityTo(true);
+    } else {
+      locator<DialogService>().quizUploadingState.setFabVisibilityTo(false);
+    }
+  }
+
+  void initializeFabListener() {
+    scrollController.addListener(_fabAppearanceListener);
+  }
+
+  ScrollController _scrollController;
+  PageController _pageController;
+  GlobalKey<ScaffoldState> _scaffoldKey;
+
+  //int _draftStoreIndex;
+
+  ScrollController get scrollController => _scrollController;
+
+  PageController get pageController => _pageController;
+
+  GlobalKey<ScaffoldState> get scaffoldKey => _scaffoldKey;
+
+  bool _fromDrafts = false;
+
+  bool get fromDrafts => _fromDrafts;
+
   String _title, _description, _topic;
   int _semester, _stage, _currentPageIndex, _draftStoreIndex;
   bool _isFabVisible = false, _hasDrafts = false;
@@ -56,7 +152,92 @@ class QuizUploadingState extends StateProvider with ChangeNotifier {
     }
   }
 
-  QuizUploadingState() {
+  // Animate to Page
+  Future<void> animateToPage(int page) async {
+    if (page != null) {
+      await pageController.animateToPage(
+        page,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  // Animate to Bottom
+  Future<void> animateToBottom() async {
+    await scrollController.animateTo(
+      scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  // handler called when the list of quizes to be uploaded is less than 10
+  Future<void> onQuizBelowLimitHandler() async {
+    if (quizList.any((quiz) => quiz.isEmpty)) {
+      var targetPos = quizList.indexWhere((quiz) => quiz.isEmpty);
+      print('this is the targetPos $targetPos');
+      await pageController.animateToPage(targetPos, duration: Duration(milliseconds: 350), curve: Curves.easeInOut);
+    } else {
+      print('inside the appending');
+      appendToQuizList(new QuizEntity());
+      var targetPos = quizList.indexOf(quizList.last);
+      pageController.animateToPage(targetPos, duration: Duration(milliseconds: 350), curve: Curves.easeInOut);
+    }
+  }
+
+  // handler called when there is at least one quiz item that has no answers
+  Future<void> onQuizHasNoAnswersHandler() async {
+    await animateToBottom();
+    int targetPos = quizList.indexOf(quizList.firstWhere((quiz) => !quiz.hasAnswers));
+    await animateToPage(targetPos);
+  }
+
+  /// this handler called when user hit the FloatingActionButton Of adding a new quiz item
+  void onAddNewQuizItemHandler() async {
+    if (quizList.length == 0 || scrollController.offset < scrollController.position.maxScrollExtent) {
+      WidgetsBinding.instance.addPostFrameCallback((timer) => animateToBottom());
+    }
+
+    // make sure that the last quiz is complete with all it's fields
+    // cause the add button does not add a new quiz item unless the last one is complete
+    QuizEntity lastOne;
+    if (quizList.length != 0) {
+      lastOne = quizList.last;
+    }
+    if (lastOne != null && lastOne.isEmpty) {
+      animateToPage(quizList.length - 1);
+      showSnackBar(text: 'Please save the current quiz item then add another one');
+    } else {
+      appendToQuizList(new QuizEntity());
+
+      if (_currentPageIndex != _quizList.length - 2) {
+        print('hard way');
+        pageController.jumpToPage(_quizList.length - 2);
+        await Future.delayed(Duration(milliseconds: 30));
+        await animateToPage(_quizList.length - 1);
+      } else {
+        print('easy way');
+        await Future.delayed(Duration(milliseconds: 30));
+        animateToPage(_quizList.length - 1);
+      }
+    }
+  }
+
+  QuizUploadingState(bool fromDrafts) {
+    _scrollController = new ScrollController(
+      initialScrollOffset: 0.0,
+      keepScrollOffset: true,
+    );
+
+    _pageController = new PageController(viewportFraction: 0.955);
+    _scaffoldKey = new GlobalKey<ScaffoldState>();
+    _fromDrafts = fromDrafts;
+
+    if (_fromDrafts) {
+      scrollController.addListener(_fabAppearanceListener);
+    }
+
     print('a new instance of quiz uploader state provider has been created');
     // initialize the currentPageIndex of the pageView which will diplay the list of quizes
     _currentPageIndex = 0;
@@ -66,10 +247,9 @@ class QuizUploadingState extends StateProvider with ChangeNotifier {
     locator<DialogService>().quizUploadingState = this;
     String account_type = locator<DialogService>().profilePageState.userData.commonFields.account_type;
     String college;
-    int stage;
     if (account_type == 'unistudents') {
       college = locator<DialogService>().profilePageState.userData.college;
-      stage = int.parse(locator<DialogService>().profilePageState.userData.stage);
+      _stage = int.parse(locator<DialogService>().profilePageState.userData.stage);
 
       if (new RegExp(r'سنان').hasMatch(college)) {
         _topicList = References.getSuitaleCollegeMaterialList(stage, college);
@@ -79,7 +259,7 @@ class QuizUploadingState extends StateProvider with ChangeNotifier {
 
   // update topicList upon changing the semester (in case of medicine or pharmacy) and / or
   // changing the stage for all types of user (except students of school of course casue they are not
-  // authorized to publish quizez be default
+  // authorized to publish quizes by default
 
   void updateTopicList() {
     ProfilePageState profilePageState = locator<DialogService>().profilePageState;
@@ -91,12 +271,7 @@ class QuizUploadingState extends StateProvider with ChangeNotifier {
 
     String college = profilePageState.userData.college;
 
-    int studentStage;
-    if (account_type == 'unistudents') {
-      studentStage = int.parse(profilePageState.userData.stage);
-    }
-
-    _topicList = References.getSuitaleCollegeMaterialList(studentStage ?? stage, college, semester: this.semester);
+    _topicList = References.getSuitaleCollegeMaterialList(stage, college, semester: this.semester);
     notifyListeners();
   }
 
@@ -126,8 +301,9 @@ class QuizUploadingState extends StateProvider with ChangeNotifier {
 
 // update topic list
   void updateStage(int update) {
-    String account_type = locator<DialogService>().profilePageState.userData.commonFields.account_type;
     ProfilePageState profilePageState = locator<DialogService>().profilePageState;
+    String account_type = profilePageState.userData.commonFields.account_type;
+
     String college;
     if (account_type == 'uniteachers') {
       college = profilePageState.userData.college;
@@ -135,7 +311,7 @@ class QuizUploadingState extends StateProvider with ChangeNotifier {
     if (update != null) {
       _stage = update;
       _topic = null;
-      if (new RegExp(r'سنان').hasMatch(college) || (isPharmacyOrMedicine(profilePageState)) && _semester != null) {
+      if (new RegExp(r'سنان').hasMatch(college) || (HelperFucntions.isPharmacyOrMedicine(profilePageState)) && _semester != null) {
         print('our conidtion was met');
         updateTopicList();
       } else {
@@ -154,36 +330,62 @@ class QuizUploadingState extends StateProvider with ChangeNotifier {
     if (update != null) {
       _semester = update;
       _topic = null;
-      bool updateTopicListForUniteachers = account_type == 'uniteachers' && (isPharmacyOrMedicine(profilePageState) || new RegExp(r'سنان').hasMatch(college)) && _stage != null;
-      bool updateTopicListForStudents = account_type == 'unistudents' && ((isPharmacyOrMedicine(profilePageState) && _semester != null) || new RegExp(r'سنان').hasMatch(college));
+
+      bool updateTopicListForUniteachers = account_type == 'uniteachers' &&
+          (HelperFucntions.isPharmacyOrMedicine(profilePageState) || new RegExp(r'سنان').hasMatch(college)) &&
+          _stage != null;
+      bool updateTopicListForStudents = account_type == 'unistudents' &&
+          ((HelperFucntions.isPharmacyOrMedicine(profilePageState) && _semester != null) || new RegExp(r'سنان').hasMatch(college));
       if (updateTopicListForUniteachers || updateTopicListForStudents) {
         updateTopicList();
       }
+
 
       notifyListeners();
     }
   }
 
+
+  // showSnackBar
+  Future<void> showSnackBar({
+    @required String text,
+    int duration,
+  }) async {
+    if (!_isSnackBarActive) {
+      _isSnackBarActive = true;
+      _scaffoldKey.currentState
+          .showSnackBar(new SnackBar(
+            content: Text(text),
+            duration: Duration(milliseconds: duration ?? 4000),
+          ))
+          .closed
+          .then((_) => _isSnackBarActive = false);
+    }
+  }
+
   // get the credentials
-  Map<String, dynamic> getCredentials() {
-    String account_type = locator<DialogService>().profilePageState.userData.commonFields.account_type;
+  QuizCredentials getCredentials() {
     ProfilePageState profilePageState = locator<DialogService>().profilePageState;
-    Map<String, dynamic> credentials = {'title': this._title, 'description': this._description, 'topic': this._topic};
+    String account_type = profilePageState.userData.commonFields.account_type;
 
-    if (account_type == 'uniteachers' || account_type == 'schteachers') {
-      credentials['stage'] = this._stage;
-    }
-    if (account_type == 'unistudents') {
-      credentials['stage'] = profilePageState.userData.stage;
-    }
-    if (isPharmacyOrMedicine(profilePageState)) {
-      credentials['semester'] = this._semester;
-    }
-    if (account_type == 'schteachers') {
-      credentials['topic'] = profilePageState.userData.speciality;
+    QuizCredentials quizCredentials = new QuizCredentials()
+      ..title = _title
+      ..topic = _topic
+      ..description = _description
+      ..semester = _semester.toString() ?? 'unknown'
+      ..stage = account_type == 'unistudents' ? profilePageState.userData.stage.toString() : _stage.toString();
+    if (account_type != 'schteachers') {
+      quizCredentials
+        ..college = profilePageState.userData.college
+        ..university = profilePageState.userData.university
+        ..section = profilePageState.userData.section;
+    } else {
+      quizCredentials
+        ..schoolSection = _schoolSection
+        ..topic = profilePageState.userData.speciality;
     }
 
-    return credentials;
+    return quizCredentials;
   }
 
   // update the status of Floating action button visibility (which is used to add a new quiz item)
@@ -208,22 +410,43 @@ class QuizUploadingState extends StateProvider with ChangeNotifier {
     }
   }
 
-  // import data from draft
-  void importFromDrafts(Map<String, dynamic> data) {
-    var credentials = data['credentials'];
-    var quizItems = data['quizItems'];
-      print('Hello World');
-    _title = credentials['title'];
-    _description = credentials['description'];
+  void removeQuizItemAt(int pos) {
+    if (pos != null) {
+      if (pos == _quizList.length - 1) {
+        pageController.animateToPage(
+          _quizList.length - 2,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+        _currentPageIndex = _quizList.length - 2;
+      }
+      _quizList.removeAt(pos);
+      if (_quizList.length == 0) {
+        scrollController.removeListener(_fabAppearanceListener);
+        _isFabVisible = false;
+      }
+      notifyListeners();
+    }
+  }
 
-    _stage = int.parse(credentials['stage']);
-    _semester = credentials['semester'];
-    _draftStoreIndex = data['index'];
+  // import data from draft
+  void importFromDrafts(QuizDraftEntity data) {
+    print(data);
+    var credentials = data.credentials;
+
+    _quizList = data.quizItems;
+    print('Hello World');
+    _title = credentials.title;
+    _description = credentials.description;
+
+    _stage = int.parse(credentials.stage.toString());
+    _semester = int.parse(credentials.semester);
+    _draftStoreIndex = data.storeIndex;
     updateTopicList();
-    updateTopic(credentials['topic']);
-    _quizList = quizItems as List<QuizEntity>;
+    updateTopic(credentials.topic);
+
     for (int i = 0; i < _quizList.length; i++) {
-      updateQuizViewMode(i);
+      _quizList[i].inReviewMode = true;
     }
     notifyListeners();
   }
@@ -272,54 +495,51 @@ class QuizUploadingState extends StateProvider with ChangeNotifier {
   }
 
 // upload new quiz
-  Future<ContractResponse> upload() async {
-    final bool isConnected = await NetWorkInfo.checkConnection();
-    if (!isConnected) {
-      return NoInternetConnection();
-    }
-    String accountType = locator<DialogService>().profilePageState.userData.commonFields.account_type;
-    Map<String, dynamic> _body = {};
-    _body.addAll(getCredentials());
+  Future<void> upload(BuildContext context) async {
+    QuizCredentials credentials = getCredentials();
+    var payload = Map<String, dynamic>();
+    payload['questions'] = _quizList.map((e) => e.toJSON()).toList();
+    payload.addAll(credentials.toJSON());
 
-    if (accountType == 'uniteachers' || accountType == 'unistudents') {
-      _body['college'] = locator<DialogService>().profilePageState.userData.college;
-    } else {
-      // Hello World
-    }
-    _body['quizItems'] = _quizList.map((quiz) => quiz.toJSON()).toList();
-    final String _url = Api.getSuitableUrl(accountType: accountType) + '/upload-new-quiz';
-    Map<String, String> _headers = {'authorization': await CachingServices.getField(key: 'token'), 'content-type': 'application/json', 'Accept': 'application/json'};
+    print('================================================');
+    payload['upload_type'] = 'quizes';
+    print('================================================');
+    print(payload);
 
-    http.Response response;
-    try {
-      response = await http.post(Uri.encodeFull(_url), body: _body, headers: _headers).timeout(Duration(seconds: 20));
-
-      switch (response.statusCode) {
-        case 201:
-          return Success201(message: 'Your quiz uploaded successfully');
-          break;
-
-        case 500:
-          return InternalServerError();
-          break;
-
-        case 403:
-          return ForbiddenAccess(message: 'You are not authorized user');
-          break;
-
-        default:
-          return NewBugException(message: 'Unhandled statusCode ${response.statusCode}');
+    locator<DialogService>().showDialogOfUploading();
+    ContractResponse contractResponse = await HttpMethods.post(body: payload, url: Api.UPLOAD_NEW_MATERIAL);
+    locator<DialogService>().completeAndCloseDialog(null);
+    if (contractResponse is Success) {
+      var responseBody = json.decode(contractResponse.message);
+      for (int i = 0; i < responseBody['data']['list_of_IDs'].length; i++) {
+        _quizList[i].id = responseBody['data']['list_of_IDs'][i].toString();
       }
-    } on TimeoutException {
-      return ServerNotResponding();
-    } catch (err) {
-      return NewBugException(message: err.toString());
+      QuizDraftEntity quizDraftEntity = new QuizDraftEntity(
+        storeIndex: null,
+        quizItems: _quizList,
+        credentials: credentials,
+        id: responseBody['_id'],
+      );
+      await QuizAccessObject().saveUploadedQuiz(quizDraftEntity.toJSON());
+      if (_fromDrafts) {
+        await QuizAccessObject().removeDrftAt(index: _draftStoreIndex);
+        locator<DialogService>().profilePageState.updateQuizDraftsCount();
+      }
+      Navigator.of(context).pop();
+      locator<DialogService>().showDialogOfSuccess(message: 'quiz uploaded Successfully');
+    } else {
+      print(contractResponse.message);
+      locator<DialogService>().showDialogOfFailure(message: 'Failed to upload quiz, try again');
     }
   }
 
   @override
   void dispose() {
     print('quiz uploader satate provider has been disposed successfully');
+    locator<DialogService>().quizUploadingState = null;
+    scrollController.removeListener(_fabAppearanceListener);
+    scrollController.dispose();
+    pageController.dispose();
     super.dispose();
   }
 }

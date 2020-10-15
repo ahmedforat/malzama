@@ -7,14 +7,11 @@ import 'add_new_comment_widget.dart';
 import 'update_already_existing_comment.dart';
 
 class BottomSheetWidget extends StatelessWidget {
-  final bool isForReply;
 
-  BottomSheetWidget({bool isForReply}) : this.isForReply = isForReply ?? false;
 
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    AddOrEditCommentWidgetStateProvider commentStateProvider = Provider.of<AddOrEditCommentWidgetStateProvider>(context, listen: false);
     return Selector<AddOrEditCommentWidgetStateProvider, bool>(
       selector: (context, stateProvider) => stateProvider.isCommentUpdating,
       builder: (context, isUpdatingComment, _) {

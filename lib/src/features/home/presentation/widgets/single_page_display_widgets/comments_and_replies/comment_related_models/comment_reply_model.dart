@@ -19,6 +19,7 @@ class CommentReply {
   String id;
   bool breakable;
   bool breaked;
+
   CommentStatus commentStatus;
 
   CommentReply({
@@ -36,6 +37,7 @@ class CommentReply {
         this.id = map['_id'],
         this.breakable = shouldBeBreaked(map['content']),
         this.breaked = shouldBeBreaked(map['content']);
+
 
   Map<String, dynamic> toJSON() => {
         'reply_author': author.toJSON(),

@@ -45,7 +45,7 @@ class UpperUplaodingBanner extends StatelessWidget {
               icon: Icons.playlist_add_check,
               icon2: false,
               text: 'Upload MCQs',
-              onPressed: () => _handleOnPressed(context: context,materialType:'quiz'),
+              onPressed: () => Navigator.of(context).pushNamed(RouteNames.UPLOAD_NEW_QUIZ),
             ),
           ),
         ],

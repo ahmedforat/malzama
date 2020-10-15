@@ -39,9 +39,10 @@ class QuizReviewBuilder extends StatelessWidget {
                     child: FlatButton(
                       child: Icon(Icons.delete),
                       onPressed: () {
-                        uploadingState.quizList.removeAt(pos);
-                        uploadingState.setState();
+                        print('deleting quiz item');
+                        uploadingState.removeQuizItemAt(pos);
                       },
+
                     ),
                   ),
                 ],
@@ -187,7 +188,7 @@ class QuizReviewBuilder extends StatelessWidget {
                         child: Container(
                           constraints: BoxConstraints(maxHeight: ScreenUtil().setHeight(250)),
                           child: TextFormField(
-                            initialValue: uploadingState.quizList[pos].explanation,
+                            initialValue: uploadingState.quizList[pos].explain,
                             maxLines: null,
                             decoration: InputDecoration(
                               hintText: 'Explanation (optional)',
@@ -197,7 +198,7 @@ class QuizReviewBuilder extends StatelessWidget {
                             ),
                             onChanged: (val) {
                               if (val.isNotEmpty) {
-                                uploadingState.quizList[pos].explanation = val;
+                                uploadingState.quizList[pos].explain = val;
                               }
                             },
                           ),

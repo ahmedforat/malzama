@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:malzama/main.dart';
+import 'package:malzama/src/core/Navigator/routes_names.dart';
+import 'package:malzama/src/features/home/models/material_author.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/comment_related_models/comment_model.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/comment_related_models/comment_rating_model.dart';
 import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/comment_status_widget.dart';
 import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/functions/replies_functions.dart';
 import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/replies/reply_display_page.dart';
+import 'package:malzama/src/features/home/presentation/widgets/single_page_display_widgets/comments_and_replies/replies/widgets/display_rators_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../core/general_models/customDate.dart';
@@ -28,7 +34,7 @@ class CommentWidget extends StatelessWidget {
         this.mainComment = mainComment ?? false;
 
   /// this method is called whenever the user press the delete option in the modal sheet of the comment editing options
-  _commentOnDelete(BuildContext context, Map<String, String> res, BaseStateProvider baseStateProvider) async {
+  _commentOnDelete(BuildContext context, String res, BaseStateProvider baseStateProvider) async {
     print('deleting ......................');
 
     AddOrEditCommentWidgetStateProvider addOrEditCommentWidgetStateProvider =
@@ -36,29 +42,38 @@ class CommentWidget extends StatelessWidget {
     await Future.delayed(Duration(milliseconds: 300));
     addOrEditCommentWidgetStateProvider.removeFocus();
     CommentStateProvider commentStateProvider = Provider.of<CommentStateProvider>(context, listen: false);
-    if (res['value'] != null) {
+    if (res != null) {
       if (commentStateProvider.replyIdToBeDeleted != null) {
         commentStateProvider.comments[commentStateProvider.repliesRelevantCommentPos].replies
             .removeWhere((reply) => reply.id == commentStateProvider.replyIdToBeDeleted);
+
+        final int specificCommentPos = mainComment ? commentStateProvider.repliesRelevantCommentPos : commentPos;
+        commentStateProvider.comments[specificCommentPos].hasReplies = commentStateProvider.comments[specificCommentPos].replies.length > 0;
         commentStateProvider.setState();
       } else {
-        final String currentCommentID = commentStateProvider.comments[commentPos].id;
+        print('we are deleting a comment');
+
+        // close the replies display page
+
+        //refresh the page
+        if (mainComment) {
+          print('before closing');
+          commentStateProvider.closeRepliesDisplayPage();
+          print('after closing');
+        }
+        final String currentCommentID = mainComment
+            ? commentStateProvider.comments[commentStateProvider.repliesRelevantCommentPos].id
+            : commentStateProvider.comments[commentPos].id;
+        commentStateProvider.comments.removeAt(mainComment ? commentStateProvider.repliesRelevantCommentPos : commentPos);
         baseStateProvider.materialItems[commentStateProvider.currentMaterialPos].comments
           ..removeWhere((comment) => comment == currentCommentID);
 
-        // close the replies display page
-        if (mainComment) {
-          commentStateProvider.closeRepliesDisplayPage();
-        }
-
-        // refresh the page
+        commentStateProvider.setState();
         baseStateProvider.setState();
-        commentStateProvider.removeCommentAt(commentPos);
       }
     }
 
-    final String message =
-        res['value'] == null ? 'failed to delete ${commentStateProvider.replyIdToBeUpdated != null ? 'reply' : 'comment'}' : res['value'];
+    final String message = res == null ? 'failed to delete ${commentStateProvider.replyIdToBeUpdated != null ? 'reply' : 'comment'}' : res;
     print(message);
 
     Scaffold.of(context).showSnackBar(SnackBar(
@@ -79,21 +94,51 @@ class CommentWidget extends StatelessWidget {
       commentStateProvider.replyIdToBeUpdated =
           commentStateProvider.comments[commentStateProvider.repliesRelevantCommentPos].replies[replyPos].id;
       commentStateProvider.commentIdToBeUpdated = commentStateProvider.comments[commentStateProvider.repliesRelevantCommentPos].id;
-    }else {
+    } else {
       addOrEditCommentWidgetStateProvider.textController.text = commentStateProvider.comments[commentPos].content;
       await Future.delayed(Duration(milliseconds: 150));
       addOrEditCommentWidgetStateProvider.setIsCommentUpdatingTo(true);
       commentStateProvider.commentIdToBeUpdated = commentStateProvider.comments[commentPos].id;
       commentStateProvider.replyIdToBeUpdated = null;
     }
-    await Future.delayed(Duration(milliseconds: 150));
+    await Future.delayed(Duration(milliseconds: 400));
     addOrEditCommentWidgetStateProvider.focusNode.requestFocus();
+  }
+
+  /// this method called when the like or dislike button gets clicked
+  _commentOnRating(
+      BuildContext context, CommentStateProvider commentStateProvider, UserInfoStateProvider userInfoStateProvider, bool rating) {
+    final BaseStateProvider baseStateProvider = commentStateProvider.isVideo
+        ? getVideosPageStateProvider(context: context, listen: false)
+        : getHomePageStateProvider(context: context, listen: false);
+
+    MaterialAuthor materialAuthor = MaterialAuthor.fromJSON(userInfoStateProvider.userData);
+    final int commentPosition = mainComment ? commentStateProvider.repliesRelevantCommentPos : commentPos;
+    Comment currentComment = commentStateProvider.comments[commentPosition];
+    CommentRating myRating =
+        currentComment.ratings.firstWhere((rating) => rating.author.id == userInfoStateProvider.userData['_id'], orElse: () => null);
+    commentStateProvider.setRatingOfCommentTo(
+      commentPos: commentPosition,
+      myId: userInfoStateProvider.userData['_id'],
+      rating: rating,
+      comment: currentComment,
+      myRating: myRating,
+      material: baseStateProvider,
+      materialAuthor: materialAuthor,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     CommentStateProvider commentStateProvider = Provider.of<CommentStateProvider>(context, listen: false);
     UserInfoStateProvider userInfoStateProvider = Provider.of<UserInfoStateProvider>(context, listen: false);
+    final specificCommentPos = mainComment ? commentStateProvider.repliesRelevantCommentPos : commentPos;
+    // final bool hasReplies = commentStateProvider.comments[commentPos].replies != null &&
+    //     !withinReply &&
+    //     commentStateProvider.comments[commentPos].replies.length != 0;
+    //
+    // final ratings = commentStateProvider.comments[mainComment ? commentStateProvider.repliesRelevantCommentPos : commentPos].ratings;
+    // final bool hasRatings = ratings != null && ratings.length > 0;
     final String commentAuthorID = withinReply && !mainComment
         ? commentStateProvider.comments[commentPos].replies[replyPos].author.id
         : commentStateProvider.comments[commentPos].author.id;
@@ -154,6 +199,8 @@ class CommentWidget extends StatelessWidget {
                               size: ScreenUtil().setSp(50),
                             ),
                             onPressed: () async {
+                              addOrEditCommentWidgetStateProvider.resetWidget();
+
                               final BaseStateProvider baseStateProvider = commentStateProvider.isVideo
                                   ? getVideosPageStateProvider(context: context, listen: false)
                                   : getHomePageStateProvider(context: context, listen: false);
@@ -166,10 +213,12 @@ class CommentWidget extends StatelessWidget {
                                 builder: (_) => CommentOptionsBottomSheet(
                                   onEdit: () {
                                     print('Editing');
-                                    Navigator.of(context, rootNavigator: true).pop({'from': 'onEdit', 'value': null});
+                                    Navigator.of(context, rootNavigator: true).pop();
+                                    _commentOnEdit(context);
                                   },
                                   onDelete: () async {
-                                    final String commentId = commentStateProvider.comments[commentPos].id;
+                                    final String commentId = commentStateProvider
+                                        .comments[mainComment ? commentStateProvider.repliesRelevantCommentPos : commentPos].id;
 
                                     final BaseUploadingModel materialInfo =
                                         baseStateProvider.materialItems[commentStateProvider.currentMaterialPos];
@@ -180,33 +229,28 @@ class CommentWidget extends StatelessWidget {
                                     if (commentStateProvider.insideRepliesPage && !mainComment) {
                                       commentStateProvider.replyIdToBeDeleted = commentStateProvider
                                           .comments[commentStateProvider.repliesRelevantCommentPos].replies[replyPos].id;
-                                      res = await commentStateProvider.deleteReply(
-                                        baseUploadingModel: materialInfo,
-                                        commentID: commentId,
-                                        replyID: commentStateProvider
-                                            .comments[commentStateProvider.repliesRelevantCommentPos].replies[replyPos].id,
-                                      );
+                                      commentStateProvider
+                                          .deleteReply(
+                                            baseUploadingModel: materialInfo,
+                                            commentID: commentId,
+                                            replyID: commentStateProvider
+                                                .comments[commentStateProvider.repliesRelevantCommentPos].replies[replyPos].id,
+                                          )
+                                          .then((value) => _commentOnDelete(context, value, baseStateProvider));
                                     } else {
                                       /// deleting a entire comment
                                       commentStateProvider.replyIdToBeDeleted = null;
-                                      res = await commentStateProvider.deleteComment(comment_id: commentId, materialInfo: materialInfo);
+                                      commentStateProvider
+                                          .deleteComment(comment_id: commentId, materialInfo: materialInfo)
+                                          .then((value) => _commentOnDelete(context, value, baseStateProvider));
                                     }
-                                    Navigator.of(context, rootNavigator: true).pop({'from': 'onDelete', 'value': res});
+                                    Navigator.of(context, rootNavigator: true).pop();
                                   },
                                 ),
                               );
 
                               if (!userInfoProvider.isBottomNavBarVisible) {
                                 userInfoProvider.setBottomNavBarVisibilityTo(true);
-                              }
-                              if (res != null && res['from'] == 'onDelete') {
-                                _commentOnDelete(context, res, baseStateProvider);
-                              } else if (res != null && res['from'] == 'onEdit') {
-                                _commentOnEdit(context);
-                              } else {
-                                if (addOrEditCommentWidgetStateProvider.focusNode.hasFocus) {
-                                  addOrEditCommentWidgetStateProvider.focusNode.unfocus();
-                                }
                               }
                             },
                           ),
@@ -294,79 +338,161 @@ class CommentWidget extends StatelessWidget {
               ),
             ),
           ),
-          if (commentStateProvider.comments[commentPos].replies != null &&
-              !withinReply &&
-              commentStateProvider.comments[commentPos].replies.length != 0)
-            GestureDetector(
-              onTap: () {
-                commentStateProvider.displayRepliesOfTheComment(commentPos);
+          if (!withinReply || mainComment)
+            Selector<CommentStateProvider, List<dynamic>>(
+              selector: (context, stateProvider) {
+                final specificCommentPos = mainComment ? stateProvider.repliesRelevantCommentPos : commentPos;
+                return [
+                  stateProvider.comments[specificCommentPos].hasReplies,
+                  stateProvider.comments[specificCommentPos].hasRatings,
+                  stateProvider.comments[specificCommentPos].replies.length,
+                ];
               },
-              child: Selector<CommentStateProvider, int>(
-                selector: (context, stateProvider) => stateProvider.comments[commentPos].replies.length,
-                builder: (context, repliesCount, _) => Padding(
-                  padding: EdgeInsets.only(left: ScreenUtil().setSp(220)),
-                  child: Text(
-                    '$repliesCount Replies',
-                    style: TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
+              builder: (context, dependencies, child) => !dependencies[0] && !dependencies[1]
+                  ? Container()
+                  : Container(
+                      padding: EdgeInsets.only(left: mainComment ? 50 : 80),
+                      child: Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(width: ScreenUtil().setWidth(50)),
+                            if (dependencies[0] && !mainComment)
+                              GestureDetector(
+                                onTap: () {
+                                  addOrEditCommentWidgetStateProvider.resetWidget();
+                                  commentStateProvider.displayRepliesOfTheComment(commentPos);
+                                },
+                                child: Selector<CommentStateProvider, int>(
+                                  selector: (context, stateProvider) => stateProvider.comments[commentPos].replies.length,
+                                  builder: (context, repliesCount, _) => Text(
+                                    '$repliesCount Replies',
+                                    style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (dependencies[0])
+                              SizedBox(
+                                width: ScreenUtil().setWidth(90),
+                              ),
+                            if (dependencies[1])
+                              InkWell(
+                                child: Selector<CommentStateProvider, int>(
+                                  selector: (context, stateProvider) => stateProvider.comments[specificCommentPos].ratings.length,
+                                  builder: (context, ratingsCount, child) => Text(
+                                    '$ratingsCount ratings',
+                                    style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  List<CommentRating> commentRatings = commentStateProvider.comments[specificCommentPos].ratings;
+                                  print(commentRatings.length);
+                                  commentRatings.forEach((element) {
+                                    print(element.toJSON());
+                                  });
+                                  userInfoStateProvider.setBottomNavBarVisibilityTo(false);
+                                  showModalBottomSheet(
+                                    backgroundColor: Colors.transparent,
+                                    enableDrag: true,
+                                    isScrollControlled: true,
+                                    useRootNavigator: false,
+                                    context: context,
+                                    builder: (_) => DisplayRatorsPage(ratingsList: commentRatings),
+                                  ).whenComplete(
+                                    () => userInfoStateProvider.setBottomNavBarVisibilityTo(true),
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
             ),
-          if (commentStateProvider.comments[commentPos].replies != null &&
-              !withinReply &&
-              commentStateProvider.comments[commentPos].replies.length != 0)
+          if (commentStateProvider.comments[specificCommentPos].hasRatings || commentStateProvider.comments[specificCommentPos].hasReplies)
             SizedBox(
               height: ScreenUtil().setHeight(40),
             ),
-          Row(
-            mainAxisAlignment: !withinReply ? MainAxisAlignment.spaceAround : MainAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  SizedBox(
-                    width: ScreenUtil().setWidth(withinReply ? 200 : 35),
+          if (!withinReply || mainComment)
+            Row(
+              mainAxisAlignment: !withinReply ? MainAxisAlignment.spaceAround : MainAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    SizedBox(
+                      width: ScreenUtil().setWidth(withinReply ? 200 : 35),
+                    ),
+                    Selector<CommentStateProvider, List<dynamic>>(
+                      selector: (context, stateProvider) => [
+                        stateProvider.comments[commentPos].ratings.length,
+                        stateProvider.comments[commentPos].ratings
+                            .firstWhere((rating) => rating.author.id == userInfoStateProvider.userData['_id'],
+                                orElse: () => CommentRating())
+                            .ratingType,
+                      ],
+                      builder: (context, dependencies, child) => GestureDetector(
+                        onTap: () => _commentOnRating(context, commentStateProvider, userInfoStateProvider, true),
+                        child: Icon(
+                          FontAwesomeIcons.thumbsUp,
+                          color: dependencies[0] > 0 && dependencies[1] != null && dependencies[1] ? Colors.blueAccent : Colors.black,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: ScreenUtil().setWidth(15),
+                    ),
+                    Selector<CommentStateProvider, int>(
+                      selector: (context, stateProvider) =>
+                          stateProvider.comments[commentPos].ratings.where((rating) => rating.ratingType).toList().length,
+                      builder: (context, likesCount, _) => Text('$likesCount'),
+                    ),
+                    SizedBox(
+                      width: ScreenUtil().setWidth(15),
+                    ),
+                    Selector<CommentStateProvider, List<dynamic>>(
+                      selector: (context, stateProvider) => [
+                        stateProvider.comments[commentPos].ratings.length,
+                        stateProvider.comments[commentPos].ratings
+                            .firstWhere((rating) => rating.author.id == userInfoStateProvider.userData['_id'],
+                                orElse: () => CommentRating())
+                            .ratingType,
+                      ],
+                      builder: (context, dependencies, child) => GestureDetector(
+                        onTap: () => _commentOnRating(context, commentStateProvider, userInfoStateProvider, false),
+                        child: Icon(
+                          FontAwesomeIcons.thumbsDown,
+                          color: dependencies[0] > 0 && dependencies[1] != null && !dependencies[1] ? Colors.red : Colors.black,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: ScreenUtil().setWidth(15),
+                    ),
+                    Selector<CommentStateProvider, int>(
+                      selector: (context, stateProvider) =>
+                          stateProvider.comments[commentPos].ratings.where((rating) => !rating.ratingType).toList().length,
+                      builder: (context, dislikesCount, _) => Text('$dislikesCount'),
+                    ),
+                  ],
+                ),
+                if (!withinReply)
+                  InkWell(
+                    child: Text('Reply'),
+                    onTap: () {
+                      print('we must open the replies');
+                      addOrEditCommentWidgetStateProvider.resetWidget();
+                      commentStateProvider.displayRepliesOfTheComment(commentPos);
+                    },
                   ),
-                  Icon(
-                    Icons.thumb_up,
-                    color: Colors.blueAccent,
-                  ),
-                  SizedBox(
-                    width: ScreenUtil().setWidth(15),
-                  ),
-                  Selector<CommentStateProvider, int>(
-                    selector: (context, stateProvider) =>
-                        stateProvider.comments[commentPos].ratings.where((rating) => rating.ratingType).toList().length,
-                    builder: (context, likesCount, _) => Text('$likesCount'),
-                  ),
-                  SizedBox(
-                    width: ScreenUtil().setWidth(15),
-                  ),
-                  Icon(
-                    Icons.thumb_down,
-                    color: Colors.redAccent,
-                  ),
-                  SizedBox(
-                    width: ScreenUtil().setWidth(15),
-                  ),
-                  Selector<CommentStateProvider, int>(
-                    selector: (context, stateProvider) =>
-                        stateProvider.comments[commentPos].ratings.where((rating) => !rating.ratingType).toList().length,
-                    builder: (context, dislikesCount, _) => Text('$dislikesCount'),
-                  ),
-                ],
-              ),
-              if (!withinReply)
-                InkWell(
-                  child: Text('Reply'),
-                  onTap: () {
-                    print('we must open the replies');
-                    commentStateProvider.displayRepliesOfTheComment(commentPos);
-                  },
-                )
-            ],
-          )
+              ],
+            )
         ],
       ),
     );

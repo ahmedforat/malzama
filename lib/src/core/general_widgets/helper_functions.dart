@@ -1,10 +1,35 @@
-import 'package:malzama/src/core/platform/services/file_system_services.dart';
+
 import 'dart:async';
+import 'package:malzama/src/core/platform/services/file_system_services.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
+
+
 class HelperFucntions {
   static bool isAcademic(String account_type) {
     return account_type != 'schteachers' && account_type != 'schstudents';
   }
 
+
+  static bool isTeacher(ProfilePageState profilePageState) {
+    String account_type = profilePageState.userData.commonFields.account_type;
+    return account_type == 'uniteachers' || account_type == 'schteachers';
+  }
+
+  static bool isPharmacyOrMedicine(ProfilePageState profilePageState) {
+    String account_type = profilePageState.userData.commonFields.account_type;
+    if (account_type != 'uniteachers' && account_type != 'unistudents') {
+      return false;
+    }
+    RegExp pharmacyPattern = new RegExp(r'صيدلة');
+    RegExp dentistPattern = new RegExp(r'سنان');
+    RegExp analysisPattern = new RegExp(r'مرضية');
+
+    String college = profilePageState.userData.college;
+
+    bool isMedicine = !dentistPattern.hasMatch(college) && !analysisPattern.hasMatch(college) && !pharmacyPattern.hasMatch(college);
+
+    return (account_type == 'uniteachers' || account_type == 'unistudents') && (pharmacyPattern.hasMatch(college) || isMedicine);
+  }
 
   static Future<Map<String,dynamic>> getAuthorPopulatedData()async{
     var data = await FileSystemServices.getUserData();
@@ -27,13 +52,6 @@ class HelperFucntions {
   // get the tags map object to be sent as tags to the OneSignal Notifications Service
   static Future<Map<String, dynamic>> getUserTags() async {
     var data = await FileSystemServices.getUserData();
-
-    String name = 'sasdads';
-    if(name == 'Karrar'){
-      print('Hello World');
-    }else{
-      print('this is the end of the world "apocalypse"');
-    }
 
     Map<String, dynamic> tags;
     if (data != null && data != false) {

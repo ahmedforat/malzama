@@ -10,6 +10,7 @@ class QuizWidget extends StatefulWidget {
 class _QuizWidgetState extends State<QuizWidget> {
   PageController _pageController;
   double currentPage;
+
   @override
   void initState() {
     super.initState();
@@ -32,9 +33,7 @@ class _QuizWidgetState extends State<QuizWidget> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           print('WWWWWWWWWWWWWWWWWWWWWW'.length);
-          print(
-              'eater effect than most other antimuscarinic agents?'
-                  .length);
+          print('eater effect than most other antimuscarinic agents?'.length);
         },
       ),
       backgroundColor: Colors.grey[200],
@@ -49,9 +48,7 @@ class _QuizWidgetState extends State<QuizWidget> {
               width: double.infinity,
               height: ScreenUtil().setHeight(300),
               child: Text('Pharmacology'),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(ScreenUtil().setSp(20))),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(ScreenUtil().setSp(20))),
             ),
             Expanded(
               child: Container(
@@ -85,9 +82,7 @@ class _QuizWidgetState extends State<QuizWidget> {
                               : () {
                                   print(_pageController.page);
                                   if (_pageController.page > 0.0) {
-                                    _pageController.previousPage(
-                                        duration: Duration(milliseconds: 400),
-                                        curve: Curves.bounceInOut);
+                                    _pageController.previousPage(duration: Duration(milliseconds: 400), curve: Curves.bounceInOut);
                                   }
                                 },
                           icon: Icon(Icons.arrow_back),
@@ -98,9 +93,7 @@ class _QuizWidgetState extends State<QuizWidget> {
                             ? null
                             : () {
                                 print(_pageController.page);
-                                _pageController.nextPage(
-                                    duration: Duration(milliseconds: 400),
-                                    curve: Curves.bounceInOut);
+                                _pageController.nextPage(duration: Duration(milliseconds: 400), curve: Curves.bounceInOut);
                               },
                         icon: Text('Next'),
                         label: Icon(Icons.arrow_forward),
@@ -123,68 +116,71 @@ class QuizBody extends StatefulWidget {
 
 class _QuizBodyState extends State<QuizBody> {
   bool isExpanded = false;
-  
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
     String text = 'Ophthalmic solutions should be formulated to include which of the following?';
-    String mainText = '$text $text $text $text Ophthalmic solutions should be formulated to include which ' ;
+    String mainText = '$text $text $text $text Ophthalmic solutions should be formulated to include which ';
     return Container(
       color: Colors.white,
       padding: EdgeInsets.all(ScreenUtil().setSp(10)),
       child: SingleChildScrollView(
-              child: Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Container(
               padding: EdgeInsets.all(ScreenUtil().setSp(10)),
-                //color: Colors.yellowAccent,
-                constraints:  isExpanded || mainText.length < 360? BoxConstraints() : BoxConstraints(
-                  maxHeight: ScreenUtil().setHeight( 420),
-                  minHeight: ScreenUtil().setHeight(420),
+              //color: Colors.yellowAccent,
+              constraints: isExpanded || mainText.length < 360
+                  ? BoxConstraints()
+                  : BoxConstraints(
+                      maxHeight: ScreenUtil().setHeight(420),
+                      minHeight: ScreenUtil().setHeight(420),
+                    ),
+              child: Text(
+                mainText,
+                maxLines: isExpanded ? 1000 : 12,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: ScreenUtil().setSp(
+                    45 ?? References.getProperFontSize('The most common disintergrator in compressed tablets is'.length),
+                  ),
                 ),
-                child: Text(
-                     mainText,
-                     maxLines: isExpanded ? 1000 : 12,
-                    textAlign: TextAlign.center, 
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: ScreenUtil()
-              .setSp(45??References.getProperFontSize('The most common disintergrator in compressed tablets is'.length))),
-                  ), 
               ),
-            
-            if(mainText.length > 360) Align(
-              child: FlatButton(onPressed: (){
-              setState(() {
-                isExpanded = !isExpanded;
-              });
-              }, child: Text(isExpanded ?'See less':'See more')),
-              alignment: Alignment.centerRight,
             ),
-            SizedBox( 
+            if (mainText.length > 360)
+              Align(
+                child: FlatButton(
+                  onPressed: () {
+                    setState(() {
+                      isExpanded = !isExpanded;
+                    });
+                  },
+                  child: Text(isExpanded ? 'See less' : 'See more'),
+                ),
+                alignment: Alignment.centerRight,
+              ),
+            SizedBox(
               height: ScreenUtil().setHeight(50),
             ),
             ListTile(
-              leading: selectingWidget(
-                  ScreenUtil().setWidth(50), ScreenUtil().setHeight(50)),
+              leading: selectingWidget(ScreenUtil().setWidth(50), ScreenUtil().setHeight(50)),
               title: Text('Nexium'),
             ),
             ListTile(
-              leading: selectingWidget(
-                  ScreenUtil().setWidth(50), ScreenUtil().setHeight(50)),
+              leading: selectingWidget(ScreenUtil().setWidth(50), ScreenUtil().setHeight(50)),
               title: Text('Nexium'),
             ),
             ListTile(
-              leading: selectingWidget(
-                  ScreenUtil().setWidth(50), ScreenUtil().setHeight(50)),
+              leading: selectingWidget(ScreenUtil().setWidth(50), ScreenUtil().setHeight(50)),
               title: Text('Nexium'),
             ),
             ListTile(
-              leading: selectingWidget(
-                  ScreenUtil().setWidth(50), ScreenUtil().setHeight(50)),
+              leading: selectingWidget(ScreenUtil().setWidth(50), ScreenUtil().setHeight(50)),
               title: Text('Nexium'),
             ),
             SizedBox(
@@ -200,14 +196,16 @@ class _QuizBodyState extends State<QuizBody> {
         width: width,
         height: height,
         decoration: BoxDecoration(
-            shape: BoxShape.circle, border: Border.all(color: Colors.black)),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.black,
+          ),
+        ),
       );
 
-      BoxConstraints getBoxConstraints(bool isExpanded,String text,double minHeight,double maxHeight){
-        if(isExpanded){
-          return BoxConstraints();
-        }else{
-
-        }
-      }
+  BoxConstraints getBoxConstraints(bool isExpanded, String text, double minHeight, double maxHeight) {
+    if (isExpanded) {
+      return BoxConstraints();
+    } else {}
+  }
 }

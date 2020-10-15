@@ -6,6 +6,7 @@ import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pa
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/materialPage/my_saved_materials.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/materialPage/upper_uploading_banner.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/drafts_icon_widget.dart';
+import 'package:malzama/src/features/home/presentation/widgets/pages_navigators/material_navigator/widgets/quizes_widget.dart';
 import 'package:provider/provider.dart';
 import 'my_uploaded_material.dart';
 import '../../../state_provider/user_info_provider.dart';
@@ -18,6 +19,7 @@ class MyMaterialPage extends StatelessWidget {
     SizedBox(height: ScreenUtil().setHeight(50)),
     DraftIconWidget(),
     SizedBox(height: ScreenUtil().setHeight(50)),
+    Quizes(),
   ];
 
   @override

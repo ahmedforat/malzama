@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:malzama/src/core/Navigator/navigation_service.dart';
 import 'package:malzama/src/core/api/contract_response.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 import 'package:malzama/src/features/verify_your_email/presentation/validate_your_account_msg.dart';
 import 'package:provider/provider.dart';
 
@@ -124,8 +125,8 @@ class _UploadingLectureBodyForUniversitiesState extends State<UploadingLectureBo
                         SizedBox(
                           height: ScreenUtil().setHeight(30),
                         ),
-                      if (isPharmacyOrMedicine(dialogService.profilePageState)) QuizSemesterWidget<CollegeUploadingState>(),
-                      if (isPharmacyOrMedicine(dialogService.profilePageState))
+                      if (HelperFucntions.isPharmacyOrMedicine(dialogService.profilePageState)) QuizSemesterWidget<CollegeUploadingState>(),
+                      if (HelperFucntions.isPharmacyOrMedicine(dialogService.profilePageState))
                         SizedBox(
                           height: ScreenUtil().setHeight(50),
                         ),
