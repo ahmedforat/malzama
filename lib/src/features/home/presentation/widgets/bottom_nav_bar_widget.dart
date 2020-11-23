@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../state_provider/notifcation_state_provider.dart';
@@ -20,7 +18,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
     ScreenUtil.init(context);
     return Container(
       height: ScreenUtil().setHeight(110),
-      color: Colors.red,
+      //color: Colors.red,
       child: TabBar(
         onTap: (index) async {
           if (index == 1) {
@@ -33,21 +31,21 @@ class BottomNavigationBarWidget extends StatelessWidget {
           Tab(
             icon: Icon(
               Icons.home,
-              color: Colors.black,
+              color: Colors.black54,
               size: ScreenUtil().setSp(80),
             ),
           ),
           Tab(
             icon: Icon(
               Icons.library_books,
-              color: Colors.black,
+              color: Colors.black54,
               size: ScreenUtil().setSp(80),
             ),
           ),
           Tab(
             icon: Icon(
               Icons.mail,
-              color: Colors.black,
+              color: Colors.black54,
               size: ScreenUtil().setSp(80),
             ),
           ),
@@ -64,7 +62,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                     Positioned.fill(
                       child: Icon(
                         Icons.notifications,
-                        color: Colors.black,
+                        color: Colors.black54,
                         size: ScreenUtil().setSp(80),
                       ),
                     ),
@@ -96,7 +94,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
           Tab(
             icon: Icon(
               Icons.account_circle,
-              color: Colors.black,
+              color: Colors.black54,
               size: ScreenUtil().setSp(80),
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:malzama/src/core/general_models/notification.dart';
+
+import '../../../../core/general_models/notification.dart';
 
 class NotificationStateProvider with ChangeNotifier{
 
@@ -24,7 +25,7 @@ class NotificationStateProvider with ChangeNotifier{
   void setNotificationCountToZero(){
     if(_notOpenedNotificationsCount != 0){
       _notOpenedNotificationsCount = 0;
-      notifyListeners();
+      notifyMyListeners();
       print('not opened notifications is now Zero');
     }
   }
@@ -35,8 +36,8 @@ class NotificationStateProvider with ChangeNotifier{
 
       _notificationsList.add(notification);
       _notOpenedNotificationsCount += 1;
-      notifyListeners();
-      print('added to notification list and notifyListeners was called');
+      notifyMyListeners();
+      print('added to notification list and notifyMyListeners() was called');
     }
   }
 
@@ -46,7 +47,7 @@ class NotificationStateProvider with ChangeNotifier{
   void setAsOpenedByIndex(int index){
     _notificationsList.elementAt(index).isOpened = true;
     _notOpenedNotificationsCount =  _notificationsList.where((element) => !element.isOpened).length;
-    notifyListeners();
+    notifyMyListeners();
     print('Notificaiton has beeen set as opened');
   }
 
@@ -58,7 +59,20 @@ class NotificationStateProvider with ChangeNotifier{
   void setAsOpenedByID(String id){
     _notificationsList.firstWhere((notification) => notification.id.compareTo(id) == 0).isOpened = true;
     _notOpenedNotificationsCount -= 1 ;
-    notifyListeners();
+    notifyMyListeners();
     print('Notificaiton has beeen set as opened');
+  }
+
+  bool _isDisposed = false;
+  void notifyMyListeners(){
+    if(!_isDisposed){
+      notifyListeners();
+    }
+  }
+  
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }

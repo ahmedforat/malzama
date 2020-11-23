@@ -1,43 +1,39 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:malzama/src/core/platform/local_database/access_objects/quiz_access_object.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../../core/platform/services/caching_services.dart';
 import '../../../../core/platform/services/dialog_services/dialog_service.dart';
 import '../../../../core/platform/services/dialog_services/service_locator.dart';
 import '../../../../core/platform/services/file_system_services.dart';
-import '../../../../core/references/references.dart';
 
 class ProfilePageState with ChangeNotifier {
-  @override
-  void dispose() {
-    print('disposing ProfilePageState');
-    super.dispose();
-  }
-
   File _lectureToUpload;
+
   File get lectureToUpload => _lectureToUpload;
-  void updateLectureToUpload(File update){
-    if(update != null){
+
+  void updateLectureToUpload(File update) {
+    if (update != null) {
       _lectureToUpload = update;
-      notifyListeners();
+      notifyMyListeners();
     }
   }
+
   String target;
 
   DialogService _dialogService;
   dynamic _userData;
 
   dynamic get userData => _userData;
-  void updateUserData(update){
-    if(update != null){
-      _userData = update;
-      notifyListeners();
-    }
 
-  } 
+  void updateUserData(update) {
+    if (update != null) {
+      _userData = update;
+      notifyMyListeners();
+    }
+  }
+
   bool _dataLoaded = false;
 
   bool get dataLoaded => _dataLoaded;
@@ -59,35 +55,24 @@ class ProfilePageState with ChangeNotifier {
     print('constructuing new value');
     _onPageLaunch();
     _loadUserData();
-    updateQuizDraftsCount();
+
   }
 
- // this is special for the drafts of quiz just to get the numbers of quiz collections we have in the drafts
-
-  int _quizDraftsCount = 0;
-  int get quizDraftsCount => _quizDraftsCount;
-  void updateQuizDraftsCount()async{
-    var results = await QuizAccessObject().fetchAllDrafts();
-    _quizDraftsCount = results.length > 0 && results[0].containsKey('empty') ? 0 : results.length;
-    notifyListeners();
-  }
+  // this is special for the drafts of quiz just to get the numbers of quiz collections we have in the drafts
 
 
-  
 
   Future<void> _loadUserData() async {
     print('loading user data');
-    var userDataMap = await FileSystemServices.getUserData();
-    _userData  = References.specifyAccountType(userDataMap);
+    _userData = await FileSystemServices.getUserData();
     _dataLoaded = true;
-    notifyListeners();
+    notifyMyListeners();
   }
 
   Future<void> _onPageLaunch() async {
     _dialogService = locator.get<DialogService>();
-    _dialogService.profilePageState = this;
-    _directory = await getApplicationDocumentsDirectory();
 
+    _directory = await getApplicationDocumentsDirectory();
 
     _userPhotosPath = '${_directory.path}/user_photos';
     _userCoverPath = '${_directory.path}/user_covers';
@@ -100,15 +85,13 @@ class ProfilePageState with ChangeNotifier {
 
     print('this is the profile path in the caching system');
     if (profilPicPath == null) {
-
       if (doesUserPhotoExist) {
         final userPhoto = Directory(_userPhotosPath);
         var allFiles = userPhoto.listSync();
         if (allFiles.length > 0) {
-          await CachingServices.saveStringField(
-              key: 'profilePicture', value: allFiles[0].path);
+          await CachingServices.saveStringField(key: 'profilePicture', value: allFiles[0].path);
           _profilePicture = allFiles[0];
-          notifyListeners();
+          notifyMyListeners();
           return;
         }
       } else {
@@ -120,7 +103,7 @@ class ProfilePageState with ChangeNotifier {
         bool doesFileExist = await File(profilPicPath).exists();
         if (doesFileExist) {
           _profilePicture = File(profilPicPath);
-          notifyListeners();
+          notifyMyListeners();
         }
       } else {
         await Directory(_userPhotosPath).delete(recursive: true);
@@ -133,10 +116,9 @@ class ProfilePageState with ChangeNotifier {
         final userCover = Directory(_userCoverPath);
         var allFiles = userCover.listSync();
         if (allFiles.length > 0) {
-          await CachingServices.saveStringField(
-              key: 'coverPicture', value: allFiles[0].path);
+          await CachingServices.saveStringField(key: 'coverPicture', value: allFiles[0].path);
           _coverPicture = allFiles[0];
-          notifyListeners();
+          notifyMyListeners();
           return;
         }
       } else {
@@ -148,7 +130,7 @@ class ProfilePageState with ChangeNotifier {
         bool doesFileExist = await File(coverPicPath).exists();
         if (doesFileExist) {
           _coverPicture = File(coverPicPath);
-          notifyListeners();
+          notifyMyListeners();
         }
       } else {
         await Directory(_userPhotosPath).delete(recursive: true);
@@ -159,27 +141,31 @@ class ProfilePageState with ChangeNotifier {
 
   void updateCounter() {
     count++;
-    notifyListeners();
+    notifyMyListeners();
   }
 
 // related to the dropDownButton of school stages inside the dialog of uploading new lecture
 // for schools
 
- String _targetSchoolStage;
+  String _targetSchoolStage;
+
   String get targetSchoolStage => _targetSchoolStage;
-  void updateTragetSchoolStage(String update){
-    if(update != null){
+
+  void updateTragetSchoolStage(String update) {
+    if (update != null) {
       _targetSchoolStage = update;
-      notifyListeners();
+      notifyMyListeners();
     }
   }
 
   String _targetSchoolSection;
+
   String get targetSchoolSection => _targetSchoolSection;
-  void updateTragetSchoolSection(String update){
-    if(update != null){
+
+  void updateTragetSchoolSection(String update) {
+    if (update != null) {
       _targetSchoolSection = update;
-      notifyListeners();
+      notifyMyListeners();
     }
   }
 
@@ -190,11 +176,9 @@ class ProfilePageState with ChangeNotifier {
     await dir.delete(recursive: true);
     await new Directory(_userPhotosPath).create(recursive: true);
     final extName = update.path.split('.').last;
-    _profilePicture = await update
-        .copy(_userPhotosPath + '/${DateTime.now().millisecond}.$extName');
-    await CachingServices.saveStringField(
-        key: 'profilePicture', value: '${_profilePicture.path}');
-    notifyListeners();
+    _profilePicture = await update.copy(_userPhotosPath + '/${DateTime.now().millisecond}.$extName');
+    await CachingServices.saveStringField(key: 'profilePicture', value: '${_profilePicture.path}');
+    notifyMyListeners();
   }
 
   // update cover picture
@@ -204,22 +188,19 @@ class ProfilePageState with ChangeNotifier {
     await dir.delete(recursive: true);
     await new Directory(_userCoverPath).create(recursive: true);
     final extName = update.path.split('.').last;
-    _coverPicture = await update
-        .copy(_userCoverPath + '/${DateTime.now().millisecond}.$extName');
-    await CachingServices.saveStringField(
-        key: 'coverPicture', value: '${_coverPicture.path}');
-    notifyListeners();
+    _coverPicture = await update.copy(_userCoverPath + '/${DateTime.now().millisecond}.$extName');
+    await CachingServices.saveStringField(key: 'coverPicture', value: '${_coverPicture.path}');
+    notifyMyListeners();
   }
- 
- 
+
   // choosing image source dialog
   Future<void> showDialogeOfChoosingImageSource() async {
     await _dialogService.showDialogeOfChoosingImageSource();
   }
 
-   Future showOnProfilePictureTappingDialoge() async {
+  Future showOnProfilePictureTappingDialoge() async {
     print('dialog has been started right now (of profile picture)');
-    _dialogService.profilePageState.target = 'profilePicture';
+   // _dialogService.profilePageState.target = 'profilePicture';
     var result = await _dialogService.showDialogOfProfilePicture();
     print('dialog has been ended right now (of profile picture)');
   }
@@ -231,13 +212,26 @@ class ProfilePageState with ChangeNotifier {
     print('dialog has been ended right now (of cover picture)');
   }
 
-  Future showDialogeOfEditingProfileData()async{
+  Future showDialogeOfEditingProfileData() async {
     var result = await _dialogService.showDialogOfEditingInfo();
   }
 
+  bool _isDisposed = false;
 
-  // Future showDialogOfUploadingNewMaterial()async{
-  //   var result = await _dialogService.showDialogOfUploadingNewVideo();
-  // }
+  void notifyMyListeners() {
+    if (!_isDisposed) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    print('disposing ProfilePageState');
+    super.dispose();
+  }
+
+// Future showDialogOfUploadingNewMaterial()async{
+//   var result = await _dialogService.showDialogOfUploadingNewVideo();
+// }
 }
-

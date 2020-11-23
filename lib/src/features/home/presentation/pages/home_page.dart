@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:malzama/demos/google_map.dart';
-import 'package:malzama/src/core/platform/services/caching_services.dart';
-import '../state_provider/user_info_provider.dart';
-
-import '../widgets/pages_navigators/home_page_navigator/home_page_navigator/home_navigator.dart';
-import '../widgets/pages_navigators/material_navigator/material_navigator.dart';
-import '../widgets/pages_navigators/videos_navigator/videos_navigator.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/Navigator/navigation_service.dart';
 import '../../../../core/platform/services/notifications_service/one_signal_notfication.dart';
+import '../state_provider/user_info_provider.dart';
 import '../widgets/bottom_nav_bar_widget.dart';
-import '../widgets/pages_navigators/notifications_navigator/notification_navigator.dart';
-import '../widgets/pages_navigators/profile_page_navigator/profile_navigator.dart';
+import 'lectures_pages/home_navigator.dart';
+import 'my_materials/material_navigator.dart';
+import 'notifications/notifications_navigator/notification_navigator.dart';
+import 'profile/profile_page_navigator/profile_navigator.dart';
+import 'videos/videos_navigator/videos_navigator.dart';
 
 // OneSignal App ID
 // 50c8ad6e-b20b-4f8e-a71a-219c4f4ce74e

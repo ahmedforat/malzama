@@ -1,27 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/api/api_client/clients/registration_client.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
+import 'package:malzama/src/core/platform/local_database/local_caches/cached_user_info.dart';
 import 'package:malzama/src/features/Signup/presentation/state_provider/execution_state.dart';
-import 'package:malzama/src/features/Signup/usecases/signup_usecase.dart';
+import 'package:malzama/src/features/home/models/users/user.dart';
 import 'package:malzama/src/features/verify_your_email/presentation/send_auth_code_btn.dart';
-
-import 'package:provider/provider.dart';
 
 import '../../../core/api/contract_response.dart';
 import '../../../core/debugging/debugging_widgets.dart';
 import '../../../core/platform/services/file_system_services.dart';
-import '../../../core/style/colors.dart';
+
 import '../usecases/send_auth_code.dart';
 
-int auth_code;
-Map _user;
+int authCode;
+User _user;
 
-class ValidateYourAccountMessageWidget extends StatelessWidget {
+class ValidateYourAccountMessageWidget extends StatefulWidget {
+  @override
+  _ValidateYourAccountMessageWidgetState createState() => _ValidateYourAccountMessageWidgetState();
+}
 
-
+class _ValidateYourAccountMessageWidgetState extends State<ValidateYourAccountMessageWidget> {
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  Future<User> data;
 
-  Future _fetchUserData() async {
-    return  FileSystemServices.getUserData();
+  Future<User> _fetchUserData() async {
+    return await FileSystemServices.getUserData();
+  }
+
+  @override
+  void initState() {
+    data = _fetchUserData();
+    super.initState();
   }
 
   @override
@@ -29,7 +40,7 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
     print('building validation page');
     ScreenUtil.init(context);
     return FutureBuilder(
-      future: _fetchUserData(),
+      future: data,
       builder: (BuildContext ctx, AsyncSnapshot snapshot) {
         if (!snapshot.hasData)
           return Container(
@@ -38,7 +49,7 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
               child: CircularProgressIndicator(),
             ),
           );
-        else if (snapshot.hasError)
+        else if (snapshot.hasError || snapshot.data == null)
           return Center(
             child: Text('Something went wrong'),
           );
@@ -52,7 +63,7 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
             child: Scaffold(
               floatingActionButton: FloatingActionButton(
                 onPressed: () async {
-                  print(auth_code);
+                  print(authCode);
                   var data = await FileSystemServices.getUserData();
                   print(data);
                 },
@@ -102,7 +113,7 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
                       width: double.infinity,
                       alignment: Alignment.topLeft,
                       child: Text(
-                        'Dear ${_user['firstName'] ?? 'user'}',
+                        'Dear ${_user.firstName ?? 'user'}',
                         style: TextStyle(fontSize: ScreenUtil().setSp(45), fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -123,7 +134,7 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
                               ),
                             ),
                             TextSpan(
-                              text: 'Enter the code that has just been sent to your email account ( ${_user['email']} ) ',
+                              text: 'Enter the code that has just been sent to your email account ( ${_user.email} ) ',
                               style: TextStyle(
                                 fontSize: ScreenUtil().setSp(40),
                                 color: Colors.black,
@@ -140,7 +151,8 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
                             ),
                             TextSpan(
                               text: 'OK.',
-                              style: TextStyle(fontSize: ScreenUtil().setSp(40), color: Colors.black, fontWeight: FontWeight.bold,
+                              style: TextStyle(
+                                fontSize: ScreenUtil().setSp(40), color: Colors.black, fontWeight: FontWeight.bold,
                                 //fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -161,7 +173,9 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
                       height: ScreenUtil().setHeight(150),
                     ),
                     Align(
-                      child: SendAuthCodeButton(onPressed: _sendAuthCodeOnPressed,),
+                      child: SendAuthCodeButton(
+                        onPressed: _sendAuthCodeOnPressed,
+                      ),
                     ),
                     SizedBox(
                       height: ScreenUtil().setHeight(150),
@@ -173,7 +187,8 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
                       child: FlatButton(
                         child: Text('send me again'),
                         onPressed: () async {
-                          ContractResponse response = await ValidationAuthCode(user: _user).sendMeAnotherMail();
+                          ContractResponse response =
+                              await RegistrationClient().sendMeAuthCodeAgain(id: _user.id, accounType: _user.accountType);
                           if (response is SnackBarException) {
                             scaffoldKey.currentState.showSnackBar(getSnackBar(response.message));
                             if (response is AuthorizationBreaking)
@@ -182,7 +197,7 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
                               );
                             Navigator.of(context).pushNamedAndRemoveUntil(
                               '/landing-page',
-                                  (_) => false,
+                              (_) => false,
                             );
                           } else if (response is Success) {
                             scaffoldKey.currentState.showSnackBar(
@@ -204,8 +219,7 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
     );
   }
 
-  Widget digitsHolder() =>
-      TextField(
+  Widget digitsHolder() => TextField(
         maxLength: 6,
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
@@ -218,7 +232,7 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
         ),
         onChanged: (val) {
           try {
-            auth_code = int.parse(val);
+            authCode = int.parse(val);
           } catch (err) {
             scaffoldKey.currentState.showSnackBar(
               getSnackBar('Please Enter only numbers'),
@@ -228,17 +242,17 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
       );
 
   Future<void> _sendAuthCodeOnPressed(BuildContext context, ExecutionState state) async {
-    if (auth_code == null || auth_code
-        .toString()
-        .length < 6) {
+    if (authCode == null || authCode.toString().length < 6) {
       scaffoldKey.currentState.showSnackBar(getSnackBar('Please Enter The 6 digits code number'));
       return;
     }
 
-    _user['auth_code'] = auth_code.toString();
+
+
     state.setLoadingStateTo(true);
     ContractResponse response;
-    response = await ValidationAuthCode(user: _user).send();
+    response = await RegistrationClient().verifyAccount(authCode: authCode,verificationData: _user.verifitionData);
+   print(response.statusCode);
     state.setLoadingStateTo(false);
     print('after sending');
     if (response is SnackBarException) {
@@ -249,20 +263,17 @@ class ValidateYourAccountMessageWidget extends StatelessWidget {
         Navigator.of(context).pushNamedAndRemoveUntil('/signup-page', (_) => false);
       }
     } else if (response is Success) {
-      var data = await FileSystemServices.getUserData();
-      bool isAcademic = data['account_type'] != 'schteachers' && data['account_type'] != 'schstudents';
+      final String accountType = await UserCachedInfo().getRecord('account_type');
+      final bool isAcademic = HelperFucntions.isAcademic(accountType);
       Navigator.of(context).pushNamedAndRemoveUntil('/home-page', (_) => false, arguments: isAcademic);
     } else {
       DebugTools.showErrorMessageWidget(context: context, message: response.message);
     }
-    print(auth_code);
-  }
 
+  }
 }
 
-
-Widget getSnackBar(String text) =>
-    SnackBar(
+Widget getSnackBar(String text) => SnackBar(
       content: Text(text),
       duration: Duration(milliseconds: 3000),
     );

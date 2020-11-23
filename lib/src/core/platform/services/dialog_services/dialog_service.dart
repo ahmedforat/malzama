@@ -1,23 +1,20 @@
 import 'dart:async';
 
-import 'package:malzama/src/features/home/presentation/state_provider/pdf_viewer_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploading_state_provider.dart';
 
-import '../../../../features/home/presentation/state_provider/profile_page_state_provider.dart';
 
 class DialogService {
   String pdfUrl;
   String pdfLocalPath;
   int pdfSize;
 
-  PDFSource pdfSource ;
+  //PDFSource pdfSource ;
 
   bool _isDailogOpened = false;
   bool get isDialogOpened => _isDailogOpened;
   Completer _dialogCompleter;
 
 
-  ProfilePageState profilePageState;
   QuizUploadingState quizUploadingState;
 
 
@@ -96,6 +93,22 @@ class DialogService {
   }
 
   Future showDialogOfLoadingPDF() => showDialog(_showDialogOfLoadingPDF);
+
+
+
+  // show dialog of general loading
+  Function({String message}) _showDialogOfLoading;
+
+  void registerShowDialogOfLoading(Function({String message})listener) {
+    _showDialogOfLoading = listener;
+  }
+
+  Future showDialogOfLoading({String message}) {
+    _dialogCompleter = new Completer();
+    _isDailogOpened = true;
+    _showDialogOfLoading(message:message);
+    return _dialogCompleter.future;
+  }
 
   //****************************************************************************************************************
 

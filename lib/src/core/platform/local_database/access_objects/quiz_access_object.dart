@@ -1,14 +1,16 @@
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
+
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
-import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_entity.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_draft_model.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_entity.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'package:sembast/sembast.dart';
 
 import '../app_database.dart';
 
-class MyUploadedMaterialStores {
-  static const MY_UPLOADED_QUIZES = 'my-uploaded-quizes';
-  static const MY_UPLOADED_LECTURES = 'my-uploaded-lectures';
-  static const MY_UPLOADED_VIDEOS = 'my-uploaded-videos';
+class MyUploaded {
+  static const QUIZES = 'my-uploaded-quizes';
+  static const LECTURES = 'my-uploaded-lectures';
+  static const VIDEOS = 'my-uploaded-videos';
 }
 
 class QuizAccessObject {
@@ -82,7 +84,7 @@ class QuizAccessObject {
   // save new collection to he local sembast database
   // it will return true when there are available stores to hold the new drafts
   // otherwise it will return false which indicate that there are no available spaces to hold the new drafts
-  Future<bool> saveQuizItemsToDrafts(List<QuizEntity> entities, Map<String, dynamic> credentials) async {
+  Future<bool> saveQuizItemsToDrafts(String id, List<QuizEntity> entities, QuizCredentials credentials) async {
     StoreRef<int, Map<String, dynamic>> ref;
     int index;
     print('first check point');
@@ -108,27 +110,13 @@ class QuizAccessObject {
       // save the new available stores after removing the occupied one
       await store.record(_AVAILABLE_STORES_INDEXES).put(await this.database, _availableStoresIndexes);
 
-      print('third check point');
-      print(entities.runtimeType);
+      Map<String, dynamic> payload = {
+        'index': index,
+        'questions': entities.map((e) => e.toJSON()).toList(),
+        '_id': id,
+      }..addAll(credentials.toJSON());
 
-      // save the quiz entities to the jsonList
-      List<Map<String, dynamic>> jsonList = entities.map((quiz) => quiz.toJSON()).toList();
-
-      // add the credentials at the beginning of the jsonList
-      jsonList.insert(0, credentials);
-
-      // also add the index of the store that hold the newly saved draft at the beginnig as well
-      jsonList.insert(0, {'index': index});
-
-      // so far
-      // the first index of the jsonList (i.e index 0) is holding the index of the store that hold this quiz collection
-      // the second index of the jsonList (i.e index 1) is holding the credentials of the quiz collection like title,description ... et cetera
-      // so the json list will become like this
-      // jsonList = [{'index':[index]} , credentials , ... entities]
-      // start inserting to the Database
-
-      // save the new draft to the database
-      await ref.addAll(await this.database, jsonList);
+      ref.add(await this.database, payload);
       print('saving done');
 
       // end the process and return true
@@ -139,55 +127,42 @@ class QuizAccessObject {
   }
 
   // fetch quiz with the specific index from drafts
-  Future<Map<String, dynamic>> fetchQuizListFromDrafts(int index) async {
-    List<QuizEntity> quizList = [];
+  Future<QuizDraftEntity> fetchQuizListFromDrafts(int index) async {
     var results = await intMapStoreFactory.store(draftStores[index]).find(await this.database);
     print(results);
     if (results.length == 0) {
       // no items
-      return {'empty': true};
+      return null;
     }
-    index = results[0].value['index'];
-    Map<String, dynamic> credentials = results[1].value;
-
-    for (int i = 2; i < results.length; i++) {
-      quizList.add(new QuizEntity.fromJSON(results[i].value));
-    }
-    return {'index': index, 'credentials': credentials, 'quizItems': quizList};
+    return QuizDraftEntity.fromJSON(results[0].value);
   }
 
   // fetch all quiz drafts
-  Future<List<Map<String, dynamic>>> fetchAllDrafts() async {
+  Future<List<QuizDraftEntity>> fetchAllDrafts() async {
     print('inside fetching all Drafts 000');
 
     await _initializeAvailableStoresIndexes();
 
-    List<Map<String, dynamic>> payload = [];
-    List<QuizEntity> quizList;
+    List<QuizDraftEntity> drafts = [];
+
     print('available stores == $_availableStoresIndexes');
     if (_availableStoresIndexes.length == 10) {
       // all the available stores are empty
       // this means that there are no quiz collection saved in the drafts
-      return payload;
+      return drafts;
     }
 
     for (int i = 0; i < 10; i++) {
-      quizList = [];
       if (!_availableStoresIndexes.contains(i)) {
         var results = await intMapStoreFactory.store(draftStores[i]).find(await this.database);
         print('before the first for loop of the fetch all');
-        print(results.map((item) => item.value));
         if (results != null && results.isNotEmpty) {
-          print('we are here inside');
-          for (int j = 2; j < results.length; j++) {
-            quizList.add(new QuizEntity.fromJSON(results[j].value));
-          }
-          var credentials = results[1].value;
-          payload.add({'index': results[0].value['index'], 'credentials': credentials, 'quizItems': quizList});
+          print(results[0].value);
+          drafts.add(new QuizDraftEntity.fromJSON(results[0].value));
         }
       }
     }
-    return payload;
+    return drafts;
   }
 
   // to check whether there are saved drafts or not
@@ -206,7 +181,7 @@ class QuizAccessObject {
     await intMapStoreFactory.store(draftStores[index]).delete(await this.database);
 
     // update the count of collections in the profile page
-    locator<DialogService>().profilePageState.updateQuizDraftsCount();
+    locator<UserInfoStateProvider>().updateQuizDraftsCount();
   }
 
   Future clearAllDrafts() async {
@@ -215,7 +190,7 @@ class QuizAccessObject {
     }
     List<int> myList = List<int>.generate(10, (i) => i);
     await store.record(_AVAILABLE_STORES_INDEXES).put(await this.database, myList);
-    locator<DialogService>().profilePageState.updateQuizDraftsCount();
+    //locator<DialogService>().profilePageState.updateQuizDraftsCount();
   }
 
   Future<bool> hasAvailableStores() async {
@@ -228,35 +203,40 @@ class QuizAccessObject {
     return await store.record(_AVAILABLE_STORES_INDEXES).get(await this.database);
   }
 
-  // savae quizes uploaded
-  Future saveUploadedQuiz(Map<String, dynamic> payload) async {
-    await intMapStoreFactory.store(MyUploadedMaterialStores.MY_UPLOADED_QUIZES).add(
-          await this.database,
-          payload,
-        );
-  }
-
-  // savae lectures uploaded
-  Future saveUploadedLecture(Map<String, dynamic> payload) async {
-    await intMapStoreFactory.store(MyUploadedMaterialStores.MY_UPLOADED_LECTURES).add(
-          await this.database,
-          payload,
-        );
-  }
-
-  // savae videos uploaded
-  Future saveUploadedVideo(Map<String, dynamic> payload) async {
-    await intMapStoreFactory.store(MyUploadedMaterialStores.MY_UPLOADED_VIDEOS).add(
-          await this.database,
-          payload,
-        );
-  }
 
 
   // get uploaded materials
-  Future<List<Map<String,dynamic>>> getUploadedMaterials(String storeName)async{
+  Future<List<Map<String, dynamic>>> getUploadedMaterials(String storeName) async {
     var res = await intMapStoreFactory.store(storeName).find(await this.database);
-    List<Map<String,dynamic>> payload =  res.map((item) => item.value).toList();
-    return payload ?? <Map<String,dynamic>>[];
+    List<Map<String, dynamic>> payload = res.map((item) => item.value).toList();
+    return payload ?? <Map<String, dynamic>>[];
+  }
+
+
+  Future<bool> saveUploadedMaterial(String storeName,Map<String, dynamic> payload)async{
+    try{
+      await intMapStoreFactory.store(storeName).add(
+        await this.database,
+        payload,
+      );
+      return true;
+    }catch(err){
+      print(err);
+      return false;
+    }
+  }
+
+  Future<bool> deleteUploadedMaterial(String name,{ String id}) async {
+    try {
+      if (id != null) {
+        await intMapStoreFactory.store(name).delete(await this.database, finder: Finder(filter: Filter.equals('_id', id)));
+      } else {
+        await intMapStoreFactory.store(name).delete(await this.database);
+      }
+      return true;
+    } catch (err) {
+      print(err);
+      return false;
+    }
   }
 }

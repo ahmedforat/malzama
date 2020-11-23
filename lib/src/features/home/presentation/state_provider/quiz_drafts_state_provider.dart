@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:malzama/src/core/platform/local_database/access_objects/quiz_access_object.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
-import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_draft_model.dart';
+
+import '../../../../core/platform/local_database/access_objects/quiz_access_object.dart';
+import '../../../../core/platform/services/dialog_services/service_locator.dart';
+import '../pages/my_materials/materialPage/quizes/quiz_draft_model.dart';
+import 'user_info_provider.dart';
 
 class QuizDraftState with ChangeNotifier {
 
@@ -17,7 +18,7 @@ class QuizDraftState with ChangeNotifier {
   void setIsFetchingDraftsTo(bool update){
     if(update != null){
       _isFetchingDraft = update;
-      notifyListeners();
+      notifyMyListeners();
     }
   }
 
@@ -37,24 +38,33 @@ class QuizDraftState with ChangeNotifier {
   Future<void> refresh()async{
     var results = await QuizAccessObject().fetchAllDrafts();
     updateQuizDrafts(results);
-    notifyListeners();
+    print(results.length);
+    print('refreshing');
+    notifyMyListeners();
   }
-  void updateQuizDrafts(List<Map<String, dynamic>> update) {
-    _quizDrafts = update.map((item) => QuizDraftEntity.fromJSON(item)).toList();
-    notifyListeners();
+  void updateQuizDrafts(List<QuizDraftEntity> update) {
+    _quizDrafts = update;
+    notifyMyListeners();
   }
 
   Future<void> deleteQuizDraft(int index,int pos) async {
     print(index);
     await QuizAccessObject().removeDrftAt(index: index);
     // this to update the number of collections of drafts appears in the profile page
-    locator<DialogService>().profilePageState.updateQuizDraftsCount();
+    locator<UserInfoStateProvider>().updateQuizDraftsCount();
     _quizDrafts.removeAt(pos);
-    notifyListeners();
+    notifyMyListeners();
   }
 
+  bool _isDisposed = false;
+void notifyMyListeners(){
+  if(!_isDisposed){
+    notifyListeners();
+  }
+}
   @override
   void dispose() {
+    _isDisposed = true;
     print('Quiz drafts state provider has been disposed successfully');
     super.dispose();
   }

@@ -1,14 +1,14 @@
-import 'package:malzama/src/core/platform/local_database/models/base_model.dart';
-import 'package:malzama/src/core/platform/local_database/models/college_uploads_models/college_uploaded_pdf_model.dart';
-import 'package:malzama/src/core/platform/local_database/models/college_uploads_models/college_uploaded_video_model.dart';
-import 'package:malzama/src/core/platform/local_database/models/school_uploads_models/school_uploaded_pdf_model.dart';
-import 'package:malzama/src/core/platform/local_database/models/school_uploads_models/school_uploaded_video_model.dart';
-import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/user_profile/widgets/materials_widgets/quizes/quiz_entity.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
+import 'package:malzama/src/core/platform/local_database/local_caches/cached_user_info.dart';
+
+import 'package:malzama/src/features/home/models/materials/college_material.dart';
+import 'package:malzama/src/features/home/models/materials/school_material.dart';
+import 'package:malzama/src/features/home/models/materials/study_material.dart';
 import 'package:sembast/sembast.dart';
 
 import '../app_database.dart';
 
-class TeacherAccessObject{
+class TeacherAccessObject {
   static const String MY_UPLOADED_PDFS = 'my_pdfs_uploads';
   static const String MY_UPLOADED_VIDEOS = 'my_video_uploads';
 
@@ -19,62 +19,61 @@ class TeacherAccessObject{
 
   // for lectures or PDFS
 
-  Future insert(BaseUploadingModel pdf) async {
+  Future insert(StudyMaterial pdf) async {
     await myPDFUploads.add(await this.database, pdf.toJSON());
   }
 
-  Future update<PDF_TYPE extends BaseUploadingModel>(PDF_TYPE pdf) async {
-    await myPDFUploads.update(await this.database, pdf.toJSON(), finder: new Finder(filter: Filter.byKey(pdf.key)));
+  Future update(StudyMaterial pdf) async {
+    await myPDFUploads.update(await this.database, pdf.toJSON(), finder: new Finder(filter: Filter.matches('_id', pdf.id)));
   }
 
-  Future delete<PDF_TYPE extends BaseUploadingModel>(PDF_TYPE pdf) async {
-    await myPDFUploads.delete(await this.database, finder: Finder(filter: Filter.byKey(pdf.key)));
+  Future delete(StudyMaterial pdf) async {
+    await myPDFUploads.delete(await this.database, finder: Finder(filter: Filter.matches('_id', pdf.id)));
   }
 
-  Future<List<BaseUploadingModel>> fetchAllPDFS<PDF_TYPE extends BaseUploadingModel>() async {
+  Future<List<StudyMaterial>> fetchAllPDFS() async {
     var data = await myPDFUploads.find(await this.database);
-
+    var accountType = await UserCachedInfo().getRecord('account_type');
     var pdfs = data.map((record) {
-      if (PDF_TYPE == CollegeUploadedPDF) {
-        return new CollegeUploadedPDF.fromJSON(record.value);
+      bool isAcademic = HelperFucntions.isAcademic(accountType);
+      if (isAcademic) {
+        return new CollegeMaterial.fromJSON(record.value);
       } else {
-        return new SchoolUploadedPDF.fromJSON(record.value);
+        return new SchoolMaterial.fromJSON(record.value);
       }
     }).toList();
 
     return pdfs;
-
-
   }
 
   // for videos
 
-  Future insertVideo(BaseUploadingModel video) async {
+  Future insertVideo(StudyMaterial video) async {
     print('******************* just before saving in the database');
     print(video.toJSON());
     print('********************************************************');
     await myVideoUploads.add(await this.database, video.toJSON());
   }
 
-  Future updateVideo<VIDEO_TYPE extends BaseUploadingModel>(VIDEO_TYPE video) async {
-    await myVideoUploads.update(await this.database, video.toJSON(), finder: new Finder(filter: Filter.byKey(video.key)));
+  Future updateVideo(StudyMaterial video) async {
+    await myVideoUploads.update(await this.database, video.toJSON(), finder: new Finder(filter: Filter.matches('_id', video.id)));
   }
 
-  Future deleteVideo<VIDEO_TYPE extends BaseUploadingModel>(VIDEO_TYPE video) async {
-    await myVideoUploads.delete(await this.database, finder: Finder(filter: Filter.byKey(video.key)));
+  Future deleteVideo(StudyMaterial video) async {
+    await myVideoUploads.delete(await this.database, finder: Finder(filter: Filter.matches('_id', video.id)));
   }
 
-  Future<List<BaseUploadingModel>> fetchAllVideos<VIDEO_TYPE extends BaseUploadingModel>() async {
+  Future<List<StudyMaterial>> fetchAllVideos() async {
     var data = await myVideoUploads.find(await this.database);
-
+    var accountType = await UserCachedInfo().getRecord('account_type');
+    bool isAcademic = HelperFucntions.isAcademic(accountType);
     var videos = data.map((record) {
-      if(VIDEO_TYPE == CollegeUploadedVideo){
-        return CollegeUploadedVideo.fromJSON(record.value);
-      }else{
-        return SchoolUploadedVideo.fromJSON(record.value);
+      if (isAcademic) {
+        return CollegeMaterial.fromJSON(record.value);
+      } else {
+        return SchoolMaterial.fromJSON(record.value);
       }
     }).toList();
-
 
     return videos;
   }

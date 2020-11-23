@@ -1,23 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
-import 'package:malzama/src/core/platform/local_database/models/base_model.dart';
-import 'package:malzama/src/core/platform/local_database/models/college_uploads_models/college_uploaded_pdf_model.dart';
-import 'package:malzama/src/core/platform/local_database/models/college_uploads_models/college_uploaded_video_model.dart';
-import 'package:malzama/src/core/platform/local_database/models/school_uploads_models/school_uploaded_pdf_model.dart';
-import 'package:malzama/src/core/platform/local_database/models/school_uploads_models/school_uploaded_video_model.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
-import 'package:mime/mime.dart';
+
+import 'package:malzama/src/core/platform/local_database/local_caches/cached_user_info.dart';
+
 
 import '../../../api/contract_response.dart';
 import '../../../api/routes.dart';
 import '../../../references/references.dart';
-import '../../local_database/access_objects/teacher_access_object.dart';
 import '../caching_services.dart';
 import '../file_system_services.dart';
 import '../network_info.dart';
@@ -25,60 +15,60 @@ import 'dialog_service.dart';
 import 'service_locator.dart';
 
 class DialogManagerUseCases {
-  static Future<ContractResponse> updatePersonalInfo(
-      Map<String, String> updates) async {
-    bool isConnected = await NetWorkInfo.checkConnection();
-    if (!isConnected) {
-      return NoInternetConnection();
-    }
-
-    http.Response response;
-    var data = await FileSystemServices.getUserData();
-    String accountType = data['account_type'];
-    String _url =
-        Api.getSuitableUrl(accountType: accountType) + '/update-personal-info';
-    Map<String, String> _headers = {
-      'authorization': await CachingServices.getField(key: 'token'),
-      'content-type': 'application/json',
-      'accept': 'application/json'
-    };
-    try {
-      response = await http
-          .post(Uri.encodeFull(_url),
-              headers: _headers, body: json.encode(updates))
-          .timeout(References.timeout);
-      switch (response.statusCode) {
-        case 500:
-          return InternalServerError();
-          break;
-
-        case 403:
-          await CachingServices.clearAllCachedData();
-          await FileSystemServices.deleteUserData();
-          return ForbiddenAccess(message: 'You are not authorized as user');
-          break;
-
-        case 200:
-          var data = json.decode(response.body);
-          await CachingServices.saveStringField(
-              key: 'token', value: 'bearer ${data['token']}');
-          await FileSystemServices.saveUserData(data['userData']);
-          var dialogService = locator.get<DialogService>();
-          dialogService.profilePageState
-              .updateUserData(References.specifyAccountType(data['userData']));
-          return Success200();
-          break;
-
-        default:
-          return NewBugException(
-              message: 'Unhandled statusCode ${response.statusCode}');
-      }
-    } on TimeoutException {
-      return ServerNotResponding();
-    } catch (err) {
-      return NewBugException(message: err.toString());
-    }
-  }
+  // static Future<ContractResponse> updatePersonalInfo(
+  //     Map<String, String> updates) async {
+  //   bool isConnected = await NetWorkInfo.checkConnection();
+  //   if (!isConnected) {
+  //     return NoInternetConnection();
+  //   }
+  //
+  //   http.Response response;
+  //
+  //   String accountType = await UserCachedInfo().getRecord('account_type');
+  //   String _url =
+  //       Api.getSuitableUrl(accountType: accountType) + '/update-personal-info';
+  //   Map<String, String> _headers = {
+  //     'authorization': await CachingServices.getField(key: 'token'),
+  //     'content-type': 'application/json',
+  //     'accept': 'application/json'
+  //   };
+  //   try {
+  //     response = await http
+  //         .post(Uri.encodeFull(_url),
+  //             headers: _headers, body: json.encode(updates))
+  //         .timeout(References.timeout);
+  //     switch (response.statusCode) {
+  //       case 500:
+  //         return InternalServerError();
+  //         break;
+  //
+  //       case 403:
+  //         await CachingServices.clearAllCachedData();
+  //         await FileSystemServices.deleteUserData();
+  //         return ForbiddenAccess(message: 'You are not authorized as user');
+  //         break;
+  //
+  //       case 200:
+  //         var data = json.decode(response.body);
+  //         await CachingServices.saveStringField(
+  //             key: 'token', value: 'bearer ${data['token']}');
+  //         await FileSystemServices.saveUserData(data['userData']);
+  //         var dialogService = locator.get<DialogService>();
+  //         dialogService.profilePageState
+  //             .updateUserData(References.specifyAccountType(data['userData']));
+  //         return Success200();
+  //         break;
+  //
+  //       default:
+  //         return NewBugException(
+  //             message: 'Unhandled statusCode ${response.statusCode}');
+  //     }
+  //   } on TimeoutException {
+  //     return ServerNotResponding();
+  //   } catch (err) {
+  //     return NewBugException(message: err.toString());
+  //   }
+  // }
 
   // for universities
 

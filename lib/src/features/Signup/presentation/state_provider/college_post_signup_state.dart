@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 
 class CollegePostSignUpState with ChangeNotifier {
   bool _isCompleted = false;
@@ -50,6 +52,7 @@ class CollegePostSignUpState with ChangeNotifier {
   List<String> get sections => _sectionsList;
 
   List<dynamic> get collegeList => _collegeList;
+
   List<String> get universitiesList => _allUniversitiesAndCollege.keys.toList();
 
   String get speciality => _speciality;
@@ -134,8 +137,7 @@ class CollegePostSignUpState with ChangeNotifier {
 
   Future<void> loadAllUniversitiesAndColleges() async {
     if (_allUniversitiesAndCollege == null) {
-      String data = await rootBundle
-          .loadString('assets/iraq_schools_and_unis/all_unis.json');
+      String data = await rootBundle.loadString('assets/iraq_schools_and_unis/all_unis.json');
       _allUniversitiesAndCollege = json.decode(data);
     }
     print(_allUniversitiesAndCollege.keys.toList());
@@ -162,25 +164,32 @@ class CollegePostSignUpState with ChangeNotifier {
     _collegeList = null;
   }
 
-  Map<String, dynamic> fetchStudentData(Map<String, dynamic> commonState) {
+  Future<Map<String, dynamic>> fetchStudentData(Map<String, dynamic> commonState) async {
+    final int stage = _stageDictionary.entries.firstWhere((entry) => entry.value == _stage).key;
+    final String uuid = await HelperFucntions.getAcademicUUID(university: _university, college: _college);
     return commonState
-      ..addAll({
-        'university': _university,
-        'college': _college,
-        'section': _section,
-        'stage': _stageDictionary.entries
-            .firstWhere((entry) => entry.value == _stage)
-            .key
-      });
+      ..addAll(
+        {
+          'university': _university,
+          'college': _college,
+          'section': _section,
+          'stage': stage,
+          'uuid': '$uuid$stage',
+        },
+      );
   }
 
-  Map<String, dynamic> fetchLecturerData(Map<String, dynamic> commonState) {
+  Future<Map<String, dynamic>> fetchLecturerData(Map<String, dynamic> commonState) async {
+    final String uuid = await HelperFucntions.getAcademicUUID(university: _university, college: _college);
     return commonState
-      ..addAll({
-        'university': _university,
-        'college': _college,
-        'speciality': _speciality,
-        'section': _section
-      });
+      ..addAll(
+        {
+          'university': _university,
+          'college': _college,
+          'speciality': _speciality,
+          'section': _section,
+          'uuid': uuid,
+        },
+      );
   }
 }

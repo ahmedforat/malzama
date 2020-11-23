@@ -1,12 +1,16 @@
-import 'package:malzama/src/core/references/college_materials/dentist.dart';
-import 'package:malzama/src/core/references/college_materials/medicine.dart';
-import 'package:malzama/src/core/references/college_materials/pharmacy.dart';
-
-import '../../features/home/models/school_student.dart';
-import '../../features/home/models/school_teacher_model.dart';
-import '../../features/home/models/uni_student.dart';
-import '../../features/home/models/uni_teacher.dart';
-import '../../features/home/presentation/state_provider/profile_page_state_provider.dart';
+import '../../features/home/models/materials/college_material.dart';
+import '../../features/home/models/materials/school_material.dart';
+import '../../features/home/models/materials/study_material.dart';
+import '../../features/home/models/users/college_student.dart';
+import '../../features/home/models/users/college_teacher.dart';
+import '../../features/home/models/users/school_student.dart';
+import '../../features/home/models/users/school_teacher.dart';
+import '../../features/home/models/users/user.dart';
+import '../general_widgets/helper_functions.dart';
+import '../platform/local_database/local_caches/cached_user_info.dart';
+import 'college_materials/dentist.dart';
+import 'college_materials/medicine.dart';
+import 'college_materials/pharmacy.dart';
 
 class AccountType {
   static String get uniteachers => 'uniteachers';
@@ -55,7 +59,7 @@ class References {
   }
 
   static bool isTeacher(String account_type) {
-    return account_type == 'uniteachers' || account_type == 'schteachers';
+    return account_type != 'schstudents';
   }
 
   static String getVideoLength(Map<String, dynamic> userData) {
@@ -66,19 +70,19 @@ class References {
     return isTeacher(userData['account_type']) ? userData['lectures'].length.toString() : userData['saved_lectures'].length.toString();
   }
 
-  static dynamic specifyAccountType(Map<String, dynamic> map) {
+  static User specifyAccountType(Map<String, dynamic> map) {
     switch (map['account_type']) {
       case 'uniteachers':
-        return UniTeacher.fromJSON(map: map);
+        return CollegeTeacher.fromJSON(map);
         break;
       case 'unistudents':
-        return UniStudent.fromJSON(map: map);
+        return CollegeSutdent.fromJSON( map);
         break;
       case 'schteachers':
-        return SchoolTeacher.fromJSON(map: map);
+        return SchoolTeacher.fromJSON(map);
         break;
       case 'schstudents':
-        return SchoolStudent.fromJSON(map: map);
+        return SchoolStudent.fromJSON(map);
         break;
       default:
         return null;
@@ -176,6 +180,8 @@ class References {
             : 'Please enter a valid link';
   }
 
+  static String getFullYouTubeUrl(String videoId) => 'https://www.youtube.com/watch?v=$videoId';
+
   static List<String> getSuitaleCollegeMaterialList(int stage, String college, {int semester}) {
     RegExp dentist = new RegExp(r'سنان');
     RegExp pharmacy = new RegExp(r'صيدلة');
@@ -190,6 +196,23 @@ class References {
     } else {
       return MedicineSyllabus.getByStageAndSemester(stage, semester);
     }
+  }
+
+
+  static StudyMaterial getProperStudyMaterial(Map<String,dynamic> data,bool isAcademic){
+    return isAcademic ? CollegeMaterial.fromJSON(data) : SchoolMaterial.fromJSON(data);
+  }
+
+
+  static Future<String> getMaterialType({String text,String accountType})async{
+    bool isAcademic;
+    if(accountType != null){
+      isAcademic = HelperFucntions.isAcademic(accountType);
+    }else{
+      accountType = await UserCachedInfo().getRecord('account_type');
+      isAcademic = HelperFucntions.isAcademic(accountType);
+    }
+    return isAcademic ? 'uni$text' : 'sch$text';
   }
 // text.length <= 128  => ScreenUtil.setSp(65)
 // 128 < text.length < 145  => ScreenUtil.setSp(60)

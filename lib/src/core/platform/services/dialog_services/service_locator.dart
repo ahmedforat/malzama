@@ -1,16 +1,21 @@
 
 import 'package:get_it/get_it.dart';
-import 'package:malzama/src/core/Navigator/navigation_service.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
-import 'package:malzama/src/core/platform/services/file_system_services.dart';
-import 'package:malzama/src/core/platform/services/user_info._service.dart';
+import 'package:malzama/src/features/home/models/users/user.dart';
+import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/pdf_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/players/video_player_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/messages_page/global_current_sender.dart';
-import '../../../Navigator/navigation_service.dart';
 GetIt locator = GetIt.instance;
 
-void setup()async{
+void setup(User data)async{
   locator.registerLazySingleton(() => DialogService());
   locator.registerLazySingleton(() => NotificationStateProvider());
   locator.registerLazySingleton(() => CurrentSender());
+  locator.registerLazySingleton(() => PDFStateProvider());
+  locator.registerLazySingleton(() => VideoStateProvider());
+  locator.registerLazySingleton(() => UserInfoStateProvider(data));
+  locator.registerLazySingleton(() => VideoPlayerStateProvider());
 }

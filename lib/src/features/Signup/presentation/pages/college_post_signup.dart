@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/api/api_client/clients/registration_client.dart';
 import 'package:malzama/src/core/references/references.dart';
 import 'package:malzama/src/features/Signup/presentation/state_provider/execution_state.dart';
 import 'package:provider/provider.dart';
@@ -97,22 +98,23 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
                 ),
                 Consumer<ExecutionState>(
                   builder: (context, executionState, __) => RaisedButton(
-                      color: Color(0xff696b9e),
-                      onPressed: executionState.isLoading
-                          ? null
-                          : () {
-                              if (accountType == AccountType.uniteachers.toString()) {
-                                _handleCollegeLecturerDoneButton(scaffoldKey, collegeState, context);
-                              } else {
-                                _handleCollegeStudentDoneButton(scaffoldKey, collegeState, context);
-                              }
-                            },
-                      child: executionState.isLoading
-                          ? CircularProgressIndicator()
-                          : Text(
-                              'Done',
-                              style: TextStyle(color: Colors.white),
-                            )),
+                    color: Color(0xff696b9e),
+                    onPressed: executionState.isLoading
+                        ? null
+                        : () {
+                            if (accountType == AccountType.uniteachers.toString()) {
+                              _handleCollegeLecturerDoneButton(scaffoldKey, collegeState, context);
+                            } else {
+                              _handleCollegeStudentDoneButton(scaffoldKey, collegeState, context);
+                            }
+                          },
+                    child: executionState.isLoading
+                        ? CircularProgressIndicator()
+                        : Text(
+                            'Done',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                  ),
                 )
               ],
             ),
@@ -131,16 +133,17 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
         ExecutionState executionState = Provider.of<ExecutionState>(context, listen: false);
         executionState.setLoadingStateTo(true);
         String cachedData = await CachingServices.getField(key: 'commonState');
-        var _user = collegeState.fetchLecturerData(json.decode(cachedData));
+        var _user = await collegeState.fetchLecturerData(json.decode(cachedData));
         _user['account_type'] = accountType.toString();
         print(collegeState.fetchLecturerData(json.decode(cachedData)));
-        ContractResponse response = await SignUpNewUser(user: _user).execute();
+        ContractResponse response = await RegistrationClient().registerNewUser(user: _user);
         executionState.setLoadingStateTo(false);
         if (response is SnackBarException) {
           key.currentState.showSnackBar(getSnackBar(response.message));
         } else if (response is NewBugException) {
           DebugTools.showErrorMessageWidget(context: context, message: response.message);
         } else {
+          print(response.message);
           Navigator.of(context).pushNamedAndRemoveUntil('/validate-account-page', ModalRoute.withName(null));
         }
       }
@@ -161,9 +164,9 @@ class CollegeStudentPostSignUpWidget extends StatelessWidget {
       executionState.setLoadingStateTo(true);
       String cachedData = await CachingServices.getField(key: 'commonState');
       print(collegeState.fetchStudentData(json.decode(cachedData)));
-      var _user = collegeState.fetchStudentData(json.decode(cachedData));
+      var _user = await collegeState.fetchStudentData(json.decode(cachedData));
       _user['account_type'] = accountType.toString();
-      ContractResponse response = await SignUpNewUser(user: _user).execute();
+      ContractResponse response = await RegistrationClient().registerNewUser(user: _user);
       executionState.setLoadingStateTo(false);
       if (response is SnackBarException) {
         key.currentState.showSnackBar(getSnackBar(response.message));

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/api/api_client/clients/registration_client.dart';
 import 'package:malzama/src/features/Signup/presentation/state_provider/execution_state.dart';
 import 'package:provider/provider.dart';
 
@@ -139,7 +140,7 @@ void _handleOnDone(GlobalKey<ScaffoldState> key, BuildContext context,
 
     executionState.setLoadingStateTo(true);
 
-    ContractResponse response = await SignUpNewUser(user: user).execute();
+    ContractResponse response = await RegistrationClient().registerNewUser(user: user);
 
     executionState.setLoadingStateTo(false);
 
