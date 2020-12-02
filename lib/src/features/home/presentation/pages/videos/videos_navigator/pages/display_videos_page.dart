@@ -48,7 +48,7 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
               ),
             );
           }
-          return materials();
+          return Materials();
         });
   }
 
@@ -57,12 +57,12 @@ class _DisplayVideosPageState extends State<DisplayVideosPage> {
 }
 
 
-class materials extends StatelessWidget {
+class Materials extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     VideoStateProvider videoStateProvider = Provider.of<VideoStateProvider>(context, listen: false);
     UserInfoStateProvider userInfo = Provider.of<UserInfoStateProvider>(context, listen: false);
-    bool isAcademic = HelperFucntions.isAcademic(userInfo.userData.accountType);
+    bool isAcademic = userInfo.isAcademic;
 
     return RefreshIndicator(
       onRefresh: () async {

@@ -1,10 +1,76 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/platform/local_database/access_objects/quiz_access_object.dart';
 import '../state_provider/notifcation_state_provider.dart';
 import 'notifications/notification_widgets/notification_widget.dart';
+
+Map<String, dynamic> data = {
+  'name': 'Karrar Mohammed',
+  'age': 27,
+  'career': 'software engineer',
+  'projects': ['Locator', 'yalla ensafer', 'taxi', 'malzama'],
+  'birthDate': '17/05/1993',
+  'co-worker': 'Ahmed Furat',
+  'co-worker-age': 27,
+  'co-worker-career': 'software engineer',
+  'co-worker-projects': ['yalla ensafer', 'taxi', 'malzama'],
+  'co-worker-birthDate': '11/07/1993',
+  'sub-data': {
+    'name': 'Karrar Mohammed',
+    'age': 27,
+    'career': 'software engineer',
+    'projects': ['Locator', 'yalla ensafer', 'taxi', 'malzama'],
+    'birthDate': '17/05/1993',
+    'co-worker': 'Ahmed Furat',
+    'co-worker-age': 27,
+    'co-worker-career': 'software engineer',
+    'co-worker-projects': ['yalla ensafer', 'taxi', 'malzama'],
+    'co-worker-birthDate': '11/07/1993',
+  },
+  'sub-sub-data': {
+    'name': 'Karrar Mohammed',
+    'age': 27,
+    'career': 'software engineer',
+    'projects': ['Locator', 'yalla ensafer', 'taxi', 'malzama'],
+    'birthDate': '17/05/1993',
+    'co-worker': 'Ahmed Furat',
+    'co-worker-age': 27,
+    'co-worker-career': 'software engineer',
+    'co-worker-projects': ['yalla ensafer', 'taxi', 'malzama'],
+    'co-worker-birthDate': '11/07/1993',
+  },
+  'sub-sub': {
+    'name': 'Karrar Mohammed',
+    'age': 27,
+    'career': 'software engineer',
+    'projects': ['Locator', 'yalla ensafer', 'taxi', 'malzama'],
+    'birthDate': '17/05/1993',
+    'co-worker': 'Ahmed Furat',
+    'co-worker-age': 27,
+    'co-worker-career': 'software engineer',
+    'co-worker-projects': ['yalla ensafer', 'taxi', 'malzama'],
+    'co-worker-birthDate': '11/07/1993',
+  },
+  'payload': {
+    'name': 'Karrar Mohammed',
+    'age': 27,
+    'career': 'software engineer',
+    'projects': ['Locator', 'yalla ensafer', 'taxi', 'malzama'],
+    'birthDate': '17/05/1993',
+    'co-worker': 'Ahmed Furat',
+    'co-worker-age': 27,
+    'co-worker-career': 'software engineer',
+    'co-worker-projects': ['yalla ensafer', 'taxi', 'malzama'],
+    'co-worker-birthDate': '11/07/1993',
+  }
+};
 
 class NotificationPage extends StatelessWidget {
   @override
@@ -24,8 +90,16 @@ class NotificationPage extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.dashboard, color: Colors.amber,),
               onPressed: () async {
-                await QuizAccessObject().deleteUploadedMaterial(MyUploaded.QUIZES);
-                print('quizes deleted');
+               //  print('cachedFiles = ${locator<UserInfoStateProvider>().cachedFiles}');
+               // Directory d = await getApplicationDocumentsDirectory();
+               // final String dirPath = '${d.path}/cached_files';
+               //  Directory(dirPath).createSync();
+               // print(Directory(dirPath).existsSync());
+               // var dd = Directory(dirPath).listSync();
+               // print(dd);
+               //  print('quizes deleted');
+
+
               },
             )
           ],

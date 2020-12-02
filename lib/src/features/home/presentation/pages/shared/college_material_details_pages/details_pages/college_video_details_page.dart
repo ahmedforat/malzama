@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/players/video_player_widget.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/players/video_player/video_player_widget.dart';
 import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 
 import 'package:provider/provider.dart';
@@ -21,6 +21,7 @@ class CollegeVideoDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     ScreenUtil.init(context);
     VideoStateProvider pdfState = Provider.of<VideoStateProvider>(context, listen: false);
     print('building Entire page widget');
@@ -34,7 +35,7 @@ class CollegeVideoDetailsPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _UpperPart(),
+                _UpperPart(pos),
                 SizedBox(
                   height: ScreenUtil().setHeight(50),
                 ),
@@ -64,7 +65,7 @@ class CollegeVideoDetailsPage extends StatelessWidget {
                       SizedBox(
                         height: ScreenUtil().setHeight(50),
                       ),
-                      CollegeMaterialDescriptionWidget<VideoStateProvider>(pos: null),
+                      CollegeMaterialDescriptionWidget<VideoStateProvider>(pos: pos),
                     ],
                   ),
                 ),
@@ -86,6 +87,10 @@ class CollegeVideoDetailsPage extends StatelessWidget {
 }
 
 class _UpperPart extends StatelessWidget {
+  final int pos;
+
+  const _UpperPart(this.pos);
+
   @override
   Widget build(BuildContext context) {
     print('building Upper part widget');
@@ -100,14 +105,16 @@ class _UpperPart extends StatelessWidget {
                 size: ScreenUtil().setHeight(280),
                 color: Colors.red,
               ),
-              SizedBox(height: ScreenUtil().setHeight(30),),
+              SizedBox(
+                height: ScreenUtil().setHeight(30),
+              ),
               Text('Tap to Play the video')
             ],
           ),
         ),
       ),
       onTap: () {
-        Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => VideoPlayer()));
+        Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => VideoPlayer(pos: pos)));
       },
     );
   }

@@ -115,7 +115,7 @@ class AccessManager {
 
         case 200:
           var data = json.decode(response.body);
-          await UserCachedInfo().saveStringKey('account_type', data['account_type']);
+          await UserCachedInfo().saveStringKey('account_type', data['doc']['account_type']);
           await CachingServices.saveStringField(key: 'token', value: 'bearer ${data['token']}');
           await FileSystemServices.saveUserData(data['doc']);
           return Success200();

@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 
 import '../../../../core/platform/services/caching_services.dart';
 
 class SchoolStudentPostSignUpState with ChangeNotifier {
   bool _isCompleted = false;
+
   bool get isCompleted => _isCompleted;
 
   @override
@@ -27,12 +29,14 @@ class SchoolStudentPostSignUpState with ChangeNotifier {
   //**********************************************************************************
   // this is related to the state of the raised button in the commonSignUp page
   bool _isLoading = false;
+
   bool get isloading => _isLoading;
 
   void setLoadingTo(bool update) {
     _isLoading = update;
     notifyListeners();
   }
+
   //**********************************************************************************
 
   void reset() {
@@ -44,7 +48,9 @@ class SchoolStudentPostSignUpState with ChangeNotifier {
   }
 
   String _speciality;
+
   String get speciality => _speciality;
+
   void updateSpeciality({String update}) {
     if (_speciality != update) {
       _speciality = update;
@@ -54,6 +60,7 @@ class SchoolStudentPostSignUpState with ChangeNotifier {
 
   Map<String, dynamic> _schoolList;
   Map<String, dynamic> _allSchools;
+
   Map<String, dynamic> get schoolList => _schoolList;
   List<String> _sortedSchoolList;
 
@@ -61,7 +68,7 @@ class SchoolStudentPostSignUpState with ChangeNotifier {
 
   Future<void> updateSchoolList({String name}) async {
     print('initial');
-    _allSchools.entries.forEach((item){
+    _allSchools.entries.forEach((item) {
       print(item.key);
       print('-------------------');
       print(item.value);
@@ -88,9 +95,7 @@ class SchoolStudentPostSignUpState with ChangeNotifier {
     print(_schoolList);
     print('*****************************************\n\n\n\n\n');
 
-    _schoolList.removeWhere((k, v) => gender == 'female'
-        ? !femaleSchool.hasMatch(k)
-        : femaleSchool.hasMatch(k));
+    _schoolList.removeWhere((k, v) => gender == 'female' ? !femaleSchool.hasMatch(k) : femaleSchool.hasMatch(k));
     print('this is school list after second removing \n\n\n\n\n');
     print(_schoolList);
     print('*****************************************\n\n\n\n\n');
@@ -102,8 +107,7 @@ class SchoolStudentPostSignUpState with ChangeNotifier {
 
   Future<void> loadAllSchools() async {
     if (_allSchools == null) {
-      String data = await rootBundle
-          .loadString('assets/iraq_schools_and_unis/all_schools.json');
+      String data = await rootBundle.loadString('assets/iraq_schools_and_unis/all_schools.json');
       _allSchools = json.decode(data);
     }
   }
@@ -141,24 +145,30 @@ class SchoolStudentPostSignUpState with ChangeNotifier {
     }
   }
 
-  Map<String, dynamic> fetchStudentData(Map<String, dynamic> commonState) {
-    return commonState
-      ..addAll({
-        'subRegion': _baghdadSubRegion,
-        'school_section': _schoolSection,
-        'school': _school
-      });
-  }
+  Future<Map<String, dynamic>> fetchStudentData(Map<String, dynamic> commonState) async {
+    final String _region = _baghdadSubRegion ?? commonState['province'];
 
-  Map<String, dynamic> fetchTechertData(Map<String, dynamic> commonState) {
     return commonState
       ..addAll({
         'subRegion': _baghdadSubRegion,
         'school_section': _schoolSection,
         'school': _school,
-        'speciality': _speciality
+        'uuid': await HelperFucntions.getSchoolUUID(region: _region, school: _school)
       });
   }
+
+  Future<Map<String, dynamic>> fetchTechertData(Map<String, dynamic> commonState) async {
+    final String _region = _baghdadSubRegion ?? commonState['province'];
+    return commonState
+      ..addAll({
+        'subRegion': _baghdadSubRegion,
+        'school_section': _schoolSection,
+        'school': _school,
+        'speciality': _speciality,
+        'uuid':await HelperFucntions.getSchoolUUID(region: _region, school: _school),
+      });
+  }
+
   void setState() {
     notifyListeners();
   }

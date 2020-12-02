@@ -101,6 +101,22 @@ class SchoolPDFHoldingWidget extends StatelessWidget {
                   builder: (context, commentsCount, _) => Text(' تعليق$commentsCount'),
                 ),
                 Icon(Icons.picture_as_pdf),
+
+                SizedBox(
+                  width: ScreenUtil().setWidth(50),
+                ),
+                Selector<PDFStateProvider, bool>(
+                  selector: (context, stateProvider) => stateProvider.materials[pos].isSaved,
+                  builder: (context, isSaved, _) => GestureDetector(
+                    child: Icon(
+                      isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      color: Colors.black,
+                    ),
+                    onTap: () {
+                      Provider.of<PDFStateProvider>(context, listen: false).onMaterialSaving(pos);
+                    },
+                  ),
+                )
               ],
             ),
           ],

@@ -13,8 +13,6 @@ class SchoolVideoHoldingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     ScreenUtil.init(context);
     return Container(
       //color: Colors.w,
@@ -38,9 +36,9 @@ class SchoolVideoHoldingWidget extends StatelessWidget {
                     ),
                     Selector<VideoStateProvider, List<String>>(
                         selector: (context, stateProvider) => [
-                          stateProvider.materials[pos].author.firstName,
-                          stateProvider.materials[pos].author.lastName,
-                        ],
+                              stateProvider.materials[pos].author.firstName,
+                              stateProvider.materials[pos].author.lastName,
+                            ],
                         builder: (context, names, _) => Text('اعداد المدرس : ${names[0] + names[1]}')),
                     Selector<VideoStateProvider, String>(
                         selector: (context, stateProvider) => stateProvider.materials[pos].author.school,
@@ -101,6 +99,21 @@ class SchoolVideoHoldingWidget extends StatelessWidget {
                   builder: (context, commentsCount, _) => Text(' تعليق$commentsCount'),
                 ),
                 Icon(Icons.video_collection_rounded),
+                SizedBox(
+                  width: ScreenUtil().setWidth(50),
+                ),
+                Selector<VideoStateProvider, bool>(
+                  selector: (context, stateProvider) => stateProvider.materials[pos].isSaved,
+                  builder: (context, isSaved, _) => GestureDetector(
+                    child: Icon(
+                      isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      color: Colors.black,
+                    ),
+                    onTap: () {
+                      Provider.of<VideoStateProvider>(context, listen: false).onMaterialSaving(pos);
+                    },
+                  ),
+                )
               ],
             ),
           ],

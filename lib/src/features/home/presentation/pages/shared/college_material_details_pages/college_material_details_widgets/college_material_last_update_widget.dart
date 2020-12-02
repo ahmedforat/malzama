@@ -11,24 +11,17 @@ class CollgeMaterialLastUpdateWidget<B extends MaterialStateRepo> extends Statel
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    return Padding(
-      padding: EdgeInsets.only(left: ScreenUtil().setSp(50)),
-      child: Text(
-         'last update: 22/08/2050',
+    return Selector<B, String>(
+      selector: (context, stateProvider) => stateProvider.materials[pos].lastUpdate,
+      builder: (context, lastUpdate, _) =>
+      Text(
+        lastUpdate,
         style: TextStyle(
-          fontSize: ScreenUtil().setSp(35),
+          fontSize: ScreenUtil().setSp(30),
           fontWeight: FontWeight.bold,
-        ),
-      )??Selector<B, String>(
-        selector: (context, stateProvider) => stateProvider.materials[pos].lastUpdate,
-        builder: (context, lastUpdate, _) => Text(
-          lastUpdate ?? 'last update: 22/08/2050',
-          style: TextStyle(
-            fontSize: ScreenUtil().setSp(35),
-            fontWeight: FontWeight.bold,
-          ),
         ),
       ),
     );
+
   }
 }

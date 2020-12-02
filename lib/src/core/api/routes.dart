@@ -39,7 +39,6 @@ class Api {
   /// upload new material videos pdfs or quizes => [ _LOCALHOST_URL + '/materials/common/new' ]
   static const String UPLOAD_NEW_MATERIAL = _LOCALHOST_URL + '/materials/common/new';
 
-
   ///  delete entire material pdf or video or even entire quiz collection => ['/materials/common/delete']
   static const String DELETE_MATERIAL = _LOCALHOST_URL + '/materials/common/delete';
 
@@ -47,7 +46,7 @@ class Api {
   static const String EDIT_MATERIAL = _LOCALHOST_URL + '/materials/common/edit';
 
   /// add a material to user saved items => ['/materials/common/save']
-  static const String MARK_MATERIAL_AS_SAVED = '/materials/common/save';
+  static const String MARK_MATERIAL_AS_SAVED = _LOCALHOST_URL + '/materials/common/save';
 
   // ///  fetch materials for videos and lectures only => ['/materials/videos-and-pdfs/fetch-material']
   // static const String _FETCH_MATERIALS = _LOCALHOST_URL + '/materials/fetch-material';
@@ -58,11 +57,14 @@ class Api {
 
   // fetch by id
   /// fetch single video or lecture by id => [/materials/videos-and-pdfs/fetchById]
-  static const String FETCH_VIDEO_OR_PDF_BY_ID = _LOCALHOST_URL +'/materials/videos-and-pdfs/fetchById';
+  static const String FETCH_VIDEO_OR_PDF_BY_ID = _LOCALHOST_URL + '/materials/videos-and-pdfs/fetchById';
 
   // fetch for Pagination
   /// fetch videos or lectures in pagination style => [/materials/videos-and-pdfs/fetch]
-  static const String FETCH_VIDEOS_OR_PDFS = _LOCALHOST_URL +'/materials/videos-and-pdfs/fetch';
+  static const String FETCH_VIDEOS_OR_PDFS = _LOCALHOST_URL + '/materials/videos-and-pdfs/fetch';
+
+  /// fetch saved videos or pdfs => ['/fetch-saved-materials']
+  static const String FETCH_SAVED_VIDEOS_OR_PDFS = _LOCALHOST_URL + '/materials/videos-and-pdfs/fetch-saved-materials';
 
   // ==========================================================================================================================
 
@@ -85,6 +87,9 @@ class Api {
 
   /// fetch single quiz collection => ['/materials/quizes/fetchById']
   static const String FETCH_QUIZ_BY_ID = _LOCALHOST_URL + '/materials/quizes/fetchById';
+
+  /// fetch saved quizes headers => ["/fetch-saved-quizes-headers"]
+  static const String FETCH_SAVED_QUIZES_HEADERS = _LOCALHOST_URL + '/materials/quizes/fetch-saved-quizes-headers';
 
 // ==========================================================================================================================
 
@@ -123,9 +128,6 @@ class Api {
   // quizes
 
   /*[X]*/
-
-
-
 
   static String getSuitableUrl({String accountType, bool fromCloud = true}) {
     return '$_LOCALHOST_URL' + mainRoutes[accountType];

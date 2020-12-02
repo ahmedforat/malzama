@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/foundation.dart';
 
 import '../../contract_response.dart';
@@ -20,5 +18,12 @@ class VideosAndPDFClient implements VideoAndPDFRepository {
   Future<ContractResponse> fetchByID({@required String id, @required String collectionName}) async {
     final String queryString = '?id=$id&collectionName=$collectionName';
     return await HttpMethods.get(url: Api.FETCH_VIDEO_OR_PDF_BY_ID, queryString: queryString);
+  }
+
+  @override
+  Future<ContractResponse> fetchSavedMaterials({@required String collection, @required List<String> ids}) async{
+    final String idList = ids.join(',');
+    final String query = '?collection=$collection&ids=$idList';
+    return await HttpMethods.get(url: Api.FETCH_SAVED_VIDEOS_OR_PDFS, queryString: query);
   }
 }

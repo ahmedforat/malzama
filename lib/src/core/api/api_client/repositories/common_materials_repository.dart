@@ -28,5 +28,6 @@ abstract class CommonMaterialsRepository {
   Future<ContractResponse> saveMaterial({
     @required String id,
     @required String fieldName,
+    @required String indicator,
   });
 }

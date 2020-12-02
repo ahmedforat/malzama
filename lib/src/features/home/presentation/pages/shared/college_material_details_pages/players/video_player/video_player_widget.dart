@@ -5,15 +5,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/models/materials/study_material.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/details_pages/college_pdf_details_page.dart';
+import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/pages/videos/widgets/info_overlay_widget.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoPlayer extends StatefulWidget {
-  final String videoId;
+  final int pos;
 
-  const VideoPlayer({@required this.videoId});
+  const VideoPlayer({@required this.pos});
 
   @override
   _VideoDisplayState createState() => _VideoDisplayState();
@@ -33,14 +35,17 @@ class _VideoDisplayState extends State<VideoPlayer> {
   bool _rotationAngle = false;
   GlobalKey<ScaffoldState> scaffoldKey;
 
+  StudyMaterial _studyMaterial;
+
   @override
   void initState() {
     super.initState();
+    _studyMaterial = locator<VideoStateProvider>().materials[widget.pos];
     freeMode = [...portrait, ...landscape];
 
     scaffoldKey = new GlobalKey<ScaffoldState>();
     _controller = YoutubePlayerController(
-      initialVideoId: widget.videoId ?? 'wBA4jq47xRs',
+      initialVideoId: _studyMaterial.src,
       flags: YoutubePlayerFlags(
         autoPlay: true,
         hideThumbnail: true,
@@ -70,79 +75,79 @@ class _VideoDisplayState extends State<VideoPlayer> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-
-
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _controller.play();
+    });
     return WillPopScope(
       onWillPop: _handleOnWillPop,
       child: OrientationBuilder(
-
-        builder:(context,orientation) =>  Scaffold(
+        builder: (context, orientation) => Scaffold(
           key: scaffoldKey,
           body: SizedBox.expand(
             child: Container(
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Container(
-                      height: orientation == Orientation.portrait ? screenHeight * 0.33 : screenHeight,
-                      width: screenWidth,
-                      child: YoutubePlayer(
-                        onEnded: (YoutubeMetaData metaData) {
-                          _controller.play();
-                          _controller.pause();
-                        },
-                        onReady: () {
-//                _controller.addListener(() {
-//                  print(_controller.metadata.duration.inSeconds);
-//                  print(_controller.value.position.inSeconds);
-//                });
-                        },
-                        controller: _controller,
-                        bottomActions: <Widget>[
-                          CurrentPosition(
-                            controller: _controller,
+              child: _studyMaterial.src == null
+                  ? Center(
+                      child: Text('This Video is no longer availabe'),
+                    )
+                  : Stack(
+                      children: [
+                        Positioned.fill(
+                          child: Container(
+                            height: orientation == Orientation.portrait ? screenHeight * 0.33 : screenHeight,
+                            width: screenWidth,
+                            child: YoutubePlayer(
+                              onEnded: (YoutubeMetaData metaData) {
+                                _controller.play();
+                                _controller.pause();
+                              },
+                              onReady: () {
+                                _controller.play();
+                              },
+                              controller: _controller,
+                              bottomActions: <Widget>[
+                                CurrentPosition(
+                                  controller: _controller,
+                                ),
+                                step10Forward(),
+                                ProgressBar(
+                                  controller: _controller,
+                                  isExpanded: true,
+                                  colors: ProgressBarColors(
+                                      playedColor: Colors.red, handleColor: Colors.white, backgroundColor: Colors.white30),
+                                ),
+                                step10Backward(),
+                                Text(
+                                  _getTotalDuration(_controller.metadata.duration.inSeconds) == '0.0'
+                                      ? '_:_'
+                                      : _getTotalDuration(_controller.metadata.duration.inSeconds),
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                screenResizingWidget()
+                              ],
+                            ),
                           ),
-                          step10Forward(),
-                          ProgressBar(
-                            controller: _controller,
-                            isExpanded: true,
-                            colors: ProgressBarColors(playedColor: Colors.red, handleColor: Colors.white, backgroundColor: Colors.white30),
-                          ),
-                          step10Backward(),
-                          Text(
-                            _getTotalDuration(_controller.metadata.duration.inSeconds) == '0.0'
-                                ? '_:_'
-                                : _getTotalDuration(_controller.metadata.duration.inSeconds),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          screenResizingWidget()
-                        ],
-                      ),
+                        ),
+                        if (orientation == Orientation.portrait)
+                          Positioned(
+                            top: ScreenUtil().setHeight(50),
+                            child: RaisedButton(
+                              child: Text('info'),
+                              onPressed: () {
+                                if (_controller.value.isPlaying) {
+                                  _controller.pause();
+                                }
+                                showModalBottomSheet(
+                                  backgroundColor: Colors.transparent,
+                                  isScrollControlled: true,
+                                  context: context,
+                                  builder: (_) =>
+                                      CollegeVideoInfoOverlayWidget(widget.pos)
+                                );
+                              },
+                            ),
+                          )
+                      ],
                     ),
-                  ),
-                  if(orientation == Orientation.portrait)Positioned(
-                    top: ScreenUtil().setHeight(50),
-                    child: RaisedButton(
-                      child: Text('info'),
-                      onPressed: () {
-                        if(_controller.value.isPlaying){
-                          _controller.pause();
-                        }
-                        showModalBottomSheet(
-                          backgroundColor: Colors.transparent,
-                          isScrollControlled: true,
-                          context: context,
-                          builder: (_) => VideoInfoOverlayWidget(0)??Container(
-                            height: ScreenUtil().setHeight(1500),
-                            color: Colors.red,
-                            child: Center(child: Text('This is the best video ever',style: TextStyle(color: Colors.white),)),
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                ],
-              ),
             ),
           ),
         ),
@@ -206,7 +211,6 @@ class _VideoDisplayState extends State<VideoPlayer> {
     final Orientation orientation = MediaQuery.of(context).orientation;
     final List<DeviceOrientation> nextOrientation = orientation == Orientation.portrait ? landscape : portrait;
     await setScreenOrientationTo(nextOrientation);
-
   }
 
 // change the landscape to portrait when the back button gets pressed
@@ -236,5 +240,3 @@ class _VideoDisplayState extends State<VideoPlayer> {
     await SystemChrome.setPreferredOrientations(orientations);
   }
 }
-
-

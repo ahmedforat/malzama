@@ -1,11 +1,12 @@
 import 'dart:convert';
+
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:malzama/src/core/general_widgets/helper_functions.dart';
-import 'package:malzama/src/features/home/models/users/user.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../../../../../core/api/api_client/clients/common_materials_client.dart';
 import '../../../../../../../../core/api/contract_response.dart';
@@ -201,7 +202,7 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
   }
 
   // pick lecture to upload and update
-  Future<String> pickLectureToUpload() async {
+  Future<String> _pickLectureToUpload() async {
     File lecture = await FilePicker.getFile(type: FileType.custom, allowedExtensions: ['pdf']);
 
     if (lecture != null) {
@@ -216,6 +217,35 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
       }
     }
     return null;
+  }
+
+  Future<String> pickLectureFile(BuildContext context) async {
+    PermissionStatus status = await Permission.storage.request();
+
+    if (status.isPermanentlyDenied) {
+      return await showDialog(
+          context: context,
+          builder: (context) {
+            final String text = Platform.isAndroid
+                ? 'You must ensure app access to your device files\n'
+                    'go to settings -> privacy ->  Manager -> Files and media -> malzama\n'
+                    'and allow access to media '
+                : 'this app require to access your files, allow it manually from your device settings';
+            return AlertDialog(
+              content: Text(text),
+              actions: [
+                RaisedButton(
+                  onPressed: () => Navigator.of(context).pop(null),
+                  child: Text('Ok'),
+                ),
+              ],
+            );
+          });
+    } else if (status.isGranted) {
+      return await _pickLectureToUpload();
+    } else {
+      return null;
+    }
   }
 
   // set all fields to null

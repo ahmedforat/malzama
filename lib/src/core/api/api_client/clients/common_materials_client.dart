@@ -23,8 +23,8 @@ class CommonMaterialClient implements CommonMaterialsRepository {
   }
 
   @override
-  Future<ContractResponse> saveMaterial({String id, String fieldName}) async {
-    final String queryString = '?id=$id&fieldName=$fieldName';
+  Future<ContractResponse> saveMaterial({String id, String fieldName,String indicator}) async {
+    final String queryString = '?id=$id&fieldName=$fieldName&indicator=$indicator';
     return await HttpMethods.get(url: Api.MARK_MATERIAL_AS_SAVED, queryString: queryString);
   }
 

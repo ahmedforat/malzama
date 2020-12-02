@@ -1,14 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:malzama/src/core/general_widgets/helper_functions.dart';
+import 'package:malzama/src/core/platform/services/file_system_services.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../../core/api/api_client/clients/quiz_client.dart';
 import '../../../../core/platform/local_database/access_objects/general_variables.dart';
 import '../../../../core/platform/local_database/access_objects/quiz_access_object.dart';
 import '../../models/users/user.dart';
-
 
 class UserInfoStateProvider with ChangeNotifier {
   // ====================================
@@ -32,6 +34,7 @@ class UserInfoStateProvider with ChangeNotifier {
     notifyMyListeners();
   }
 
+  // =============================================================================================
   // the count of uploaded pdfs
   int _uploadedPDFsCount;
 
@@ -41,6 +44,8 @@ class UserInfoStateProvider with ChangeNotifier {
     _uploadedPDFsCount = update ?? 0;
     notifyMyListeners();
   }
+
+  // =============================================================================================
 
   // the count of uploaded videos
   int _uploadedVideosCount;
@@ -52,6 +57,15 @@ class UserInfoStateProvider with ChangeNotifier {
     notifyMyListeners();
   }
 
+  // =============================================================================================
+
+  /// update user Info and save them
+  Future<void> updateUserInfo() async {
+    await FileSystemServices.saveUserData(userData.toJSON());
+  }
+
+  // =============================================================================================
+
 // count of quizes drafts
   int _quizDraftsCount = 0;
 
@@ -62,6 +76,8 @@ class UserInfoStateProvider with ChangeNotifier {
     _quizDraftsCount = results.length;
     notifyMyListeners();
   }
+
+  // =============================================================================================
 
   Future<void> fetchQuizesCount() async {
     print('Fetching quiz count started');
@@ -80,10 +96,12 @@ class UserInfoStateProvider with ChangeNotifier {
     print('Fetching quiz count Ended');
   }
 
+  // =============================================================================================
+
   // fetch uploaded materials count from local database
   Future<void> fetchUploadedMaterialsCount() async {
     print('Fetching my uploaded materials count Started');
-    
+
     var res = await QuizAccessObject().getUploadedMaterials(MyUploaded.LECTURES);
     _uploadedPDFsCount = res?.length ?? 0;
     res = await QuizAccessObject().getUploadedMaterials(MyUploaded.QUIZES);
@@ -94,25 +112,39 @@ class UserInfoStateProvider with ChangeNotifier {
     print('Fetching my uploaded materials count Ended');
   }
 
-  // ====================================
+  // =============================================================================================
 
   bool showQuizWelcomeMessage = true;
 
+  /// Constructor
   UserInfoStateProvider(User data) {
     print('initailizing USER_INFO_STATE_PROVIDER');
-    if (data != null) {
-      userData = data;
-      fetchQuizesCount();
-      GeneralVariablesService.getQuizWelcomeMessagePermission.then((value) {
-        print('after setting up');
-        print(value);
-        print('after setting up');
-        showQuizWelcomeMessage = value ?? true;
-      });
-      fetchUploadedMaterialsCount();
-    }
+
+    userData = data;
+
+    fetchQuizesCount();
+    loadCachedFiles();
+    GeneralVariablesService.getQuizWelcomeMessagePermission.then((value) {
+      print('after setting up');
+      print(value);
+      print('after setting up');
+      showQuizWelcomeMessage = value ?? true;
+    });
+    fetchUploadedMaterialsCount();
+
     print('DONE _____initailizing USER_INFO_STATE_PROVIDER');
   }
+
+  // =============================================================================================
+
+  void refreshData() {
+    FileSystemServices.getUserData().then((value) {
+      userData = value;
+      notifyMyListeners();
+    });
+  }
+
+  // =============================================================================================
 
   PersistentBottomSheetController bottomSheetController;
 
@@ -121,27 +153,14 @@ class UserInfoStateProvider with ChangeNotifier {
 
   bool get isBottomNavBarVisible => _isBottomNavBarVisible;
 
-  // ========================================================================================
-
-//  // check whether the comment sheet is visible or not
-//  bool _isCommentSheetVisible = false;
-//  bool get isCommentSheetVisible => _isCommentSheetVisible;
-//
-//  void setIsCommentSheetVisibilityTo(bool update){
-//    if(update != null ){
-//      _isCommentSheetVisible = update;
-//      notifyMyListeners()();
-//    }
-//  }
-
-  // ========================================================================================
-
   void setBottomNavBarVisibilityTo(bool update) {
     if (_isBottomNavBarVisible != update) {
       _isBottomNavBarVisible = update;
       notifyMyListeners();
     }
   }
+
+  // =============================================================================================
 
   // visibility of the comment floating text field to add a comment
   bool _isCommentTextFieldVisible = false;
@@ -155,9 +174,31 @@ class UserInfoStateProvider with ChangeNotifier {
     }
   }
 
+  // =============================================================================================
+
+  List<String> cachedFiles = [];
+
+  Future<void> loadCachedFiles() async {
+    Directory directory = await getApplicationDocumentsDirectory();
+    final String subDirPath = directory.path + '/cached_files';
+    final bool hasCachedDir = await Directory(subDirPath).exists();
+    if (hasCachedDir) {
+      List<FileSystemEntity> files = Directory(subDirPath).listSync();
+      if (files.isNotEmpty) {
+        List<FileSystemEntity> existedFiles = files.where((element) => element.existsSync()).toList();
+        if (existedFiles.isNotEmpty) {
+          cachedFiles = existedFiles.map((e) => e.path).toList();
+        }
+      }
+    }
+  }
+
   User userData;
+
   bool get isAcademic => HelperFucntions.isAcademic(this.userData.accountType);
+
   bool get isTeacher => HelperFucntions.isTeacher(this.userData.accountType);
+
   // void _loadUserData() async {
   //   var data = await FileSystemServices.getUserData();
   //   if (data != null && data != false) {}

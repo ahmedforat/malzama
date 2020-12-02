@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/details_pages/college_pdf_details_page.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/details_pages/school_pdf_details_page.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/Navigator/routes_names.dart';
 import '../shared/comments_and_replies/state_providers/comment_state_provider.dart';
-import '../shared/single_page_display_widgets/view_college_material.dart';
 import 'pages/pdfs_page.dart';
 
 // handle the routing inside the nested navigator of the notifications page
@@ -28,19 +31,22 @@ Route<dynamic> homeOnGenerateRoutes(RouteSettings settings) {
     //   builder = (context) => DisplayRatorsPage(ratingsList: settings.arguments);
     //   break;
     // display a lecture in a single page
-    case RouteNames.VIEW_LECTURE:
+
+    // view lecture details page
+    case RouteNames.VIEW_LECTURE_DETAILS:
+      final bool isAcademic = locator<UserInfoStateProvider>().isAcademic;
       try {
         var args = settings.arguments as Map<String, dynamic>;
         builder = (context) => ChangeNotifierProvider<CommentStateProvider>(
-          lazy: false,
+              lazy: false,
               create: (context) => CommentStateProvider(
                 state: args['state'],
                 isVideo: args['isVideo'],
                 materialPos: args['pos'],
               ),
-              builder:(context,_) => CollegePDFDetailsPage(
+              builder: (context, _) => isAcademic ? CollegePDFDetailsPage(
                 pos: args['pos'],
-                addComment: args['addComment'],
+              ) : SchoolPDFDetailsPage(
               ),
             );
       } catch (err) {
@@ -48,17 +54,10 @@ Route<dynamic> homeOnGenerateRoutes(RouteSettings settings) {
       }
       break;
 
-    // display a video in a single page
-    case RouteNames.VIEW_VIDEO:
-      builder = (context) => throw UnimplementedError();
-      break;
-
     // display a quiz in a single page
     // case RouteNames.VIEW_QUIZ:
     //   builder = (context) => throw UnimplementedError();
     //   break;
-
-
 
 //    case RouteNames.VIEW_COMMENTS_PAGE:
 //      final Map<String,dynamic> args = settings.arguments as Map<String, dynamic>;

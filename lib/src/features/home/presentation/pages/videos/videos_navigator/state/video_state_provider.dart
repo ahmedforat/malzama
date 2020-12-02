@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:malzama/src/core/api/api_client/clients/common_materials_client.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 
 import '../../../../../../../core/api/api_client/clients/video_and_pdf_client.dart';
 import '../../../../../../../core/api/contract_response.dart';
@@ -11,10 +14,10 @@ import '../../../../../../../core/references/references.dart';
 import '../../../../../models/materials/study_material.dart';
 
 class VideoStateProvider with ChangeNotifier implements MaterialStateRepo {
-
-  VideoStateProvider(){
+  VideoStateProvider() {
     loadCredentialData();
   }
+
   List<StudyMaterial> _videosList = [];
 
   List<StudyMaterial> get materials => _videosList;
@@ -80,7 +83,7 @@ class VideoStateProvider with ChangeNotifier implements MaterialStateRepo {
       if (responseBody.isNotEmpty) {
         appendToMaterialsFrom(responseBody);
       }
-    }else{
+    } else {
       _failureOfInitialFetch = true;
     }
     setIsFetchingTo(false);
@@ -105,40 +108,57 @@ class VideoStateProvider with ChangeNotifier implements MaterialStateRepo {
     setIsPaginatingTo(false);
   }
 
-  void appendToMaterialsFrom(List<Map<String, dynamic>> data) {
-    data.forEach((element) {
-      _videosList.add(References.getProperStudyMaterial(element, isAcademic));
-    });
+  void appendToMaterialsFrom(List<dynamic> data) {
+    if (data.length != 0) {
+      data.forEach((element) {
+        _videosList.add(References.getProperStudyMaterial(element as Map<String, dynamic>, isAcademic));
+      });
+    }
   }
 
-
-  Future<void> onRefresh()async{
+  Future<void> onRefresh() async {
     var collectionName = _isAcademic ? 'univideos' : 'schvideos';
     ContractResponse response = await VideosAndPDFClient().fetch(collectionName: collectionName, idFactor: _videosList.last?.id);
-    if(response is Success){
+    if (response is Success) {
       List data = json.decode(response.message);
-      if(data.isNotEmpty){
+      if (data.isNotEmpty) {
         appendToMaterialsFrom(data);
         notifyMyListeners();
       }
     }
-
   }
 
   // =========================================================================================================
 
-
-  void appendToComments(String id,int pos){
+  void appendToComments(String id, int pos) {
     _videosList[pos].comments.add(id);
     notifyMyListeners();
   }
 
-
-  void removeFromComments(String id,int pos){
+  void removeFromComments(String id, int pos) {
     _videosList[pos].comments.removeWhere((comment) => comment == id);
     notifyMyListeners();
   }
+
   // =========================================================================================================
+
+  // @override
+  // Future<void> addToSaved(int pos) async {
+  //   final String id = materials[pos].id;
+  //   final String fieldName = materials[pos].materialType + 's';
+  //   locator<UserInfoStateProvider>().userData.savedVideos.add(id);
+  //   notifyMyListeners();
+  //   ContractResponse response = await CommonMaterialClient().saveMaterial(
+  //     id: id,
+  //     fieldName: fieldName,
+  //   );
+  //   if (response is Success) {
+  //     await locator<UserInfoStateProvider>().updateUserInfo();
+  //   }
+  // }
+
+  // =========================================================================================================
+
   bool _isDisposed = false;
 
   void notifyMyListeners() {
@@ -151,5 +171,46 @@ class VideoStateProvider with ChangeNotifier implements MaterialStateRepo {
   void dispose() {
     _isDisposed = true;
     super.dispose();
+  }
+
+  @override
+  Future<void> onMaterialSaving(int pos) async {
+    _videosList[pos].isSaved = !_videosList[pos].isSaved;
+    final String indicator = _videosList[pos].isSaved ? 'add' : 'pull';
+
+    print('=======================================');
+    print(indicator);
+    print('=======================================');
+    final String id = materials[pos].id;
+    final String fieldName = 'saved_${materials[pos].materialType}s';
+    await _onMaterialSavingDelegate(id, fieldName, indicator);
+  }
+
+
+  @override
+  Future<void> onMaterialSavingFromExternal(String id) async {
+    final StudyMaterial lecture = _videosList.firstWhere((element) => element.id == id);
+    lecture.isSaved = !lecture.isSaved;
+    final String indicator = lecture.isSaved ? 'add' : 'pull';
+    final String fieldName = 'saved_${lecture.materialType}s';
+    await _onMaterialSavingDelegate(id, fieldName, indicator);
+  }
+
+  Future<void> _onMaterialSavingDelegate(String id, String fieldName, String indicator) async {
+    ContractResponse response = await CommonMaterialClient().saveMaterial(
+      id: id,
+      fieldName: fieldName,
+      indicator: indicator,
+    );
+    if (response is Success) {
+      if (indicator == 'pull') {
+        locator<UserInfoStateProvider>().userData.savedVideos.remove(id);
+      } else {
+        locator<UserInfoStateProvider>().userData.savedVideos.add(id);
+      }
+      await locator<UserInfoStateProvider>().updateUserInfo();
+      locator<UserInfoStateProvider>().notifyMyListeners();
+      notifyMyListeners();
+    }
   }
 }

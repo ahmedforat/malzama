@@ -3,7 +3,6 @@ import 'package:malzama/src/features/home/presentation/pages/my_materials/materi
 
 import '../../contract_response.dart';
 
-
 // uuid consist of institution code + stage number aaa1
 abstract class QuizRepository {
   /// [delete single quiz question] <br>
@@ -43,7 +42,11 @@ abstract class QuizRepository {
     @required int skipCount,
   });
 
-
-/// [Fetch questions of single quiz in pagination style 8 by 8]
+  /// [Fetch questions of single quiz in pagination style 8 by 8]
   Future<ContractResponse> fetchQuizesCount();
+
+  /// [fetch saved quizes headers] <br>
+  ///  [require] collection in addition list of ids as query string <br>
+  ///  GET Request
+  Future<ContractResponse> fetchSavedQuizesHeaders({@required String collection, @required List<String> ids});
 }

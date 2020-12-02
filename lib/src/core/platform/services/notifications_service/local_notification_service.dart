@@ -5,7 +5,6 @@ import 'package:malzama/src/features/home/presentation/state_provider/notifcatio
 import '../../../Navigator/navigation_service.dart';
 import '../../../Navigator/routes_names.dart';
 import '../dialog_services/service_locator.dart';
-import 'package:flutter/material.dart';
 
 class LocalNotificationService {
   // private default constructor
@@ -44,7 +43,8 @@ class LocalNotificationService {
       print(NavigationService.navigationKeys);
       print(service.currentIndex);
       print(NavigationService.navigationKeys[service.currentIndex]);
-      NavigationService.navigationKeys[service.currentIndex].currentState.pushNamed(RouteNames.VIEW_LECTURE, arguments: json.decode(payload));
+      NavigationService.navigationKeys[service.currentIndex].currentState.pushNamed(RouteNames.VIEW_LECTURE_DETAILS, arguments: json.decode
+        (payload));
     } catch (err) {
       print('we have got an error');
       print(err.toString());

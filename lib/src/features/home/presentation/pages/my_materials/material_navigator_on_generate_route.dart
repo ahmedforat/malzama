@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/pages/my_saved_page.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/my_saved_common_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_pdf_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_quizes_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/Navigator/routes_names.dart';
@@ -31,7 +36,7 @@ Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
       builder = (context) => MyMaterialPage();
       break;
     // display a lecture in a single page
-    case RouteNames.VIEW_LECTURE:
+    case RouteNames.VIEW_LECTURE_DETAILS:
       Map<String, dynamic> args = settings.arguments;
       builder = (context) => Container(child: Text(args['title'].toString()));
       break;
@@ -43,7 +48,7 @@ Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
       print('inside the on generate routes navigator');
       builder = (context) => ChangeNotifierProvider<CollegeUploadingState>(
             create: (context) => CollegeUploadingState(),
-            builder: (context, _) => materialType == 'lecture' ? CollegeLectureUploadingFormWidget(): CollegeVideoUploadingFormWidget(),
+            builder: (context, _) => materialType == 'lecture' ? CollegeLectureUploadingFormWidget() : CollegeVideoUploadingFormWidget(),
           );
       break;
 
@@ -120,38 +125,24 @@ Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
           );
       break;
 
-    // display a video in a single page
-    case RouteNames.VIEW_VIDEO:
-      builder = (context) => throw UnimplementedError();
-      break;
-
-    // display a quiz in a single page
-    // case RouteNames.VIEW_QUIZ:
-    //   builder = (context) => QuizUploaderWidget(false);
-    //   break;
-
-    // display a lecture with someone comment in a single page
-    case RouteNames.VIEW_COMMENT_ON_LECTURE:
-      builder = (context) => throw UnimplementedError();
-      break;
-    // display a vieo with someone comment in a single page
-    case RouteNames.VIEW_COMMENT_ON_VIDEO:
-      builder = (context) => throw UnimplementedError();
-      break;
-
-    // display user own profile page
-    case RouteNames.VIEW_MY_PROFILE_PAGE:
-      builder = (context) => throw UnimplementedError();
-      break;
-
-    // display any other user profile page
-    case RouteNames.VIEW_USER_PROFILE_PAGE:
-      builder = (context) => throw UnimplementedError();
-      break;
-
-    case RouteNames.EXPLORE_MY_MATERIALS:
-      builder = (context) => ExploreMaterialPage();
-      break;
+    case RouteNames.VIEW_MY_SAVED_MATERIALS:
+      builder = (context) => MultiProvider(
+            providers: [
+              ChangeNotifierProvider<SavedCommonState>(
+                create: (context) => SavedCommonState(),
+              ),
+              ChangeNotifierProvider<MySavedQuizesStateProvider>(
+                create: (context) => MySavedQuizesStateProvider(),
+              ),
+              ChangeNotifierProvider<MySavedVideosStateProvider>(
+                create: (context) => MySavedVideosStateProvider(),
+              ),
+              ChangeNotifierProvider<MySavedPDFStateProvider>(
+                create: (context) => MySavedPDFStateProvider(),
+              ),
+            ],
+            builder: (context, child) => MySavedMaterialPage(),
+          );
   }
 
   return new MaterialPageRoute(builder: builder);

@@ -139,7 +139,7 @@ class _CollegeLectureUploadingFormState extends State<CollegeLectureUploadingFor
                           onPressed: data[0] && data[1]
                               ? null
                               : () async {
-                                  String message = await collegeUploadingState.pickLectureToUpload();
+                                  String message = await collegeUploadingState.pickLectureFile(context);
                                   if (message != null && message.isNotEmpty) {
                                     collegeUploadingState.showSnackBar(message);
                                   }

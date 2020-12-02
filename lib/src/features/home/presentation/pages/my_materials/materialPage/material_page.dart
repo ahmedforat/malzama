@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/models/users/user.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materials_page_widgets/my_saved_materials_icon_widget.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/details_pages/college_pdf_details_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../../state_provider/user_info_provider.dart';
-import '../materials_widgets/my_saved_materials.dart';
-import '../quizes_widget.dart';
-import 'drafts/drafts_icon_widget.dart';
-import 'my_uploads/my_uploaded_material_widget.dart';
+import '../materials_page_widgets/quizes_icon_widget.dart';
+import '../materials_page_widgets/drafts_icon_widget.dart';
+import '../materials_page_widgets/my_uploaded_material_icon_widget.dart';
 import 'upper_uploading_banner/upper_uploading_banner.dart';
 
 class MyMaterialPage extends StatelessWidget {
@@ -24,15 +25,15 @@ class MyMaterialPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    return Selector<UserInfoStateProvider, String>(
-      selector: (context, stateProvider) => stateProvider.userData.accountType,
-      builder: (context, account_type, child) => Scaffold(
+    return Selector<UserInfoStateProvider, User>(
+      selector: (context, stateProvider) => stateProvider.userData,
+      builder: (context, data, child) => Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) => CollegePDFDetailsPage()));
           },
         ),
-        body: account_type == null
+        body: data == null
             ? Center(
                 child: CircularProgressIndicator(),
               )
@@ -46,8 +47,8 @@ class MyMaterialPage extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Column(
                     children: <Widget>[
-                      if (account_type != 'schstudents') ..._contentCreators,
-                      MySavedMaterials(),
+                      if (data.accountType != 'schstudents') ..._contentCreators,
+                      MySavedMaterialsIcon(),
                     ],
                   ),
                 ),

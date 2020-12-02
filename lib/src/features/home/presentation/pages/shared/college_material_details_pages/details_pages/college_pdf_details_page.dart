@@ -1,14 +1,22 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:malzama/src/core/Navigator/routes_names.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/core/platform/services/file_system_services.dart';
+import 'package:malzama/src/features/home/models/materials/college_material.dart';
 import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/pdf_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/players/video_player_widget.dart';
+import 'file:///C:/Users/Karrar/Desktop/secret%20stuffs/current%20projects/online_learning/malzama/lib/src/features/home/presentation/pages/shared/college_material_details_pages/players/pdf_player/pdf_player_widget.dart';
+import 'file:///C:/Users/Karrar/Desktop/secret%20stuffs/current%20projects/online_learning/malzama/lib/src/features/home/presentation/pages/shared/college_material_details_pages/players/video_player/video_player_widget.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/school_material_details_widget/author_widget.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/school_material_details_widget/school_materials_details_comment_section.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/school_material_details_widget/school_materials_details_last_update_widget.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/school_material_details_widget/school_materials_details_published_in_widget.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 
 import 'package:provider/provider.dart';
 
@@ -30,6 +38,7 @@ class CollegePDFDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
     PDFStateProvider pdfState = Provider.of<PDFStateProvider>(context, listen: false);
+    CollegeMaterial collegeMaterial = pdfState.materials[pos];
     print('building Entire page widget');
 
     return SafeArea(
@@ -41,9 +50,9 @@ class CollegePDFDetailsPage extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _UpperPart(),
+                _UpperPart(collegeMaterial, pos),
                 SizedBox(
                   height: ScreenUtil().setHeight(50),
                 ),
@@ -64,27 +73,30 @@ class CollegePDFDetailsPage extends StatelessWidget {
                       SizedBox(
                         height: ScreenUtil().setHeight(30),
                       ),
-                      SchoolMaterialPublishedInWidget(publishingDate: 'تاريخ النشر: 21/08/2030' ?? pdfState.materials[pos]?.postDate),
-                      SizedBox(
-                        height: ScreenUtil().setHeight(20),
-                      ),
-                      SchoolMaterialDetailsLastUpdateWidget<PDFStateProvider>(pos: pos),
+                      CollegeMaterialPublishedInWidget(publishingDate: pdfState.materials[pos].postDate),
+                      if (pdfState.materials[pos].lastUpdate != null)
+                        SizedBox(
+                          height: ScreenUtil().setHeight(20),
+                        ),
+                      if (pdfState.materials[pos].lastUpdate != null)
+                        CollgeMaterialLastUpdateWidget<PDFStateProvider>(
+                          pos: pos,
+                        ),
                       SizedBox(
                         height: ScreenUtil().setHeight(50),
                       ),
-                      CollegeMaterialDescriptionWidget<PDFStateProvider>(pos: null),
+                      CollegeMaterialDescriptionWidget<PDFStateProvider>(pos: pos),
                     ],
                   ),
                 ),
                 SizedBox(
                   height: ScreenUtil().setHeight(50),
                 ),
-                SchoolMaterialDetailsAuthorWidget<PDFStateProvider>(pos),
                 CollegeMaterialDetailsAuthorWidget<PDFStateProvider>(pos),
                 SizedBox(
-                  height: ScreenUtil().setHeight(50),
+                  height: ScreenUtil().setHeight(70),
                 ),
-                SchoolCommentsSectionWidget<PDFStateProvider>(pos),
+                CommentsSectionWidget<PDFStateProvider>(pos),
               ],
             ),
           ),
@@ -95,6 +107,11 @@ class CollegePDFDetailsPage extends StatelessWidget {
 }
 
 class _UpperPart extends StatelessWidget {
+  final int pos;
+  final CollegeMaterial collegeMaterial;
+
+  _UpperPart(this.collegeMaterial, this.pos);
+
   @override
   Widget build(BuildContext context) {
     print('building Upper part widget');
@@ -109,15 +126,18 @@ class _UpperPart extends StatelessWidget {
                     size: ScreenUtil().setHeight(280),
                     color: Colors.red,
                   ),
-                  SizedBox(height: ScreenUtil().setHeight(30),),
+                  SizedBox(
+                    height: ScreenUtil().setHeight(30),
+                  ),
                   Text('Tap to open the file')
                 ],
               ),
             ),
           ),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => VideoPlayer()));
-          },
+          onTap: () => Navigator.of(context, rootNavigator: true).pushNamed(
+            RouteNames.OPEN_LECTURE_FILE,
+            arguments: pos,
+          ),
         ) ??
         Container(
           height: ScreenUtil().setHeight(550),

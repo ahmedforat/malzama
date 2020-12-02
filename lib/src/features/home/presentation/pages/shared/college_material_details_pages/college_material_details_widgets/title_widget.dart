@@ -15,7 +15,7 @@ class CollegeMaterialTitleWidget<B extends MaterialStateRepo> extends StatelessW
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setSp(50)),
       child: Text(
-        'Clinical Pharmacy And Therapeutics And Therapeutics  And Therapeutics',
+        materialStateRepo.materials[pos].title,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(

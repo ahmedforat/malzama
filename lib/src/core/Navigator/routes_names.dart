@@ -1,6 +1,9 @@
 class RouteNames {
-  static const String VIEW_LECTURE = '/view-lecture';
-  static const String VIEW_VIDEO = '/view-video';
+  static const String VIEW_LECTURE_DETAILS = '/view-lecture-details';
+  static const String VIEW_VIDEO_DETAILS = '/view-video-details';
+
+  static const String PLAY_VIDEO = '/play-video';
+  static const String OPEN_LECTURE_FILE = '/open-file';
   //static const String VIEW_QUIZ = '/view-quiz';
 
   static const String VIEW_COMMENT_ON_LECTURE = '/view-comment-on-lecture';
@@ -15,6 +18,7 @@ class RouteNames {
   static const String EXPLORE_MY_DRAFTS = '/explore-my-drafts';
 
   static const String VIEW_COMMENTS_PAGE = '/view-comments-page';
+  static const String VIEW_MY_SAVED_MATERIALS = '/view-my-saved-materials';
 
 
   // uplaoding

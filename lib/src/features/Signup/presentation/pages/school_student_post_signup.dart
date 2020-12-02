@@ -9,9 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/api/contract_response.dart';
 import '../../../../core/debugging/debugging_widgets.dart';
 import '../../../../core/platform/services/caching_services.dart';
-import '../../../../core/platform/services/file_system_services.dart';
 import '../../../../core/references/references.dart';
-import '../../usecases/signup_usecase.dart';
 import '../state_provider/school_student_state_provider.dart';
 import '../widgets/school_student_and_teacher_widgets.dart/select_baghdad_sub_region.dart';
 import '../widgets/school_student_and_teacher_widgets.dart/select_school_section_widget..dart';
@@ -130,8 +128,8 @@ void _handleOnDone(GlobalKey<ScaffoldState> key, BuildContext context,
   } else {
     Map<String,dynamic> user =
         accountType == AccountType.unistudents.toString()
-            ? schoolState.fetchStudentData(commonState)
-            : schoolState.fetchTechertData(commonState);
+            ? await schoolState.fetchStudentData(commonState)
+            : await schoolState.fetchTechertData(commonState);
     user['account_type'] = accountType.toString();
     print(user);
 

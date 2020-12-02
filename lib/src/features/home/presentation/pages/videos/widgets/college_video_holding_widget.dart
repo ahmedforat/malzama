@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../core/Navigator/routes_names.dart';
-import '../../../../models/materials/study_material.dart';
 import '../videos_navigator/state/video_state_provider.dart';
 
 class CollegeVideoHoldingWidget extends StatelessWidget {
@@ -15,17 +14,12 @@ class CollegeVideoHoldingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    VideoStateProvider videoState = Provider.of<VideoStateProvider>(context, listen: false);
     ScreenUtil.init(context);
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pushNamed(
-          RouteNames.VIEW_LECTURE,
-          arguments: {
-            'pos': pos,
-            'isVideo': true,
-            'state': videoState.materials[pos],
-          },
+          RouteNames.VIEW_VIDEO_DETAILS,
+          arguments: pos
         );
       },
       child: Padding(
@@ -121,12 +115,12 @@ class CollegeVideoHoldingWidget extends StatelessWidget {
   }
 }
 
-String _reformatDescription(String desc) {
-  var desclist = desc.split('\n');
-  var descStr = '';
-  desclist.forEach((element) => descStr += element.toString().trim() + ' ');
-  return descStr;
-}
+// String _reformatDescription(String desc) {
+//   var desclist = desc.split('\n');
+//   var descStr = '';
+//   desclist.forEach((element) => descStr += element.toString().trim() + ' ');
+//   return descStr;
+// }
 
 class LowerPart extends StatelessWidget {
   final int pos;
@@ -137,46 +131,34 @@ class LowerPart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Row(
-        children: <Widget>[
-          MaterialButton(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text('Add Comment'),
-                SizedBox(
-                  width: ScreenUtil().setWidth(20),
-                ),
-                Icon(Icons.comment),
-              ],
-            ),
-            onPressed: () {
-              VideoStateProvider videoState = Provider.of<VideoStateProvider>(context, listen: false);
-              final routName = RouteNames.VIEW_LECTURE;
-              Navigator.of(context).pushNamed(
-                routName,
-                arguments: {
-                  'isVideo': false,
-                  'pos': pos,
-                  'addComment': true,
-                  'commentIds': videoState.materials[pos].comments,
-                },
-              );
-            },
-          ),
-          Expanded(
-            child: Selector<VideoStateProvider, int>(
-              selector: (context, stateProvider) => stateProvider.materials[pos].comments.length,
-              builder: (context, commentsCount, _) => Container(
-                padding: EdgeInsets.only(
-                  right: ScreenUtil().setSp(30),
-                ),
-                //color: Colors.red,
-                width: double.infinity,
-                alignment: Alignment.centerRight,
-                child: Text('$commentsCount Comments'),
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Selector<VideoStateProvider, int>(
+            selector: (context, stateProvider) => stateProvider.materials[pos].comments.length,
+            builder: (context, commentsCount, _) => Container(
+              padding: EdgeInsets.only(
+                right: ScreenUtil().setSp(30),
               ),
+              //color: Colors.red,
+              alignment: Alignment.centerRight,
+              child: Text('$commentsCount Comments'),
             ),
           ),
+          SizedBox(
+            width: ScreenUtil().setWidth(50),
+          ),
+          Selector<VideoStateProvider, bool>(
+            selector: (context, stateProvider) => stateProvider.materials[pos].isSaved,
+            builder: (context, isSaved, _) => GestureDetector(
+              child: Icon(
+                isSaved ? Icons.bookmark : Icons.bookmark_border,
+                color: Colors.black,
+              ),
+              onTap: () {
+                Provider.of<VideoStateProvider>(context, listen: false).onMaterialSaving(pos);
+              },
+            ),
+          )
         ],
       ),
     );
@@ -190,7 +172,6 @@ class UpperPart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    StudyMaterial myState = Provider.of<VideoStateProvider>(context, listen: false).materials[pos];
     return Padding(
       padding: EdgeInsets.all(ScreenUtil().setSp(15)),
       child: Row(

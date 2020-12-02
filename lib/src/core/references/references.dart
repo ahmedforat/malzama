@@ -33,7 +33,8 @@ class References {
     'schteachers': 'School Teacher'
   };
 
-  static getSuitableSchoolTeacherSpeciality(String specaility) => classes[specaility];
+  static getSuitableSchoolTeacherSpeciality(String specaility) =>
+      classes[specaility];
 
   static getSuitableSubRegion(String subRegion) {
     switch (subRegion) {
@@ -63,11 +64,15 @@ class References {
   }
 
   static String getVideoLength(Map<String, dynamic> userData) {
-    return isTeacher(userData['account_type']) ? userData['videos'].length.toString() : userData['saved_videos.'].length.toString();
+    return isTeacher(userData['account_type'])
+        ? userData['videos'].length.toString()
+        : userData['saved_videos.'].length.toString();
   }
 
   static String getLectureLength(Map<String, dynamic> userData) {
-    return isTeacher(userData['account_type']) ? userData['lectures'].length.toString() : userData['saved_lectures'].length.toString();
+    return isTeacher(userData['account_type'])
+        ? userData['lectures'].length.toString()
+        : userData['saved_lectures'].length.toString();
   }
 
   static User specifyAccountType(Map<String, dynamic> map) {
@@ -76,7 +81,7 @@ class References {
         return CollegeTeacher.fromJSON(map);
         break;
       case 'unistudents':
-        return CollegeSutdent.fromJSON( map);
+        return CollegeSutdent.fromJSON(map);
         break;
       case 'schteachers':
         return SchoolTeacher.fromJSON(map);
@@ -90,7 +95,8 @@ class References {
     }
   }
 
-  static String getSuitableSchholSection(String key) => key == 'bio' ? 'الفرع الاحيائي' : 'الفرع التطبيقي';
+  static String getSuitableSchholSection(String key) =>
+      key == 'bio' ? 'الفرع الاحيائي' : 'الفرع التطبيقي';
   static final Map<String, String> iraqProvinces = {
     'baghdad': 'بغداد',
     'anbar': 'الأنبار',
@@ -147,7 +153,11 @@ class References {
     6: schoolStages[0]
   };
 
-  static List<String> schoolSections = ['الفرع الاحيائي', 'الفرع التطبيقي', 'الاحيائي والتطبيقي'];
+  static List<String> schoolSections = [
+    'الفرع الاحيائي',
+    'الفرع التطبيقي',
+    'الاحيائي والتطبيقي'
+  ];
 
   static double getProperFontSize(int textLength) {
     print('this is textlength' + textLength.toString());
@@ -165,7 +175,9 @@ class References {
     const String TYPICAL_PREFIX = 'https://www.youtube.com/watch?v=';
     int startIndex = TYPICAL_PREFIX.length;
     int endIndex = youTubeLink.indexOf('&');
-    String videoID = endIndex == -1 ? youTubeLink.substring(startIndex) : youTubeLink.substring(startIndex, endIndex);
+    String videoID = endIndex == -1
+        ? youTubeLink.substring(startIndex)
+        : youTubeLink.substring(startIndex, endIndex);
     return videoID;
   }
 
@@ -174,15 +186,20 @@ class References {
     return link.isEmpty
         ? 'this field is required'
         : link.contains('watch?v=') &&
-                link.substring(0, TYPICAL_PREFIX.length).compareTo(TYPICAL_PREFIX) == 0 &&
+                link
+                        .substring(0, TYPICAL_PREFIX.length)
+                        .compareTo(TYPICAL_PREFIX) ==
+                    0 &&
                 link.substring(0, TYPICAL_PREFIX.length) == TYPICAL_PREFIX
             ? null
             : 'Please enter a valid link';
   }
 
-  static String getFullYouTubeUrl(String videoId) => 'https://www.youtube.com/watch?v=$videoId';
+  static String getFullYouTubeUrl(String videoId) =>
+      'https://www.youtube.com/watch?v=$videoId';
 
-  static List<String> getSuitaleCollegeMaterialList(int stage, String college, {int semester}) {
+  static List<String> getSuitaleCollegeMaterialList(int stage, String college,
+      {int semester}) {
     RegExp dentist = new RegExp(r'سنان');
     RegExp pharmacy = new RegExp(r'صيدلة');
     RegExp analysis = new RegExp(r'مرضية');
@@ -198,17 +215,19 @@ class References {
     }
   }
 
-
-  static StudyMaterial getProperStudyMaterial(Map<String,dynamic> data,bool isAcademic){
-    return isAcademic ? CollegeMaterial.fromJSON(data) : SchoolMaterial.fromJSON(data);
+  static StudyMaterial getProperStudyMaterial(
+      Map<String, dynamic> data, bool isAcademic) {
+    return isAcademic
+        ? CollegeMaterial.fromJSON(data)
+        : SchoolMaterial.fromJSON(data);
   }
 
-
-  static Future<String> getMaterialType({String text,String accountType})async{
+  static Future<String> getMaterialType(
+      {String text, String accountType}) async {
     bool isAcademic;
-    if(accountType != null){
+    if (accountType != null) {
       isAcademic = HelperFucntions.isAcademic(accountType);
-    }else{
+    } else {
       accountType = await UserCachedInfo().getRecord('account_type');
       isAcademic = HelperFucntions.isAcademic(accountType);
     }

@@ -4,8 +4,10 @@ import 'package:flutter_screenutil/screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:malzama/src/core/api/contract_response.dart';
 import 'package:malzama/src/core/debugging/debugging_widgets.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/core/style/colors.dart';
 import 'package:malzama/src/features/Signup/presentation/state_provider/execution_state.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'package:malzama/src/features/home/usecases/log_out.dart';
 
 import 'package:malzama/src/features/verify_your_email/presentation/validate_your_account_msg.dart';
@@ -90,6 +92,7 @@ class LoginPage extends StatelessWidget {
                                 Navigator.of(context).pushNamed('/validate-account-page');
                               }
                             } else if (response is Success) {
+                              locator<UserInfoStateProvider>().refreshData();
                               Navigator.of(context).pushNamedAndRemoveUntil('/home-page', (_) => false);
                             } else {
                               DebugTools.showErrorMessageWidget(context: context, message: response.message);

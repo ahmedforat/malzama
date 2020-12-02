@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:malzama/src/core/api/api_client/repositories/quiz_repository.dart';
 import 'package:malzama/src/core/api/contract_response.dart';
 import 'package:malzama/src/core/api/http_methods.dart';
@@ -37,4 +38,11 @@ class QuizClient implements QuizRepository {
 
   @override
   Future<ContractResponse> fetchQuizesCount() async => await HttpMethods.get(url: Api.FETCH_QUIZES_COUNT);
+
+  @override
+  Future<ContractResponse> fetchSavedQuizesHeaders({@required String collection, @required List<String> ids}) async {
+    final String idList = ids.join(',');
+    final String query = '?collection=$collection&ids=$idList';
+    return await HttpMethods.get(url: Api.FETCH_SAVED_QUIZES_HEADERS, queryString: query);
+  }
 }

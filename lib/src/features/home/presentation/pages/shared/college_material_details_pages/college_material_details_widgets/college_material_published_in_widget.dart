@@ -10,9 +10,9 @@ const CollegeMaterialPublishedInWidget({@required this.publishingDate});
     return  Padding(
       padding: EdgeInsets.only(left: ScreenUtil().setSp(50)),
       child: Text(
-        publishingDate ??'Published in: 22/08/2050',
+        'Published in: ${publishingDate.substring(0,10)}',
         style: TextStyle(
-          fontSize: ScreenUtil().setSp(35),
+          fontSize: ScreenUtil().setSp(30),
           fontWeight: FontWeight.bold,
         ),
       ),

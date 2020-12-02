@@ -21,11 +21,10 @@ class CommentsSectionWidget<B extends MaterialStateRepo> extends StatelessWidget
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Text('Tap To View Comments'),
-          Text('52 comments') ??
-              Selector<B, int>(
-                selector: (context, stateProvider) => stateProvider.materials[pos].comments.length,
-                builder: (context, count, _) => Text('$count comments'),
-              ),
+          Selector<B, int>(
+            selector: (context, stateProvider) => stateProvider.materials[pos].comments.length,
+            builder: (context, count, _) => Text('$count comments'),
+          ),
         ],
       ),
     );

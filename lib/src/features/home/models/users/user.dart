@@ -83,4 +83,7 @@ class User {
     'accountType':accountType,
     'email':email,
   };
+
+
+  bool get isAcademic => this.accountType == 'uniteachers' || this.accountType == 'unistudents';
 }

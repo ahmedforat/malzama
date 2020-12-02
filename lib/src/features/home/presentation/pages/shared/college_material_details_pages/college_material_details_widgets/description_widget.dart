@@ -27,7 +27,10 @@ class __DescriptionWidgetState<B extends MaterialStateRepo> extends State<Colleg
     print('building description widget');
     ScreenUtil.init(context);
     MaterialStateRepo materialStateRepo = Provider.of<B>(context, listen: false);
-    _isBroken = false ??materialStateRepo.materials[widget.pos].description.length > 350;
+    final bool shouldBeBreaked = materialStateRepo.materials[widget.pos].description.length > 350;
+    _isBroken = shouldBeBreaked;
+
+    print(materialStateRepo.materials[widget.pos].description);
     return GestureDetector(
       onTap: () => setState(() => _isBroken = !_isBroken),
       child: Container(
@@ -36,14 +39,7 @@ class __DescriptionWidgetState<B extends MaterialStateRepo> extends State<Colleg
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'some description',
-              maxLines: _isBroken ? 4 : null,
-              overflow: _isBroken ? TextOverflow.ellipsis : null,
-              style: TextStyle(
-                fontSize: ScreenUtil().setSp(40),
-              ),
-            )??Selector<B, String>(
+            Selector<B, String>(
               selector: (context, stateProvider) => stateProvider.materials[widget.pos].description,
               builder: (context, description, _) => Container(
                 //color: Colors.redAccent,
@@ -60,9 +56,10 @@ class __DescriptionWidgetState<B extends MaterialStateRepo> extends State<Colleg
             SizedBox(
               height: ScreenUtil().setHeight(35),
             ),
+            if(shouldBeBreaked)
             GestureDetector(
               onTap: () => setState(() => _isBroken = !_isBroken),
-              child: Text(_isBroken  ? 'show more' : 'show less'),
+              child: Text( _isBroken  ? 'show more' : 'show less'),
             )
           ],
         ),

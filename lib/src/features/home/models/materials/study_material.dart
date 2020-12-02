@@ -1,3 +1,7 @@
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/models/users/user.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
+
 import '../material_author.dart';
 
 class StudyMaterial {
@@ -16,6 +20,7 @@ class StudyMaterial {
   int size;
   String src;
   String localPath;
+  bool isSaved;
 
   StudyMaterial(
       {this.id,
@@ -32,7 +37,20 @@ class StudyMaterial {
       this.stage,
       this.size,
       this.src,
-      this.localPath});
+      this.localPath}) {
+    isSaved = _getIsSavedValue();
+  }
+
+  bool _getIsSavedValue() {
+    User userData = locator<UserInfoStateProvider>().userData;
+    if (this.size != null) {
+      return userData.savedLectures.contains(this.id);
+    }
+    if (this.src != null) {
+      return userData.savedVideos.contains(this.id);
+    }
+    return userData.savedQuizes.contains(this.id);
+  }
 
   StudyMaterial.fromJSON(Map<String, dynamic> json)
       : id = json['_id'],
@@ -47,9 +65,11 @@ class StudyMaterial {
         comments = List<String>.from(json['comments']),
         commentsCollection = json['comments_collection'],
         stage = int.parse(json['stage'].toString()),
-        size = int.parse(json['size'].toString()),
+        size = int.parse(json['size']?.toString() ?? '0'),
         src = json['src'],
-        localPath = json['localPath'];
+        localPath = json['localPath'] {
+    isSaved = _getIsSavedValue();
+  }
 
   Map<String, dynamic> toJSON() => {
         '_id': id,

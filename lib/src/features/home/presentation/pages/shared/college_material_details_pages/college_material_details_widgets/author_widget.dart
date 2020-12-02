@@ -14,7 +14,7 @@ class CollegeMaterialDetailsAuthorWidget<B extends MaterialStateRepo> extends St
 
   @override
   Widget build(BuildContext context) {
-    MaterialStateRepo materialStateRepo = Provider.of<B>(context,listen: false);
+    MaterialStateRepo materialStateRepo = Provider.of<B>(context, listen: false);
     ScreenUtil.init(context);
     return Container(
       //height: ScreenUtil().setSp(300),
@@ -30,20 +30,19 @@ class CollegeMaterialDetailsAuthorWidget<B extends MaterialStateRepo> extends St
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-               Text('By Proof Asis Dhiaa Jabbar') ??Selector<B, List<String>>(
+              Selector<B, List<String>>(
                 selector: (context, stateProvider) => [
                   stateProvider.materials[pos].author.firstName,
                   stateProvider.materials[pos].author.lastName,
                 ],
                 builder: (context, data, _) => Text('By ${data.first} ${data.last}'),
               ),
-              if(false)
               if (HelperFucntions.isTeacher(materialStateRepo.materials[pos].author.accountType))
-                Text('Clinical Pharmacy and Therapeutics') ??Selector<B, String>(
+                Selector<B, String>(
                   selector: (context, stateProvider) => stateProvider.materials[pos].author.speciality,
                   builder: (context, speciality, _) => Text('$speciality'),
                 ),
-              Text('College of Pharmacy \nBaghdad University')?? Selector<B, List<String>>(
+              Selector<B, List<String>>(
                 selector: (context, stateProvider) => [
                   stateProvider.materials[pos].author.university,
                   stateProvider.materials[pos].author.college,
@@ -56,16 +55,14 @@ class CollegeMaterialDetailsAuthorWidget<B extends MaterialStateRepo> extends St
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text('Stage 3') ?? Selector<B, int>(
+              Selector<B, int>(
                 selector: (context, stateProvider) => stateProvider.materials[pos].stage,
                 builder: (context, stage, _) => Text('Stage $stage'),
               ),
-        Text('semester 3'),
-              if(false)
               if (false || (locator<B>().materials[pos] as CollegeMaterial)?.semester != null)
-                  Selector<B, int>(
+                Selector<B, int>(
                   selector: (context, stateProvider) => (stateProvider.materials[pos] as CollegeMaterial).semester,
-                  builder: (context, semester, _) => Text('Stage $semester'),
+                  builder: (context, semester, _) => Text('Semester $semester'),
                 ),
             ],
           ),

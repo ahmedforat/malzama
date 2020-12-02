@@ -1,12 +1,20 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_pdf_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_quizes_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../core/Navigator/routes_names.dart';
 import '../../../../models/materials/study_material.dart';
 import '../state/pdf_state_provider.dart';
 
-class CollegePDFHoldingWidget extends StatelessWidget {
+class CollegePDFHoldingWidget<T extends MaterialStateRepo> extends StatelessWidget {
   final int pos;
 
   const CollegePDFHoldingWidget({
@@ -15,12 +23,12 @@ class CollegePDFHoldingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    PDFStateProvider pdfState = Provider.of<PDFStateProvider>(context, listen: false);
+    T pdfState = Provider.of<T>(context, listen: false);
     ScreenUtil.init(context);
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pushNamed(
-          RouteNames.VIEW_LECTURE,
+          RouteNames.VIEW_LECTURE_DETAILS,
           arguments: {
             'pos': pos,
             'isVideo': false,
@@ -33,11 +41,6 @@ class CollegePDFHoldingWidget extends StatelessWidget {
         child: Card(
           margin: EdgeInsets.only(bottom: ScreenUtil().setHeight(30)),
           child: Container(
-//            decoration: BoxDecoration(
-//              gradient: LinearGradient(
-//                colors: pos % 2 == 0 ? [Colors.redAccent,Colors.redAccent.withOpacity(0.7)]:[Colors.blueAccent,Colors.blueAccent.withOpacity(0.7)]
-//              )
-//            ),
             padding: EdgeInsets.fromLTRB(
               ScreenUtil().setSp(30),
               ScreenUtil().setSp(30),
@@ -55,14 +58,10 @@ class CollegePDFHoldingWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-//                  Padding(
-//                    padding: EdgeInsets.all(ScreenUtil().setSp(15)),
-//                    child: Text('Ph Asistant Dhiaa Jabbar'),
-//                  ),
                       UpperPart(pos: pos),
                       Padding(
                         padding: EdgeInsets.all(ScreenUtil().setSp(15)),
-                        child: Selector<PDFStateProvider, String>(
+                        child: Selector<T, String>(
                           selector: (context, stateProvider) => stateProvider.materials[pos].topic,
                           builder: (context, topic, _) => Text(
                             topic,
@@ -73,10 +72,9 @@ class CollegePDFHoldingWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       Padding(
                         padding: EdgeInsets.all(ScreenUtil().setSp(15)),
-                        child: Selector<PDFStateProvider, String>(
+                        child: Selector<T, String>(
                           selector: (context, stateProvider) => stateProvider.materials[pos].title,
                           builder: (context, title, _) => Text(
                             title.toString(),
@@ -89,7 +87,7 @@ class CollegePDFHoldingWidget extends StatelessWidget {
                       ),
                       Padding(
                         padding: EdgeInsets.all(ScreenUtil().setSp(15)),
-                        child: Selector<PDFStateProvider, String>(
+                        child: Selector<T, String>(
                           selector: (context, stateProvider) => stateProvider.materials[pos].description,
                           builder: (context, description, _) => Text(
                             description.toString(),
@@ -108,7 +106,7 @@ class CollegePDFHoldingWidget extends StatelessWidget {
                       SizedBox(
                         height: ScreenUtil().setHeight(20),
                       ),
-                      LowerPart(pos: pos),
+                      SizedBox(child: LowerPart(pos: pos)),
                     ],
                   ),
                 ),
@@ -128,7 +126,7 @@ String _reformatDescription(String desc) {
   return descStr;
 }
 
-class LowerPart extends StatelessWidget {
+class LowerPart<T extends MaterialStateRepo> extends StatelessWidget {
   final int pos;
 
   const LowerPart({@required this.pos});
@@ -137,60 +135,60 @@ class LowerPart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Row(
-        children: <Widget>[
-          MaterialButton(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text('Add Comment'),
-                SizedBox(
-                  width: ScreenUtil().setWidth(20),
-                ),
-                Icon(Icons.comment),
-              ],
-            ),
-            onPressed: () {
-              PDFStateProvider pdfState = Provider.of<PDFStateProvider>(context, listen: false);
-              final routName = RouteNames.VIEW_LECTURE;
-              Navigator.of(context).pushNamed(
-                routName,
-                arguments: {
-                  'isVideo': false,
-                  'pos': pos,
-                  'addComment': true,
-                  'commentIds': pdfState.materials[pos].comments,
-                },
-              );
-            },
-          ),
-          Expanded(
-            child: Selector<PDFStateProvider, int>(
-              selector: (context, stateProvider) => stateProvider.materials[pos].comments.length,
-              builder: (context, commentsCount, _) => Container(
-                padding: EdgeInsets.only(
-                  right: ScreenUtil().setSp(30),
-                ),
-                //color: Colors.red,
-                width: double.infinity,
-                alignment: Alignment.centerRight,
-                child: Text('$commentsCount Comments'),
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Selector<T, int>(
+            selector: (context, stateProvider) => stateProvider.materials[pos].comments.length,
+            builder: (context, commentsCount, _) => Container(
+              padding: EdgeInsets.only(
+                right: ScreenUtil().setSp(30),
               ),
+              //color: Colors.red,
+              alignment: Alignment.centerRight,
+              child: Text('$commentsCount Comments'),
             ),
           ),
+          SizedBox(
+            width: ScreenUtil().setWidth(50),
+          ),
+          Selector<T, bool>(
+            selector: (context, stateProvider) => stateProvider.materials[pos].isSaved,
+            builder: (context, isSaved, _) => GestureDetector(
+              child: Icon(
+                isSaved ? Icons.bookmark : Icons.bookmark_border,
+                color: Colors.black,
+              ),
+              onTap: () {
+                final List<Type> types = [MySavedVideosStateProvider, MySavedPDFStateProvider, MySavedQuizesStateProvider];
+
+                if (types.contains(T)) {
+                  if(T == types.first){
+                    _onMaterialSavingOfSavedStateProvider<T,VideoStateProvider>(context, pos);
+                  }else if(T == types[1]){
+                    _onMaterialSavingOfSavedStateProvider<T,PDFStateProvider>(context, pos);
+                  }else{
+                    throw new Exception('No Implemented Yet of Saving Quizes');
+                  }
+                } else {
+                  Provider.of<T>(context, listen: false).onMaterialSaving(pos);
+                }
+              },
+            ),
+          )
         ],
       ),
     );
   }
 }
 
-class UpperPart extends StatelessWidget {
+class UpperPart<T extends MaterialStateRepo> extends StatelessWidget {
   final int pos;
 
   const UpperPart({@required this.pos});
 
   @override
   Widget build(BuildContext context) {
-    StudyMaterial myState = Provider.of<PDFStateProvider>(context, listen: false).materials[pos];
+    StudyMaterial myState = Provider.of<T>(context, listen: false).materials[pos];
     return Padding(
       padding: EdgeInsets.all(ScreenUtil().setSp(15)),
       child: Row(
@@ -200,7 +198,7 @@ class UpperPart extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Selector<PDFStateProvider, List<String>>(
+              Selector<T, List<String>>(
                 selector: (context, stateProvider) => [
                   stateProvider.materials[pos].author.firstName,
                   stateProvider.materials[pos].author.lastName,
@@ -210,7 +208,7 @@ class UpperPart extends StatelessWidget {
                   style: TextStyle(fontSize: ScreenUtil().setSp(30)),
                 ),
               ),
-              Selector<PDFStateProvider, List<String>>(
+              Selector<T, List<String>>(
                 selector: (context, stateProvider) => [
                   stateProvider.materials[pos].author.college,
                   stateProvider.materials[pos].author.university,
@@ -226,14 +224,14 @@ class UpperPart extends StatelessWidget {
             padding: EdgeInsets.only(right: ScreenUtil().setSp(15)),
             child: Column(
               children: <Widget>[
-                Selector<PDFStateProvider, String>(
+                Selector<T, String>(
                   selector: (context, stateProvider) => stateProvider.materials[pos].postDate,
                   builder: (context, postDate, _) => Text(
                     postDate.substring(0, 10),
                     style: TextStyle(fontSize: ScreenUtil().setSp(35)),
                   ),
                 ),
-                Selector<PDFStateProvider, int>(
+                Selector<T, int>(
                   selector: (context, stateProvider) => stateProvider.materials[pos].stage,
                   builder: (context, stage, _) => Text(
                     'Stage' + stage.toString(),
@@ -263,3 +261,48 @@ Widget userAvatar({String imageUrl}) => Container(
         ),
       ),
     );
+
+_onMaterialSavingOfSavedStateProvider<C extends MaterialStateRepo,P extends MaterialStateRepo>(BuildContext context, int pos) async {
+  final String text = 'Are You Sure you want to unsave this item';
+  final Widget yesButton = RaisedButton(
+    child: Text('Yes'),
+    onPressed: () {
+      Navigator.of(context, rootNavigator: true).pop(true);
+    },
+  );
+
+  final Widget noButton = RaisedButton(
+    child: Text('No'),
+    onPressed: () {
+      Navigator.of(context, rootNavigator: true).pop(false);
+    },
+  );
+
+  List<Widget> _actions = [
+    yesButton,
+    noButton,
+  ];
+
+  Widget dialogWidget = Platform.isAndroid
+      ? AlertDialog(
+          title: Text(text),
+          actions: _actions,
+        )
+      : CupertinoAlertDialog(
+          title: Text(text),
+          actions: _actions,
+        );
+  bool val = await showDialog(
+    useRootNavigator: true,
+    context: context,
+    builder: (context) => dialogWidget,
+  );
+  if (val) {
+    MaterialStateRepo materialState = Provider.of<C>(context, listen: false);
+    final String id = materialState.materials[pos].id;
+    materialState.removeMaterialAt(pos);
+    Provider.of<P>(context, listen: false).onMaterialSavingFromExternal(id);
+  }
+}
+
+

@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:malzama/src/core/api/api_client/clients/common_materials_client.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 
 import '../../../../../../core/api/api_client/clients/video_and_pdf_client.dart';
 import '../../../../../../core/api/contract_response.dart';
@@ -141,6 +144,51 @@ class PDFStateProvider with ChangeNotifier implements MaterialStateRepo {
   }
 
   // =========================================================================================================
+// update isSaved status of material
+
+  @override
+  Future<void> onMaterialSaving(int pos) async {
+    _pdfList[pos].isSaved = !_pdfList[pos].isSaved;
+    final String indicator = _pdfList[pos].isSaved ? 'add' : 'pull';
+
+    print('=======================================');
+    print(indicator);
+    print('=======================================');
+    final String id = materials[pos].id;
+    final String fieldName = 'saved_${materials[pos].materialType}s';
+    await _onMaterialSavingDelegate(id, fieldName, indicator);
+  }
+
+
+  @override
+  Future<void> onMaterialSavingFromExternal(String id) async {
+    final StudyMaterial lecture = _pdfList.firstWhere((element) => element.id == id);
+    lecture.isSaved = !lecture.isSaved;
+    final String indicator = lecture.isSaved ? 'add' : 'pull';
+    final String fieldName = 'saved_${lecture.materialType}s';
+    await _onMaterialSavingDelegate(id, fieldName, indicator);
+  }
+
+  Future<void> _onMaterialSavingDelegate(String id, String fieldName, String indicator) async {
+    ContractResponse response = await CommonMaterialClient().saveMaterial(
+      id: id,
+      fieldName: fieldName,
+      indicator: indicator,
+    );
+    if (response is Success) {
+      if (indicator == 'pull') {
+        locator<UserInfoStateProvider>().userData.savedLectures.remove(id);
+      } else {
+        locator<UserInfoStateProvider>().userData.savedLectures.add(id);
+      }
+      await locator<UserInfoStateProvider>().updateUserInfo();
+      locator<UserInfoStateProvider>().notifyMyListeners();
+      notifyMyListeners();
+    }
+  }
+
+  // =========================================================================================================
+
   bool _isDisposed = false;
 
   void notifyMyListeners() {
@@ -154,4 +202,11 @@ class PDFStateProvider with ChangeNotifier implements MaterialStateRepo {
     _isDisposed = true;
     super.dispose();
   }
+
+  @override
+  void removeMaterialAt(int pos) {
+    _pdfList.removeAt(pos);
+    notifyMyListeners();
+  }
+
 }
