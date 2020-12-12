@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploader_state_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../../state_provider/quiz_uploading_state_provider.dart';
 import 'quiz_input_page.dart';
 import 'quiz_review_page.dart';
 
@@ -12,7 +12,7 @@ class QuizQuestionsPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    QuizUploadingState uploadingState = Provider.of<QuizUploadingState>(context,listen: false);
+    QuizUploaderState uploadingState = Provider.of<QuizUploaderState>(context,listen: false);
     return Container(
       color: Colors.grey,
       height: ScreenUtil().setHeight(1600),
@@ -26,7 +26,7 @@ class QuizQuestionsPageView extends StatelessWidget {
               uploadingState.updateCurrentPageIndex(pos);
             },
             itemBuilder: (context, pos) {
-              return Selector<QuizUploadingState, bool>(
+              return Selector<QuizUploaderState, bool>(
                 selector: (context, stateProvider) => stateProvider.quizList[pos].inReviewMode,
                 builder: (context, inReviewMode, __) => AnimatedSwitcher(
                   child: inReviewMode
@@ -42,7 +42,7 @@ class QuizQuestionsPageView extends StatelessWidget {
     );
   }
 
-  animatedQuizEditBuilder(int pos, QuizUploadingState uploadingState) {
+  animatedQuizEditBuilder(int pos, QuizUploaderState uploadingState) {
     return Center(
       child: AnimatedContainer(
         decoration: BoxDecoration(
@@ -63,7 +63,7 @@ class QuizQuestionsPageView extends StatelessWidget {
     );
   }
 
-  animatedQuizReviewBuilder(int pos, QuizUploadingState uploadingState) {
+  animatedQuizReviewBuilder(int pos, QuizUploaderState uploadingState) {
     return Center(
       child: AnimatedContainer(
         decoration: BoxDecoration(

@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../../../core/api/api_client/clients/quiz_client.dart';
 import '../../../../../../../../core/api/contract_response.dart';
-import '../../../../../../../../core/api/http_methods.dart';
-import '../../../../../../../../core/api/routes.dart';
 import '../../../../../../../../core/platform/local_database/access_objects/quiz_access_object.dart';
 import '../../../../../../../../core/platform/services/dialog_services/dialog_service.dart';
 import '../../../../../../../../core/platform/services/dialog_services/service_locator.dart';
@@ -14,9 +12,6 @@ import '../../../../../../models/material_author.dart';
 import '../quiz_collection_model.dart';
 import '../quiz_draft_model.dart';
 import '../quiz_entity.dart';
-
-
-
 
 class QuizPlayerOption {
   String text;
@@ -134,7 +129,7 @@ class QuizPlayerStateProvider with ChangeNotifier {
   // ==================================================================
 
   // quiz credentials
-   QuizCredentials _credentials;
+  QuizCredentials _credentials;
 
   QuizCredentials get credentials => _credentials;
 
@@ -321,22 +316,16 @@ class QuizPlayerStateProvider with ChangeNotifier {
       setIsFetchingMoreTo(true);
       await Future.delayed(Duration(seconds: 1));
     }
-    print('==================================');
-    print('before fetching');
-    print(_quizCollection.toJSON());
-    print('==================================');
+
     final int skipCount = _quizItems.length == 0 ? 0 : _quizItems.length - 1;
-    final queryString = '?skipCount=$skipCount&quizId=$_quizID';
-    print('queryString  == $queryString');
-    final String url = Api.FETCH_QUIZES_QUESTIONS + queryString;
-    print('full url  == $url');
-    ContractResponse contractResponse = await HttpMethods.get(url: url);
+
+    ContractResponse contractResponse = await QuizClient().fetchQuizQuestions(skipCount: skipCount, quizID: quizCollection.id);
     if (contractResponse is Success) {
       _failureMessage = null;
       var responseBody = json.decode(contractResponse.message);
       print('==================================');
       print('after fetching');
-      print(responseBody);
+      print(responseBody['data']['questions']);
       print('==================================');
       List<PlayerQuizEntity> fetchedQuestions =
           responseBody['data']['questions'].map<PlayerQuizEntity>((item) => new PlayerQuizEntity.fromJSON(item)).toList();
@@ -433,12 +422,11 @@ class QuizPlayerStateProvider with ChangeNotifier {
       _quizCollection.questionsCount -= 1;
       _quizCollection.quizItems = _quizItems;
 
-
       await QuizAccessObject().deleteUploadedMaterial(MyUploaded.QUIZES, id: _quizID);
       print('just before saving to local db');
       // print(_credentials.toJSON());
       print(_quizCollection.credentials.toJSON());
-      await QuizAccessObject().saveUploadedMaterial(MyUploaded.QUIZES,_quizCollection.toJSON());
+      await QuizAccessObject().saveUploadedMaterial(MyUploaded.QUIZES, _quizCollection.toJSON());
 
       notifyMyListeners();
       locator<DialogService>().completeAndCloseDialog(null);

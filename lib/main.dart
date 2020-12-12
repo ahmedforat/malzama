@@ -11,10 +11,10 @@ import 'package:malzama/src/features/Signup/presentation/state_provider/executio
 import 'package:malzama/src/features/Signup/presentation/state_provider/temp_provider.dart';
 import 'package:malzama/src/features/home/models/users/user.dart';
 import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/pdf_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materials_page_widgets/youtube_video_displayer.dart';
-import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/players/pdf_player/pdf_player_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/players/pdf_player/pdf_player_widget.dart';
-import 'file:///C:/Users/Karrar/Desktop/secret%20stuffs/current%20projects/online_learning/malzama/lib/src/features/home/presentation/pages/shared/college_material_details_pages/players/video_player/video_player_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/players/pdf_player/pdf_player_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/players/pdf_player/pdf_player_widget.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/players/video_player/video_player_state_provider.dart';
+
 import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
 import 'package:provider/provider.dart';

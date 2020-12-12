@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../../state_provider/user_info_provider.dart';
 import '../../comment_related_models/comment_rating_model.dart';
 
 class DisplayRatorsPage extends StatefulWidget {
@@ -46,7 +44,6 @@ class _DisplayRatorsPageState extends State<DisplayRatorsPage> with SingleTicker
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
 
-    UserInfoStateProvider userInfoStateProvider = Provider.of<UserInfoStateProvider>(context, listen: false);
     print(widget.ratingsList[0].author.profilePictureRef);
     return Container(
       decoration: BoxDecoration(
@@ -69,7 +66,11 @@ class _DisplayRatorsPageState extends State<DisplayRatorsPage> with SingleTicker
               ),
             ),
             padding: EdgeInsets.only(
-                left: ScreenUtil().setSp(350), right: ScreenUtil().setSp(350), top: ScreenUtil().setSp(10), bottom: ScreenUtil().setSp(50)),
+              left: ScreenUtil().setSp(350),
+              right: ScreenUtil().setSp(350),
+              top: ScreenUtil().setSp(10),
+              bottom: ScreenUtil().setSp(50),
+            ),
           ),
           Padding(
             padding: EdgeInsets.only(right: ScreenUtil().setSp(500)),

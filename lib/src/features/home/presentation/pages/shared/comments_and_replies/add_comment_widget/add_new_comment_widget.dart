@@ -1,13 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
 import 'package:provider/provider.dart';
 
 import '../state_providers/add_comment_widget_state_provider.dart';
 import '../state_providers/comment_state_provider.dart';
 import 'add_comment_text_field.dart';
 
-class AddNewCommentWidget extends StatelessWidget {
+class AddNewCommentWidget<B extends MaterialStateRepository> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
@@ -32,7 +32,7 @@ class AddNewCommentWidget extends StatelessWidget {
                 horizontal: ScreenUtil().setSp(35),
                 vertical: ScreenUtil().setSp(10),
               ),
-              child: AddCommentTextField(),
+              child: AddCommentTextField<B>(),
             ),
           ),
           Selector<AddOrEditCommentWidgetStateProvider, bool>(
@@ -40,45 +40,44 @@ class AddNewCommentWidget extends StatelessWidget {
             builder: (context, isSendButtonVisible, _) => isSendButtonVisible
                 ? IconButton(
                     icon: Icon(Icons.send),
-                    onPressed: () => _onPressed(context),
+                    onPressed: () => _onPressed<B>(context),
                   )
                 : Container(
                     height: 0,
                     width: 0,
                   ),
-          )
+          ),
         ],
       ),
     );
-    ;
   }
 }
 
-void _onPressed(BuildContext context) {
-  CommentStateProvider commentStateProvider = Provider.of<CommentStateProvider>(context, listen: false);
+void _onPressed<B extends MaterialStateRepository>(BuildContext context) {
+  CommentStateProvider<B> commentStateProvider = Provider.of<CommentStateProvider<B>>(context, listen: false);
 
   if (commentStateProvider.insideRepliesPage) {
-    onUploadingNewReply(context);
+    onUploadingNewReply<B>(context);
   } else {
-    onUploadingNewComment(context);
+    onUploadingNewComment<B>(context);
   }
 }
+
 /// [on upload new reply]
-void onUploadingNewReply(BuildContext context) async {
+void onUploadingNewReply<B extends MaterialStateRepository>(BuildContext context) async {
   AddOrEditCommentWidgetStateProvider addOrEditCommentWidgetStateProvider =
       Provider.of<AddOrEditCommentWidgetStateProvider>(context, listen: false);
 
   final replyText = addOrEditCommentWidgetStateProvider.textController.text;
   addOrEditCommentWidgetStateProvider.resetWidget();
-  Provider.of<CommentStateProvider>(context, listen: false).uploadNewReply(content: replyText, context: context);
+  Provider.of<CommentStateProvider<B>>(context, listen: false).uploadNewReply(content: replyText, context: context);
 }
 
-
 /// [on upload new comment]
-void onUploadingNewComment(BuildContext context) async {
+void onUploadingNewComment<B extends MaterialStateRepository>(BuildContext context) async {
   AddOrEditCommentWidgetStateProvider addOrEditCommentWidgetStateProvider =
       Provider.of<AddOrEditCommentWidgetStateProvider>(context, listen: false);
-  CommentStateProvider commentStateProvider = Provider.of<CommentStateProvider>(context, listen: false);
+  CommentStateProvider<B> commentStateProvider = Provider.of<CommentStateProvider<B>>(context, listen: false);
   final String content = addOrEditCommentWidgetStateProvider.textController.text;
   addOrEditCommentWidgetStateProvider.resetWidget();
   bool result = await commentStateProvider.uplaodNewComment(

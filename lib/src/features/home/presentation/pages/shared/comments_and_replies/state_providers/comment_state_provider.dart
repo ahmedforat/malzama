@@ -4,46 +4,41 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../core/api/api_client/clients/comments_client.dart';
 import '../../../../../../../core/api/contract_response.dart';
-import '../../../../../../../core/api/http_methods.dart';
-import '../../../../../../../core/api/routes.dart';
 import '../../../../../../../core/general_widgets/helper_functions.dart';
-import '../../../../../../../core/platform/services/dialog_services/service_locator.dart';
 import '../../../../../models/material_author.dart';
 import '../../../../../models/materials/study_material.dart';
-import '../../../lectures_pages/state/pdf_state_provider.dart';
 import '../../../videos/videos_navigator/state/video_state_provider.dart';
 import '../comment_related_models/comment_model.dart';
 import '../comment_related_models/comment_rating_model.dart';
 import '../comment_related_models/comment_reply_model.dart';
-
 import 'add_comment_widget_state_provider.dart';
-
-/**
- * CommentWidget(
-    focusNode: _focusNode,
-    commentPos: pos,
-    materialPos: widget.materialPos,
-    isVideo: widget.isVideo,
-    textEditingController: _textEditingController,
-    ),
- */
 
 enum CommentStatus { SENT, IN_PROGRESS, FAILED, UPDATING, DELETING }
 
-class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
+class CommentStateProvider<T extends MaterialStateRepository> with ChangeNotifier {
+  BuildContext _context;
 
-  bool get isVideo => T is VideoStateProvider;
+// =================================================================================================
+  bool get isVideo => T is VideoStateProvider || T is MySavedVideoStateProvider;
 
+  // ===============================================================================================
+  /// current material state or object
   StudyMaterial state;
 
-  bool _isDisposed = false;
+// =================================================================================================
+  GlobalKey<ScaffoldState> _commentsScaffoldKey;
+
+  GlobalKey<ScaffoldState> get commentsScaffoldKey => _commentsScaffoldKey;
+
+  // =================================================================================================
   PageController pageController;
 
-  // ====================================================================================
+  // =================================================================================================
   CommentStatus _commentStatus;
 
   CommentStatus get commentStatus => _commentStatus;
@@ -55,13 +50,12 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
+// =================================================================================================
   int _currentMaterialPos;
-
 
   int get currentMaterialPos => _currentMaterialPos;
 
-
-
+// =================================================================================================
   // regarding showing the comment text field inside the bottom sheet that displays the comments
   bool _isAddCommentNavBarVisible = true;
 
@@ -74,28 +68,45 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
-  // ===================================================================================
-
+  // =================================================================================================
+// the count  of fetched comments
   int _fetchedCommentsCount = 0;
 
-  CommentStateProvider({this.state, bool isVideo, int materialPos}) {
+  // ================================================================================================
+  CommentStateProvider({int materialPos, BuildContext context}) {
+    _commentsScaffoldKey = GlobalKey<ScaffoldState>();
+    print('commentsScaffoldKey created');
     this._currentMaterialPos = materialPos;
-
+    print('قبل لتخرب بثواني');
+    this.state = Provider.of<T>(context, listen: false).materials[materialPos];
+    print('همزين ما خربت');
     pageController = new PageController();
-
-    print('new comment state provider has been created');
+    _context = context;
+    print('new comment state provider of type ${T} has been created');
     setIsFetchingTo(true);
     fetchComments();
   }
 
+  // ================================================================================================
   // to check if there are comments that are not fetched yet
   bool _anyMoreComments = false;
 
   bool get anyMoreComment => _anyMoreComments;
 
+  // ================================================================================================
+
   bool _isFetching = false;
 
   bool get isFetching => _isFetching;
+
+  void setIsFetchingTo(bool update) {
+    if (_isFetching != update) {
+      _isFetching = update;
+      notifyMyListeners();
+    }
+  }
+
+  // ================================================================================================
 
   bool _isFetchingMore = false;
 
@@ -108,13 +119,7 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
-  void setIsFetchingTo(bool update) {
-    if (_isFetching != update) {
-      _isFetching = update;
-      notifyMyListeners();
-    }
-  }
-
+// ================================================================================================
   // control the view or load more comment clickable text
   void _updateAnyMoreComment() {
     bool previousAnymoreComments = _anyMoreComments;
@@ -125,16 +130,20 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
+// ================================================================================================
   List<Comment> _comments = [];
 
   List<Comment> get comments => _comments;
+
+  // ================================================================================================
 
   void sortComments() {
     _comments.sort(
       (a, b) => DateTime.parse(a.postDate).compareTo(DateTime.parse(b.postDate)),
     );
-    ;
   }
+
+  // ================================================================================================
 
   void appendToComments(Comment update) {
     if (update != null) {
@@ -144,21 +153,25 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
+// ================================================================================================
   void removeCommentAt(int pos) {
-    if (pos != null) {
-      _comments.removeAt(pos);
-      sortComments();
-      notifyMyListeners();
-    }
+    _comments.removeAt(pos);
+    notifyMyListeners();
   }
 
+// ================================================================================================
   String commentIdToBeUpdated;
   String replyIdToBeUpdated;
   String commentIdToBeDeleted;
   String replyIdToBeDeleted;
 
+  // ================================================================================================
+
   // [ 0,1,2,3,4,5,,6,7,8]
   List<String> _getCommentsToFetch() {
+    if (state.comments.isEmpty) {
+      return [];
+    }
     _fetchedCommentsCount = _comments.length;
     if (state.comments.length - _fetchedCommentsCount > 7) {
       return state.comments.reversed.toList().sublist(_fetchedCommentsCount, _fetchedCommentsCount + 7);
@@ -166,28 +179,38 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     return state.comments.reversed.toList().sublist(_fetchedCommentsCount);
   }
 
+  // ================================================================================================
+
   bool _isFirstTimeOpened = true;
 
   bool get isFirstTimeOpened => _isFirstTimeOpened;
+
+  // ================================================================================================
 
   void breakComment(int commentPos) {
     this._comments[commentPos].breaked = !_comments[commentPos].breaked;
     notifyMyListeners();
   }
 
+// ================================================================================================
   void breakReply(int commentPos, int replyPos) {
     this._comments[commentPos].replies[replyPos].breaked = !this._comments[commentPos].replies[replyPos].breaked;
   }
 
+  // ================================================================================================
+// ========================================  Functionalities ====================================
+  // ================================================================================================
+  // ================================================================================================
+
   // fetch comments
   Future<void> fetchComments() async {
-    String collectionName = locator<T>().materials[_currentMaterialPos].commentsCollection;
-    // if(_isVideo){
-    //   collectionName = locator<VideoStateProvider>().videosList[_currentMaterialPos].commentsCollection;
-    // }else{
-    //   collectionName = locator<PDFStateProvider>().pdfList[_currentMaterialPos].commentsCollection;
-    // }
-    ContractResponse response = await CommentsApiClient().fetchComments(listOfIDs: _getCommentsToFetch().join(','),collection:collectionName );
+    String collectionName = state.commentsCollection;
+    List<String> ids = _getCommentsToFetch();
+    if (ids.isEmpty) {
+      setIsFetchingTo(false);
+      return;
+    }
+    ContractResponse response = await CommentsClient().fetchComments(listOfIDs: ids.join(','), collection: collectionName);
     if (response is Success) {
       var fetchedComments = json.decode(response.message);
       print(fetchedComments);
@@ -204,6 +227,7 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
+  // ================================================================================================
   Future<bool> uplaodNewComment({
     String content,
     bool resend = false,
@@ -232,18 +256,8 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
       notifyMyListeners();
     }
     await Future.delayed(Duration(seconds: 2));
-    ContractResponse response = await CommentsApiClient().createNewComment(commentData: state.newCommentData, content: content);
+    ContractResponse response = await CommentsClient().createNewComment(commentData: state.newCommentData, content: content);
 
-    /**
-     * "post_date": "2020-08-20T18:42:17.028Z",
-        "collection_name": "uniLecturesComments",
-        "_id": "5f3ec4091c359e5e3c75570b",
-        "author": "5f2c08057d9f3952987971b2",
-        "content": "first comment",
-        "lecture": "5f2c08607d9f3952987971b4",
-        "ratings": [],
-        "replies": [],
-     */
     if (response is Success) {
       print('******************** success');
       print(response.message);
@@ -252,10 +266,6 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
       responseData.entries.forEach((element) {
         newResponseData[element.key] = element.value;
       });
-      print('قبل لتخرب بثواني');
-      newResponseData.entries.forEach((element) {
-        print(element);
-      });
 
       newResponseData['newComment']['author'] = await HelperFucntions.getAuthorPopulatedData();
 
@@ -263,12 +273,7 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
       _comments.add(new Comment.fromJSON(newResponseData['newComment'])..commentStatus = CommentStatus.SENT);
       sortComments();
 
-      locator<T>().appendToComments(responseData['newComment']['_id'], _currentMaterialPos);
-      // if (_isVideo) {
-      //   locator<VideoStateProvider>().appendToComments(responseData['newComment']['_id'], _currentMaterialPos);
-      // } else {
-      //   locator<PDFStateProvider>().appendToComments(responseData['newComment']['_id'], _currentMaterialPos);
-      // }
+      Provider.of<T>(_context, listen: false).appendToComments(responseData['newComment']['_id'], _currentMaterialPos);
       notifyMyListeners();
       return true;
     }
@@ -277,29 +282,61 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     return false;
   }
 
-  Future<String> deleteComment({
+// ================================================================================================
+  Future<bool> _deleteComment({
     String commentId,
   }) async {
     _comments.firstWhere((comment) => comment.id == commentId).commentStatus = CommentStatus.DELETING;
     notifyMyListeners();
-    ContractResponse response =
-        await CommentsApiClient().deleteComment(queryString: state.commentDeletionQueryString, commentId: commentId);
+    ContractResponse response = await CommentsClient().deleteComment(queryString: state.commentDeletionQueryString, commentId: commentId);
 
-    if (response is! Success) {
+    if (response is Success) {
+      _comments.removeWhere((comment) => comment.id == commentId);
+      notifyMyListeners();
+      Provider.of<T>(_context, listen: false).removeFromComments(commentId, _currentMaterialPos);
+
+      return true;
+    } else {
       _comments.firstWhere((comment) => comment.id == commentId).commentStatus = CommentStatus.SENT;
       notifyMyListeners();
-      return null;
-    } else {
-      locator<T>().removeFromComments(commentId, _currentMaterialPos);
-      // if (_isVideo) {
-      //   locator<VideoStateProvider>().removeFromComments(commentId, _currentMaterialPos);
-      // } else {
-      //   locator<PDFStateProvider>().removeFromComments(commentId, _currentMaterialPos);
-      // }
-      return 'comment deleted';
+      return false;
     }
   }
 
+  Future<void> commentOnDelete(int commentPos, int replyPos, bool mainComment) async {
+    final String commentId = _comments[mainComment ? _repliesRelevantCommentPos : commentPos].id;
+
+    /// deleting a reply
+
+    if (_insideRepliesPage && !mainComment) {
+      replyIdToBeDeleted = _comments[_repliesRelevantCommentPos].replies[replyPos].id;
+
+      final bool result = await _deleteReply(
+        commentID: commentId,
+        replyID: replyIdToBeDeleted,
+      );
+      final String message = result ? 'reply deleted' : ' reply failed to be deleted';
+      _commentsScaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text(message),
+      ));
+    } else {
+      print('deleting entire comment');
+      replyIdToBeDeleted = null;
+      final bool result = await _deleteComment(commentId: commentId);
+      if (result && _insideRepliesPage && mainComment) {
+        closeRepliesDisplayPage();
+        notifyMyListeners();
+      }
+      final String message = result ? 'comment deleted' : 'comment failed to be deleted';
+      _commentsScaffoldKey.currentState?.showSnackBar(SnackBar(
+        content: Text(message),
+      ));
+    }
+  }
+
+  void _onReplyRelevantCommentPostDeletion() {}
+
+// ================================================================================================
   Future<void> uploadNewReply({@required String content, @required BuildContext context}) async {
     CommentReply newReply = new CommentReply(
       author: MaterialAuthor.fromJSON(await HelperFucntions.getAuthorPopulatedData()),
@@ -314,7 +351,7 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     _comments[_repliesRelevantCommentPos].replies.add(newReply);
     notifyMyListeners();
 
-    ContractResponse contractResponse = await CommentsApiClient().createNewReply(
+    ContractResponse contractResponse = await CommentsClient().createNewReply(
       replyData: state.newReplyData,
       commentId: _comments[_repliesRelevantCommentPos].id,
       replyContent: content,
@@ -337,6 +374,7 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
+// ================================================================================================
   Future<bool> editCommentOrReply({@required BuildContext context}) async {
     AddOrEditCommentWidgetStateProvider addOrEditCommentWidgetStateProvider =
         Provider.of<AddOrEditCommentWidgetStateProvider>(context, listen: false);
@@ -352,14 +390,14 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     //addOrEditCommentWidgetStateProvider.resetWidget();
     ContractResponse contractResponse;
     if (replyIdToBeUpdated != null) {
-      contractResponse = await CommentsApiClient().editReply(
+      contractResponse = await CommentsClient().editReply(
         commentsCollection: state.commentsCollection,
         commentId: commentIdToBeUpdated,
         replyId: replyIdToBeUpdated,
         replyContent: content,
       );
     } else {
-      contractResponse = await CommentsApiClient().editComment(
+      contractResponse = await CommentsClient().editComment(
         commentsCollection: state.commentsCollection,
         commentId: commentIdToBeUpdated,
         commentContent: content,
@@ -387,7 +425,8 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
-  Future<String> deleteReply({
+// ================================================================================================
+  Future<bool> _deleteReply({
     String commentID,
     String replyID,
   }) async {
@@ -395,20 +434,21 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
         CommentStatus.DELETING;
     notifyMyListeners();
     ContractResponse response =
-        await CommentsApiClient().deleteReply(commentsCollection: state.commentsCollection, commentId: commentID, replyId: replyID);
-    if (response is! Success) {
-      _comments.firstWhere((comment) => comment.id == commentID).replies.firstWhere((reply) => reply.id == replyID).commentStatus =
-          CommentStatus.SENT;
+        await CommentsClient().deleteReply(commentsCollection: state.commentsCollection, commentId: commentID, replyId: replyID);
+    if (response is Success) {
+      final int currentCommentPos = repliesRelevantCommentPos;
+      comments[currentCommentPos].replies.removeWhere((reply) => reply.id == replyIdToBeDeleted);
+      comments[currentCommentPos].hasReplies = comments[currentCommentPos].replies.length > 0;
       notifyMyListeners();
-      return null;
+      return true;
     }
-    _comments[_repliesRelevantCommentPos].replies.removeWhere((reply) => reply.id == replyIdToBeDeleted);
-
-    _comments[repliesRelevantCommentPos].hasReplies = _comments[repliesRelevantCommentPos].replies.length > 0;
+    _comments.firstWhere((comment) => comment.id == commentID).replies.firstWhere((reply) => reply.id == replyID).commentStatus =
+        CommentStatus.SENT;
     notifyMyListeners();
-    return 'reply deleted';
+    return false;
   }
 
+// ================================================================================================
   // Future<String> editComment(@required String newContent) async {
   //   _comments.firstWhere((comment) => comment.id == commentIdToBeUpdated)
   //     ..content = newContent
@@ -421,7 +461,7 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     notifyMyListeners();
   }
 
-  // ===============================================================================
+// ================================================================================================
   /// this is the pos of the comment that will be displayed in the replies display page;
   int _repliesRelevantCommentPos;
 
@@ -434,7 +474,7 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
-  // ==================================================================================
+// ================================================================================================
   /// comment rating
   void setRatingOfCommentTo(
       {int commentPos, bool rating, String myId, CommentRating myRating, Comment comment, MaterialAuthor materialAuthor}) async {
@@ -468,13 +508,18 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
       'author_one_signal_id': state.author.oneSignalID
     };
 
-    ContractResponse response = await HttpMethods.post(body: body, url: Api.RATE_COMMENT);
+    ContractResponse response = await CommentsClient().rateComment(
+      commentId: comment.id,
+      ratingId: myRating == null ? null : myRating.id,
+      newRating: rating,
+      ratingQueryString: state.commentRatingQueryString,
+    );
     if (response is Success201) {
       // TODO:implement sending the notifications body to the specific user
     }
   }
 
-  // ===============================================================================
+// ================================================================================================
   /// this is to check whether we are inside a replies page or not
   /// to handle methods that might be used inside replies display page
   /// and comments display page such as delete or even edit methods
@@ -489,9 +534,9 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     }
   }
 
-  // ==================================================================================
+// ================================================================================================
 
-  // =================================================================================
+// ================================================================================================
 
   /// methods to open and close replies display page
   ///
@@ -508,7 +553,9 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     pageController.animateToPage(0, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
   }
 
-// =================================================================================
+// ================================================================================================
+
+  bool _isDisposed = false;
 
   void notifyMyListeners() {
     if (!_isDisposed) {
@@ -526,4 +573,5 @@ class CommentStateProvider<T extends MaterialStateRepo> with ChangeNotifier {
     print('Page Controller has been disposed');
     super.dispose();
   }
+// ================================================================================================
 }

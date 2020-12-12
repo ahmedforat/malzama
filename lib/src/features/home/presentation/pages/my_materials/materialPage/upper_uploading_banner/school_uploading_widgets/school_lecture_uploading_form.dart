@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:provider/provider.dart';
+
 import '../../../../../../../../core/platform/services/dialog_services/dialog_service.dart';
 import '../../../../../../../../core/platform/services/dialog_services/service_locator.dart';
+import '../state_providers/school_uploads_state_provider.dart';
 import 'widgets/school_uploading_choose_school_section.dart';
 import 'widgets/school_uploading_choose_school_stage.dart';
-import '../state_providers/school_uploads_state_provider.dart';
-
-import 'package:provider/provider.dart';
 
 
 

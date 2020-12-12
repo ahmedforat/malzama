@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/models/users/user.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materials_page_widgets/my_saved_materials_icon_widget.dart';
-import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/details_pages/college_pdf_details_page.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../models/users/user.dart';
 import '../../../state_provider/user_info_provider.dart';
-import '../materials_page_widgets/quizes_icon_widget.dart';
 import '../materials_page_widgets/drafts_icon_widget.dart';
+import '../materials_page_widgets/my_saved_materials_icon_widget.dart';
 import '../materials_page_widgets/my_uploaded_material_icon_widget.dart';
+import '../materials_page_widgets/quizes_icon_widget.dart';
 import 'upper_uploading_banner/upper_uploading_banner.dart';
 
 class MyMaterialPage extends StatelessWidget {
@@ -30,7 +30,8 @@ class MyMaterialPage extends StatelessWidget {
       builder: (context, data, child) => Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => CollegePDFDetailsPage()));
+            print(locator<UserInfoStateProvider>().userData.savedVideos);
+            //Navigator.of(context).push(MaterialPageRoute(builder: (context) => CollegePDFDetailsPage(pos: pos,)));
           },
         ),
         body: data == null

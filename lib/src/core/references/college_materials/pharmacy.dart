@@ -142,7 +142,7 @@ List<String> _stage5Course1 = [
   'Clinical Chemistry',
   'Hospital Training',
   'Lab-clinical lab. training',
-      'Org.Pharm.Chemistry IV',
+  'Org.Pharm.Chemistry IV',
   'Applied Therapeutics I',
   'Industrial Pharmacy II',
   'Lab-Hospital Training',

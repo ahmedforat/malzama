@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/single_page_display_widgets/failed_to_load_materials_widget.dart';
 import 'package:provider/provider.dart';
 
-import '../quiz_list_displayer/quiz_list_displayer.dart';
 import 'loading_single_question_widget.dart';
 import 'quiz_player_state_provider.dart';
 import 'single_quiz_question_widget.dart';
@@ -39,8 +39,8 @@ class QuizPlayerQuestionsPageView extends StatelessWidget {
                 )
               : !fetchingState[1]
                   ? Center(
-                      child: FailedToLoadWidget(
-                      message: playerStateProvider.failureMessage,
+                      child: FailedToLoadMaterialsWidget(
+                      message: 'Failed to load questions!',
                       onReload: playerStateProvider.fetchQuestions,
                     ))
                   : PageView.builder(
@@ -52,14 +52,16 @@ class QuizPlayerQuestionsPageView extends StatelessWidget {
                         final bool isFetchingMore = fetchingState[2];
                         final bool hasFetchedMore = fetchingState[3];
                         // previous condition
-                        bool previousCondition = pos == playerStateProvider.quizItems.length - 1 && !playerStateProvider.fromLocal&& (isFetchingMore ||
-                            !hasFetchedMore);
+                        bool previousCondition = pos == playerStateProvider.quizItems.length - 1 &&
+                            !playerStateProvider.fromLocal &&
+                            (isFetchingMore || !hasFetchedMore);
                         if (playerStateProvider.quizItems[pos].isEmpty) {
                           return LoadingSingleQuestionWidget();
                         } else {
                           return SingleQuizQuestionWidget(pos: pos);
                         }
-                      }),
+                      },
+                    ),
         );
       },
     );

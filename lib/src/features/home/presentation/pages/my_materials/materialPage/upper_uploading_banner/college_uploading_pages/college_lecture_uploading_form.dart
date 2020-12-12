@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/upper_uploading_banner/college_uploading_pages/widgets/keep_the_same_uploaded_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../../core/general_widgets/helper_functions.dart';
@@ -9,6 +8,7 @@ import '../../../../../state_provider/user_info_provider.dart';
 import '../../quizes/quiz_uploader/quiz_semester_widget.dart';
 import '../state_providers/college_uploads_state_provider.dart';
 import 'widgets/college_uploading_choose_topic.dart';
+import 'widgets/keep_the_same_uploaded_widget.dart';
 import 'widgets/target_collge_stage_widget.dart';
 
 class CollegeLectureUploadingFormWidget extends StatefulWidget {

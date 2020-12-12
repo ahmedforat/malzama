@@ -1,13 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:malzama/src/core/api/contract_response.dart';
-import 'package:malzama/src/core/functions/material_functions.dart';
-import 'package:malzama/src/core/platform/local_database/access_objects/quiz_access_object.dart';
-import 'package:malzama/src/core/platform/local_database/access_objects/teacher_access_object.dart';
-import 'package:malzama/src/core/platform/services/file_system_services.dart';
-import 'package:malzama/src/features/home/models/materials/study_material.dart';
-import 'package:malzama/src/features/home/models/users/user.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_collection_model.dart';
+
+import '../../../../../../core/platform/local_database/access_objects/quiz_access_object.dart';
+import '../../../../../../core/platform/local_database/access_objects/teacher_access_object.dart';
+import '../../../../../../core/platform/services/file_system_services.dart';
+import '../../../../models/materials/study_material.dart';
+import '../../../../models/users/user.dart';
+import 'quizes/quiz_collection_model.dart';
 
 class MaterialStateProvider with ChangeNotifier {
   User userDataMap;
@@ -115,15 +114,7 @@ class MaterialStateProvider with ChangeNotifier {
     setIsFetchingQuizesTo(false);
   }
 
-  Future<bool> deleteMaterialAt(BuildContext context, int pos,String materialType) async {
-
-    ContractResponse contractResponse = await MaterialFunctions.deleteMaterial(
-      id: null,
-      collectionName: null,
-      materialType: materialType,
-    );
-    return contractResponse is Success;
-  }
+  Future<bool> deleteMaterialAt(BuildContext context, int pos, String materialType) async {}
 
   bool _isDisposed = false;
 

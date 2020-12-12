@@ -1,22 +1,21 @@
 import 'dart:convert';
-
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../../../../../core/api/api_client/clients/common_materials_client.dart';
 import '../../../../../../../../core/api/contract_response.dart';
+import '../../../../../../../../core/general_widgets/helper_functions.dart';
 import '../../../../../../../../core/platform/local_database/access_objects/quiz_access_object.dart';
 import '../../../../../../../../core/platform/services/dialog_services/dialog_service.dart';
 import '../../../../../../../../core/platform/services/dialog_services/service_locator.dart';
 import '../../../../../../../../core/references/references.dart';
 import '../../../../../../models/users/college_student.dart';
 import '../../../../../../models/users/college_user.dart';
-import '../../../../../state_provider/quiz_uploading_state_provider.dart';
+import '../../../../../state_provider/quiz_uploader_state_provider.dart';
 import '../../../../../state_provider/user_info_provider.dart';
 
 class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {

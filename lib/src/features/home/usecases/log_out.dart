@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
+import 'package:malzama/src/core/api/api_routes/registration_routes.dart';
 import 'package:malzama/src/core/platform/local_database/local_caches/cached_user_info.dart';
 
 import '../../../core/api/contract_response.dart';
-import '../../../core/api/routes.dart';
 import '../../../core/platform/services/caching_services.dart';
 import '../../../core/platform/services/file_system_services.dart';
 import '../../../core/platform/services/network_info.dart';
@@ -78,7 +78,7 @@ class AccessManager {
 //    }
   }
 
-  static Future<ContractResponse> signIn({@required String email, @required String password,@required String accountType}) async {
+  static Future<ContractResponse> signIn({@required String email, @required String password, @required String accountType}) async {
     bool isConnected = await NetWorkInfo.checkConnection();
 
     if (!isConnected) {
@@ -88,10 +88,11 @@ class AccessManager {
     Response response;
     Map<String, String> _headers = {'content-type': 'application/json', 'Accept': 'application/json'};
 
-    Map<String, String> _body = {'email': email, 'password': password,'account_type':accountType};
+    Map<String, String> _body = {'email': email, 'password': password, 'account_type': accountType};
 
     try {
-      response = await post(Uri.encodeFull(Api.LOGIN_URL), headers: _headers, body: json.encode(_body)).timeout(References.timeout);
+      response =
+          await post(Uri.encodeFull(RegistrationRoutes.LOGIN_URL), headers: _headers, body: json.encode(_body)).timeout(References.timeout);
 
       switch (response.statusCode) {
         case 500:
@@ -108,7 +109,7 @@ class AccessManager {
             var userdata = responseBody['user'];
             await FileSystemServices.saveUserData(userdata);
             return NotValidated();
-          } else  {
+          } else {
             return InternalServerError(message: 'Incorrect email and /or password');
           }
           break;

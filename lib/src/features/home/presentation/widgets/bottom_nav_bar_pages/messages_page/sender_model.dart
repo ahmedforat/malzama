@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 class MessageSender {
   String name, image, id, oneSignalID;

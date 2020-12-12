@@ -1,5 +1,5 @@
-
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_collection_model.dart';
 import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_draft_model.dart';
 import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_entity.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
@@ -203,8 +203,6 @@ class QuizAccessObject {
     return await store.record(_AVAILABLE_STORES_INDEXES).get(await this.database);
   }
 
-
-
   // get uploaded materials
   Future<List<Map<String, dynamic>>> getUploadedMaterials(String storeName) async {
     var res = await intMapStoreFactory.store(storeName).find(await this.database);
@@ -212,21 +210,31 @@ class QuizAccessObject {
     return payload ?? <Map<String, dynamic>>[];
   }
 
+  // get single uploaded material by id
+  Future<QuizCollection> getUploadedMaterialById(String storeName, String id) async {
+    var res = await intMapStoreFactory.store(storeName).findFirst(await this.database, finder: Finder(filter: Filter.equals('_id', id)));
+    if (res != null) {
+      Map<String, dynamic> record = res.value;
+      return record == null ? null : new QuizCollection.fromJSON(record);
+    } else {
+      return null;
+    }
+  }
 
-  Future<bool> saveUploadedMaterial(String storeName,Map<String, dynamic> payload)async{
-    try{
+  Future<bool> saveUploadedMaterial(String storeName, Map<String, dynamic> payload) async {
+    try {
       await intMapStoreFactory.store(storeName).add(
-        await this.database,
-        payload,
-      );
+            await this.database,
+            payload,
+          );
       return true;
-    }catch(err){
+    } catch (err) {
       print(err);
       return false;
     }
   }
 
-  Future<bool> deleteUploadedMaterial(String name,{ String id}) async {
+  Future<bool> deleteUploadedMaterial(String name, {String id}) async {
     try {
       if (id != null) {
         await intMapStoreFactory.store(name).delete(await this.database, finder: Finder(filter: Filter.equals('_id', id)));

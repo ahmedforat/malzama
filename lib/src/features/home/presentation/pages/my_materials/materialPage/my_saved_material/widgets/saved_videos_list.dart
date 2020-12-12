@@ -1,73 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/widgets/school_holding_widgets/saved_school_video_holding_widget.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/accessory_widgets/load_more_widget_for_pagination.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/accessory_widgets/no_materials_yet_widget.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/single_page_display_widgets/failed_to_load_materials_widget.dart';
 import 'package:provider/provider.dart';
 
-import 'college_holding_widgets/saved_college_video_holding_widget.dart';
+import '../../../../shared/material_holding_widgets/college/college_video_holding_widget.dart';
+import '../../../../shared/material_holding_widgets/school/school_video_holding_widget.dart';
+import '../state_provider/saved_videos_state_provider.dart';
 
 class SavedVideosList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    MySavedVideoStateProvider savedVideoStateProvider = Provider.of<MySavedVideoStateProvider>(context, listen: false);
     ScreenUtil.init(context);
-    MySavedVideosStateProvider savedVideosStateProvider = Provider.of<MySavedVideosStateProvider>(context, listen: false);
-    return Selector<MySavedVideosStateProvider, List<bool>>(
-      selector: (context, stateProvider) => [
-        stateProvider.isFetchingSavedVideos,
-        stateProvider.noData,
-        stateProvider.failedInitialFetch
-      ],
-      builder: (context, data, _) {
-        if (data.first) {
-          return Container(
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        if (data[1]) {
-          return Container(
-            child: Center(
-              child: Text(savedVideosStateProvider.failureMessage),
-            ),
-          );
-        }
-
-        if (data.last) {
-          return Container(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(savedVideosStateProvider.failureMessage),
-                  RaisedButton(
-                    child: Text('Reload'),
-                    onPressed: savedVideosStateProvider.fetchInitialSavedVideos,
-                  )
-                ],
+    return Scaffold(
+      key: savedVideoStateProvider.scaffoldKey,
+      body: Selector<MySavedVideoStateProvider, List<bool>>(
+        selector: (context, stateProvider) => [
+          stateProvider.isFetching,
+          stateProvider.failureOfInitialFetch,
+        ],
+        builder: (context, data, _) {
+          if (data.first) {
+            return Container(
+              child: Center(
+                child: CircularProgressIndicator(),
               ),
-            ),
-          );
-        }
+            );
+          }
 
-        return Container(
-          padding: EdgeInsets.all(ScreenUtil().setSp(30)),
-          child: Selector<MySavedVideosStateProvider, int>(
-            selector: (context, stateProvider) => stateProvider.savedVideos.length,
+          if (data.last) {
+            return FailedToLoadMaterialsWidget(
+              onReload: savedVideoStateProvider.fetchInitialData,
+              message: 'Failed to load saved videos',
+              onReloadOnly: true,
+            );
+          }
+
+          if (savedVideoStateProvider.materials.isEmpty) {
+            return NoMaterialYetWidget(
+              onReload: savedVideoStateProvider.fetchInitialData,
+              materialName: 'saved videos',
+            );
+          }
+
+          return Selector<MySavedVideoStateProvider, int>(
+            selector: (context, stateProvider) => stateProvider.materials.length,
             builder: (context, count, _) => ListView.builder(
               itemCount: count,
-              itemBuilder: (context, pos) => savedVideosStateProvider.userData.isAcademic
-                  ? SavedCollegeVideoHoldingWidget(
-                      pos: pos,
-                    )
-                  : SavedSchoolVideoHoldingWidget(
-                      pos: pos,
-                    ),
+              itemBuilder: (context, pos) {
+                if (pos == count - 1 && count >= 7) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      savedVideoStateProvider.isAcademic
+                          ? CollegeVideoHoldingWidget<MySavedVideoStateProvider>(pos: pos)
+                          : SchoolVideoHoldingWidget<MySavedVideoStateProvider>(pos: pos),
+                      SizedBox(
+                        height: ScreenUtil().setHeight(30),
+                      ),
+                      LoadMoreWidget<MySavedVideoStateProvider>(
+                        onLoadMore: savedVideoStateProvider.fetchForPagination,
+                      ),
+                    ],
+                  );
+                }
+
+                return savedVideoStateProvider.isAcademic
+                    ? CollegeVideoHoldingWidget<MySavedVideoStateProvider>(
+                        pos: pos,
+                      )
+                    : SchoolVideoHoldingWidget<MySavedVideoStateProvider>(pos: pos);
+              },
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

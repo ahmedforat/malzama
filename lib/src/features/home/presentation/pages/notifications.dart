@@ -1,11 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../state_provider/notifcation_state_provider.dart';

@@ -65,7 +65,7 @@ class HttpMethods {
 
   static Future<ContractResponse> post({
     Map<String, String> headers,
-    @required Map<String, String> body,
+    @required Map<String, dynamic> body,
     @required String url,
     int timeoutInSeconds,
   }) async {

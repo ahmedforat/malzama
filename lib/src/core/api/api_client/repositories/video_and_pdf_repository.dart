@@ -22,4 +22,10 @@ abstract class VideoAndPDFRepository {
   /// [require] (list of ids usually 7 in addition to the collection name) as query string <br>
   /// ///  GET Request
   Future<ContractResponse> fetchSavedMaterials({@required String collection, @required List<String> ids});
+
+  ///  [GET Request] <br>
+  /// [fetch materials on Refresh] <br>
+  ///  [require] collection and idFactor as query string <br>
+  ///  [id factor is the newest one and can be get via materialsList.first.id]
+  Future<ContractResponse> fetchOnRefresh({@required String collection, @required String idFactor});
 }

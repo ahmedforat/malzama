@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/models/materials/college_material.dart';
-import 'package:malzama/src/features/home/models/materials/study_material.dart';
-import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../models/materials/college_material.dart';
+import '../videos_navigator/state/video_state_provider.dart';
 
 class CollegeVideoInfoOverlayWidget extends StatelessWidget {
   final int pos;

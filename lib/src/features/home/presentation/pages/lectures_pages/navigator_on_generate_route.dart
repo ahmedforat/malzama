@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
-import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/details_pages/college_pdf_details_page.dart';
-import 'package:malzama/src/features/home/presentation/pages/shared/college_material_details_pages/details_pages/school_pdf_details_page.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../core/Navigator/routes_names.dart';
-import '../shared/comments_and_replies/state_providers/comment_state_provider.dart';
+import '../../../../../core/general_widgets/comment_state_change_notifier.dart';
+import '../../../../../core/platform/services/dialog_services/service_locator.dart';
+import '../../state_provider/user_info_provider.dart';
+import '../shared/materials_details_pages/details_pages/college_pdf_details_page.dart';
+import '../shared/materials_details_pages/details_pages/school_pdf_details_page.dart';
 import 'pages/pdfs_page.dart';
+import 'state/pdf_state_provider.dart';
 
 // handle the routing inside the nested navigator of the notifications page
 Route<dynamic> homeOnGenerateRoutes(RouteSettings settings) {
   WidgetBuilder builder;
+  final bool isAcademic = locator<UserInfoStateProvider>().isAcademic;
 
   switch (settings.name) {
     case '/':
@@ -34,24 +35,14 @@ Route<dynamic> homeOnGenerateRoutes(RouteSettings settings) {
 
     // view lecture details page
     case RouteNames.VIEW_LECTURE_DETAILS:
-      final bool isAcademic = locator<UserInfoStateProvider>().isAcademic;
-      try {
-        var args = settings.arguments as Map<String, dynamic>;
-        builder = (context) => ChangeNotifierProvider<CommentStateProvider>(
-              lazy: false,
-              create: (context) => CommentStateProvider(
-                state: args['state'],
-                isVideo: args['isVideo'],
-                materialPos: args['pos'],
-              ),
-              builder: (context, _) => isAcademic ? CollegePDFDetailsPage(
-                pos: args['pos'],
-              ) : SchoolPDFDetailsPage(
-              ),
-            );
-      } catch (err) {
-        throw err;
-      }
+      final int pos = settings.arguments;
+      final Widget _child =
+          isAcademic ? CollegePDFDetailsPage<PDFStateProvider>(pos: pos) : SchoolPDFDetailsPage<PDFStateProvider>(pos: pos);
+      builder = (context) => CommentStateChangeNotifierProvider<PDFStateProvider>(
+            child: _child,
+            pos: pos,
+          );
+
       break;
 
     // display a quiz in a single page

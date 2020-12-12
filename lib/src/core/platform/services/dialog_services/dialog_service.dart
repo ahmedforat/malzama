@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploading_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploader_state_provider.dart';
 
 
 class DialogService {
@@ -15,7 +15,7 @@ class DialogService {
   Completer _dialogCompleter;
 
 
-  QuizUploadingState quizUploadingState;
+  QuizUploaderState quizUploadingState;
 
 
   bool isCommentSheetVisible = false;

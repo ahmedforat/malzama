@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/my_saved_common_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_pdf_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_quizes_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/widgets/saved_pdf_list.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/widgets/saved_quizes_list.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/widgets/saved_videos_list.dart';
 import 'package:provider/provider.dart';
+
+import '../state_provider/my_saved_common_state_provider.dart';
+import '../state_provider/saved_pdf_state_provider.dart';
+import '../state_provider/saved_quizes_state_provider.dart';
+import '../widgets/saved_pdf_list.dart';
+import '../widgets/saved_quizes_list.dart';
+import '../widgets/saved_videos_list.dart';
 
 class MySavedMaterialPage extends StatefulWidget {
   @override
@@ -15,12 +16,8 @@ class MySavedMaterialPage extends StatefulWidget {
 }
 
 class _MySavedMaterialPageState extends State<MySavedMaterialPage> with SingleTickerProviderStateMixin {
-  TabController _tabController;
-
   @override
   void initState() {
-    _tabController = new TabController(length: 3, vsync: this);
-
     super.initState();
   }
 
@@ -68,7 +65,7 @@ class _MySavedMaterialPageState extends State<MySavedMaterialPage> with SingleTi
                     Row(
                       children: [
                         Selector<MySavedPDFStateProvider, int>(
-                          selector: (context, statProvider) => statProvider.savedLectures.length,
+                          selector: (context, statProvider) => statProvider.savedLectuersIds.length,
                           builder: (context, lecturesCount, _) => CountIndicatorWidget(
                             text: 'lectures',
                             count: lecturesCount,
@@ -78,8 +75,8 @@ class _MySavedMaterialPageState extends State<MySavedMaterialPage> with SingleTi
                         SizedBox(
                           width: ScreenUtil().setWidth(30),
                         ),
-                        Selector<MySavedVideosStateProvider, int>(
-                          selector: (context, statProvider) => statProvider.savedVideos.length,
+                        Selector<MySavedVideoStateProvider, int>(
+                          selector: (context, statProvider) => statProvider.savedVideosIds.length,
                           builder: (context, videosCount, _) => CountIndicatorWidget(
                             text: 'videos',
                             count: videosCount,
@@ -89,8 +86,8 @@ class _MySavedMaterialPageState extends State<MySavedMaterialPage> with SingleTi
                         SizedBox(
                           width: ScreenUtil().setWidth(30),
                         ),
-                        Selector<MySavedQuizesStateProvider, int>(
-                          selector: (context, statProvider) => statProvider.savedQuizes.length,
+                        Selector<MySavedQuizStateProvider, int>(
+                          selector: (context, statProvider) => statProvider.savedQuizesIds.length,
                           builder: (context, quizesCount, _) => CountIndicatorWidget(
                             text: 'quizes',
                             count: quizesCount,
@@ -108,9 +105,24 @@ class _MySavedMaterialPageState extends State<MySavedMaterialPage> with SingleTi
                   controller: mySavedStateProvider.pageController,
                   onPageChanged: mySavedStateProvider.onPageChange,
                   children: [
-                    SavedPDFList(),
-                    SavedVideosList(),
-                    SavedQuizesList(),
+                    RefreshIndicator(
+                      child: SavedPDFList(),
+                      onRefresh: ()async{
+                        print('from single');
+                        await Provider.of<MySavedPDFStateProvider>(context, listen: false).onRefresh();
+                      },
+                    ),
+                    RefreshIndicator(
+                      child: SavedVideosList(),
+                      onRefresh: ()async{
+                        print('from single list');
+                        Provider.of<MySavedVideoStateProvider>(context, listen: false).onRefresh();
+                      },
+                    ),
+                    RefreshIndicator(
+                      child: SavedQuizesList(),
+                      onRefresh: Provider.of<MySavedQuizStateProvider>(context, listen: false).onRefresh,
+                    ),
                   ],
                 ),
               )
@@ -143,8 +155,6 @@ class CountIndicatorWidget extends StatelessWidget {
         onTap: () async {
           if (mySavedStateProvider.currentTabIndex != tabIndex) {
             await mySavedStateProvider.animateToPage(tabIndex);
-
-
           }
         },
         child: AnimatedContainer(

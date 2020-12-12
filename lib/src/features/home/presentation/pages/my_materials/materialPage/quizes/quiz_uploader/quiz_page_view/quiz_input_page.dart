@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../../state_provider/quiz_uploading_state_provider.dart';
+import '../../../../../../state_provider/quiz_uploader_state_provider.dart';
 import '../../quiz_entity.dart';
 
 
@@ -29,7 +29,7 @@ class _QuizEditBuilderState extends State<QuizEditBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    QuizUploadingState uploadingState = Provider.of<QuizUploadingState>(context, listen: false);
+    QuizUploaderState uploadingState = Provider.of<QuizUploaderState>(context, listen: false);
 
     ScreenUtil.init(context);
     return Container(

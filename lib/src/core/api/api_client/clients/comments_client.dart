@@ -1,21 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:malzama/src/core/api/api_routes/comments_routes.dart';
 import 'package:malzama/src/core/api/contract_response.dart';
 import 'package:malzama/src/core/api/http_methods.dart';
-import 'package:malzama/src/core/api/routes.dart';
-import 'package:malzama/src/features/home/models/materials/study_material.dart';
 
 import '../repositories/comments_repository.dart';
 
-class CommentsApiClient implements CommentsRepository {
+class CommentsClient implements CommentsRepository {
   @override // [✔]
   Future<ContractResponse> createNewComment({@required Map<String, String> commentData, @required String content}) async {
-
     Map<String, dynamic> body = {
       'content': content,
     }..addAll(commentData);
 
-    return HttpMethods.post(body: body, url: Api.UPLOAD_COMMENT);
+    return HttpMethods.post(body: body, url: CommentsRoutes.UPLOAD_COMMENT);
   }
 
   @override // [✔]
@@ -29,13 +27,13 @@ class CommentsApiClient implements CommentsRepository {
       'comment_id': commentId,
     }..addAll(replyData);
 
-    return await HttpMethods.post(body: body, url: Api.UPLOAD_NEW_REPLY);
+    return await HttpMethods.post(body: body, url: CommentsRoutes.UPLOAD_NEW_REPLY);
   }
 
   @override // [✔]
   Future<ContractResponse> deleteComment({@required String queryString, @required String commentId}) async {
     final String modifiedQueryString = queryString + '&commentId=$commentId';
-    return await HttpMethods.get(url: Api.DELETE_COMMENT, queryString: modifiedQueryString);
+    return await HttpMethods.get(url: CommentsRoutes.DELETE_COMMENT, queryString: modifiedQueryString);
   }
 
   @override // [✔]
@@ -45,7 +43,10 @@ class CommentsApiClient implements CommentsRepository {
     @required replyId,
   }) async {
     final String queryString = '?commentsCollection=$commentsCollection&commentId=$commentId&replyId=$replyId';
-    return await HttpMethods.get(url: Api.DELETE_REPLY, queryString: queryString);
+    print('***' * 100);
+    print(queryString);
+    print('***' * 100);
+    return await HttpMethods.get(url: CommentsRoutes.DELETE_REPLY, queryString: queryString);
   }
 
   @override // [✔]
@@ -60,7 +61,7 @@ class CommentsApiClient implements CommentsRepository {
       'comment_content': commentContent,
     };
 
-    return await HttpMethods.post(body: body, url: Api.EDIT_COMMENT);
+    return await HttpMethods.post(body: body, url: CommentsRoutes.EDIT_COMMENT);
   }
 
   @override // [✔]
@@ -77,13 +78,16 @@ class CommentsApiClient implements CommentsRepository {
       'reply_content': replyContent,
     };
 
-    return await HttpMethods.post(body: body, url: Api.EDIT_REPLY);
+    return await HttpMethods.post(body: body, url: CommentsRoutes.EDIT_REPLY);
   }
 
   @override // [✔]
   Future<ContractResponse> fetchComments({String collection, String listOfIDs}) async {
     final String queryString = '?collection=$collection&ids=$listOfIDs';
-    return await HttpMethods.get(url: Api.FETCH_COMMENTS_BY_IDS, queryString: queryString);
+    print('*' * 50);
+    print(queryString);
+    print('*' * 50);
+    return await HttpMethods.get(url: CommentsRoutes.FETCH_COMMENTS_BY_IDS, queryString: queryString);
   }
 
   @override // [✔]
@@ -94,6 +98,6 @@ class CommentsApiClient implements CommentsRepository {
     @required String ratingQueryString,
   }) async {
     final queryString = ratingQueryString + '&commentId=$commentId&ratingId=$ratingId&newRating=$newRating';
-    return await HttpMethods.get(url: Api.RATE_COMMENT, queryString: queryString);
+    return await HttpMethods.get(url: CommentsRoutes.RATE_COMMENT, queryString: queryString);
   }
 }

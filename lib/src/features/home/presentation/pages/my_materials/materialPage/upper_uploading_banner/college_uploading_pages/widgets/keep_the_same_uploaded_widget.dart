@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/upper_uploading_banner/state_providers/college_uploads_state_provider.dart';
 import 'package:provider/provider.dart';
+
+import '../../state_providers/college_uploads_state_provider.dart';
 
 class KeepTheSameUploadedPdfFileWidget extends StatelessWidget {
   @override

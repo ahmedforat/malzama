@@ -3,13 +3,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:malzama/src/core/general_widgets/helper_functions.dart';
-import 'package:malzama/src/core/platform/services/file_system_services.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../../core/api/api_client/clients/quiz_client.dart';
+import '../../../../core/general_widgets/helper_functions.dart';
 import '../../../../core/platform/local_database/access_objects/general_variables.dart';
 import '../../../../core/platform/local_database/access_objects/quiz_access_object.dart';
+import '../../../../core/platform/services/file_system_services.dart';
 import '../../models/users/user.dart';
 
 class UserInfoStateProvider with ChangeNotifier {
@@ -80,28 +80,19 @@ class UserInfoStateProvider with ChangeNotifier {
   // =============================================================================================
 
   Future<void> fetchQuizesCount() async {
-    print('Fetching quiz count started');
     var response = await QuizClient().fetchQuizesCount();
     if (response.statusCode == 200) {
       _quizCollectionsCount = json.decode(response.message)['data'];
     } else {
-      print('***********************************');
-      print(response.message);
-      print('***********************************');
-
       _quizCollectionsCount = 0;
-      print('fetching inital quiz count done successfully');
     }
     notifyMyListeners();
-    print('Fetching quiz count Ended');
   }
 
   // =============================================================================================
 
   // fetch uploaded materials count from local database
   Future<void> fetchUploadedMaterialsCount() async {
-    print('Fetching my uploaded materials count Started');
-
     var res = await QuizAccessObject().getUploadedMaterials(MyUploaded.LECTURES);
     _uploadedPDFsCount = res?.length ?? 0;
     res = await QuizAccessObject().getUploadedMaterials(MyUploaded.QUIZES);
@@ -109,7 +100,6 @@ class UserInfoStateProvider with ChangeNotifier {
     res = await QuizAccessObject().getUploadedMaterials(MyUploaded.VIDEOS);
     _uploadedVideosCount = res?.length ?? 0;
     notifyMyListeners();
-    print('Fetching my uploaded materials count Ended');
   }
 
   // =============================================================================================
@@ -123,6 +113,7 @@ class UserInfoStateProvider with ChangeNotifier {
     userData = data;
 
     fetchQuizesCount();
+    fetchUploadedMaterialsCount();
     loadCachedFiles();
     GeneralVariablesService.getQuizWelcomeMessagePermission.then((value) {
       print('after setting up');
@@ -130,7 +121,6 @@ class UserInfoStateProvider with ChangeNotifier {
       print('after setting up');
       showQuizWelcomeMessage = value ?? true;
     });
-    fetchUploadedMaterialsCount();
 
     print('DONE _____initailizing USER_INFO_STATE_PROVIDER');
   }

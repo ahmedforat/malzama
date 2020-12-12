@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 
 class EditOrDeleteOptionWidget extends StatelessWidget {
-  final void Function() onEdit;
-  final void Function() onDelete;
   final String onEditText;
   final String onDeleteText;
 
   EditOrDeleteOptionWidget({
-    @required this.onEdit,
-    @required this.onDelete,
     String onEditText,
     String onDeleteText,
   })  : this.onEditText = onEditText ?? 'Edit',
@@ -45,12 +41,12 @@ class EditOrDeleteOptionWidget extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.edit),
             title: Text(onEditText),
-            onTap: onEdit,
+            onTap: () => Navigator.of(context).pop('edit'),
           ),
           ListTile(
             leading: Icon(Icons.delete),
             title: Text(onDeleteText),
-            onTap: onDelete,
+            onTap: () => Navigator.of(context).pop('delete'),
           ),
           ListTile(
             leading: Icon(Icons.cancel),

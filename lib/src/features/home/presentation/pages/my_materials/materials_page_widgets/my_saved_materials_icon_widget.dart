@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/core/Navigator/routes_names.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../../../core/Navigator/routes_names.dart';
 import '../../../state_provider/user_info_provider.dart';
 
 class MySavedMaterialsIcon extends StatelessWidget {

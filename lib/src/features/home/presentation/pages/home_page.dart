@@ -86,22 +86,33 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               print('on will pop');
               print(tabController.index);
 
-              final UserInfoStateProvider userInfoStateProvider = Provider.of<UserInfoStateProvider>(context,listen: false);
+              final UserInfoStateProvider userInfoStateProvider = Provider.of<UserInfoStateProvider>(context, listen: false);
 
-              
-
-              if(!userInfoStateProvider.isBottomNavBarVisible){
+              if (!userInfoStateProvider.isBottomNavBarVisible) {
                 userInfoStateProvider.bottomSheetController.close();
               }
-              if (_pagesNavigators[tabController.index].currentState.canPop()) {
-                _pagesNavigators[tabController.index].currentState.pop();
+
+              NavigationService navigationService = NavigationService.getInstance();
+
+              //print(_pagesNavigators.last.currentContext);
+              print('above is context');
+              print(_pagesNavigators.last.currentState == null);
+              print('above is context');
+              if (navigationService.currentIndex == 1 &&
+                  _pagesNavigators.last.currentState != null &&
+                  _pagesNavigators.last.currentState.canPop()) {
+                print('mySavedNavigator can pop');
+                _pagesNavigators.last.currentState.pop();
+                return Future.value(false);
+              } else if (_pagesNavigators[tabController.index].currentState.canPop()) {
+                print('original one');
+                _pagesNavigators[navigationService.currentIndex].currentState.pop();
                 return Future.value(false);
               } else {
                 return Future.value(true);
               }
             },
             child: Scaffold(
-
                 key: globalScaffoldKey,
                 body: Container(
                   child: TabBarView(
@@ -167,8 +178,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
           );
   }
-  
-
 
   @override
   void dispose() {

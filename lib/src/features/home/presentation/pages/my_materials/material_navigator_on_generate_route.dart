@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/pages/my_saved_page.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/my_saved_common_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_pdf_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_quizes_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
+import 'package:malzama/src/core/Navigator/navigation_service.dart';
+import 'package:malzama/src/core/general_widgets/comment_state_change_notifier.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/details_pages/college_pdf_details_page.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/details_pages/college_video_details_page.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/details_pages/school_pdf_details_page.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/details_pages/school_video_details_page.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploader_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/Navigator/routes_names.dart';
 import '../../state_provider/quiz_drafts_state_provider.dart';
-import '../../state_provider/quiz_uploading_state_provider.dart';
 import 'materialPage/drafts/drafts_displayer.dart';
 import 'materialPage/material_page.dart';
-import 'materialPage/my_uploads/explore_material_page.dart';
+import 'materialPage/my_saved_material/pages/my_saved_page.dart';
+import 'materialPage/my_saved_material/state_provider/my_saved_common_state_provider.dart';
+import 'materialPage/my_saved_material/state_provider/saved_pdf_state_provider.dart';
+import 'materialPage/my_saved_material/state_provider/saved_quizes_state_provider.dart';
+import 'materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
 import 'materialPage/quizes/quiz_collection_model.dart';
-import 'materialPage/quizes/quiz_list_displayer/quiz_displayer_state_provider.dart';
+import 'materialPage/quizes/quiz_draft_model.dart';
 import 'materialPage/quizes/quiz_list_displayer/quiz_list_displayer.dart';
+import 'materialPage/quizes/quiz_list_displayer/quiz_state_provider.dart';
 import 'materialPage/quizes/quiz_player/quiz_player_page.dart';
 import 'materialPage/quizes/quiz_player/quiz_player_state_provider.dart';
 import 'materialPage/quizes/quiz_uploader_widget.dart';
-
 import 'materialPage/upper_uploading_banner/college_uploading_pages/college_lecture_uploading_form.dart';
 import 'materialPage/upper_uploading_banner/college_uploading_pages/collge_video_uploading_form.dart';
 import 'materialPage/upper_uploading_banner/school_uploading_widgets/school_lecture_uploading_form.dart';
@@ -30,16 +37,12 @@ import 'materialPage/upper_uploading_banner/state_providers/school_uploads_state
 
 Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
   WidgetBuilder builder;
-
+  final bool isAcademic = locator<UserInfoStateProvider>().isAcademic;
   switch (settings.name) {
     case '/':
       builder = (context) => MyMaterialPage();
       break;
     // display a lecture in a single page
-    case RouteNames.VIEW_LECTURE_DETAILS:
-      Map<String, dynamic> args = settings.arguments;
-      builder = (context) => Container(child: Text(args['title'].toString()));
-      break;
 
     case RouteNames.UPLOAD_NEW_MATERIAL_COLLEGE:
       String materialType = settings.arguments;
@@ -64,8 +67,8 @@ Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
       break;
 
     case RouteNames.VIEW_QUIZ_DISPLAYER:
-      builder = (context) => ChangeNotifierProvider<QuizDisplayerStateProvider>(
-            create: (context) => new QuizDisplayerStateProvider(),
+      builder = (context) => ChangeNotifierProvider<QuizStateProvider>(
+            create: (context) => new QuizStateProvider(),
             builder: (context, _) => QuizListDisplayer(),
           );
       break;
@@ -74,12 +77,9 @@ Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
       print(settings.arguments);
       Map<String, dynamic> args = settings.arguments;
       print(args);
-      print('قبل لتخرب بثواني');
+
       QuizCollection payload = args['data'];
       final bool fromLocal = args['fromLocal'];
-      print('before navigating *************************');
-      print(payload.toJSON());
-      print('before navigating *************************');
 
       builder = (context) => ChangeNotifierProvider<QuizPlayerStateProvider>(
             create: (context) => QuizPlayerStateProvider(payload, fromLocal: fromLocal),
@@ -96,32 +96,18 @@ Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
       break;
 
     case RouteNames.UPLOAD_NEW_QUIZ:
-      builder = (context) => ChangeNotifierProvider<QuizUploadingState>(
-            create: (context) => QuizUploadingState(),
-            lazy: false,
+      builder = (context) => ChangeNotifierProvider<QuizUploaderState>(
+            create: (context) => QuizUploaderState(),
             builder: (context, _) => QuizUploaderWidget(),
           );
       break;
 
     case RouteNames.EDIT_QUIZ_DRAFT:
-      builder = (context) => ChangeNotifierProvider<QuizUploadingState>(
-            create: (context) => QuizUploadingState(fromDrafts: true),
+      QuizDraftEntity quizDraft = settings.arguments as QuizDraftEntity;
+      builder = (context) => ChangeNotifierProvider<QuizUploaderState>(
+            create: (context) => QuizUploaderState(fromDrafts: true, payload: quizDraft),
             lazy: false,
-            builder: (context, _) => QuizUploaderWidget(
-              payload: settings.arguments,
-              fromDrafts: true,
-            ),
-          );
-      break;
-
-    case RouteNames.EDIT_UPLOADED_QUIZ:
-      builder = (context) => ChangeNotifierProvider<QuizUploadingState>(
-            create: (context) => QuizUploadingState(fromUploads: true),
-            lazy: false,
-            builder: (context, _) => QuizUploaderWidget(
-              payload: settings.arguments,
-              toBeEdit: true,
-            ),
+            builder: (context, _) => QuizUploaderWidget(),
           );
       break;
 
@@ -131,18 +117,70 @@ Route<dynamic> materialOnGenerateRoutes(RouteSettings settings) {
               ChangeNotifierProvider<SavedCommonState>(
                 create: (context) => SavedCommonState(),
               ),
-              ChangeNotifierProvider<MySavedQuizesStateProvider>(
-                create: (context) => MySavedQuizesStateProvider(),
+              ChangeNotifierProvider<MySavedQuizStateProvider>(
+                create: (context) => MySavedQuizStateProvider(),
               ),
-              ChangeNotifierProvider<MySavedVideosStateProvider>(
-                create: (context) => MySavedVideosStateProvider(),
+              ChangeNotifierProvider<MySavedVideoStateProvider>(
+                create: (context) => MySavedVideoStateProvider(),
               ),
               ChangeNotifierProvider<MySavedPDFStateProvider>(
                 create: (context) => MySavedPDFStateProvider(),
               ),
             ],
-            builder: (context, child) => MySavedMaterialPage(),
+            builder: (context, child) => Navigator(
+              key: NavigationService.mySavedMaterialNavigatorKey,
+
+              initialRoute: '/',
+              onGenerateRoute: (RouteSettings settings) {
+                WidgetBuilder _builder;
+                switch (settings.name) {
+                  case '/':
+                    _builder = (_) => MySavedMaterialPage();
+                    break;
+
+                  case RouteNames.VIEW_VIDEO_DETAILS:
+                    final int pos = settings.arguments;
+
+                    final Widget child = isAcademic
+                        ? CollegeVideoDetailsPage<MySavedVideoStateProvider>(pos: pos)
+                        : SchoolVideoDetailsPage<MySavedVideoStateProvider>(pos: pos);
+
+                    _builder = (context) => CommentStateChangeNotifierProvider<MySavedVideoStateProvider>(child: child, pos: pos);
+                    break;
+
+                  case RouteNames.VIEW_LECTURE_DETAILS:
+                    final int pos = settings.arguments;
+
+                    final Widget child = isAcademic
+                        ? CollegePDFDetailsPage<MySavedPDFStateProvider>(pos: pos)
+                        : SchoolPDFDetailsPage<MySavedPDFStateProvider>(pos: pos);
+
+                    _builder = (context) => CommentStateChangeNotifierProvider<MySavedPDFStateProvider>(child: child, pos: pos);
+                    break;
+
+                  case RouteNames.EDIT_UPLOADED_QUIZ:
+                    final QuizCollection quizCollection = settings.arguments as QuizCollection;
+
+                    _builder = (context) => ChangeNotifierProvider<QuizUploaderState>(
+                          create: (context) => QuizUploaderState(fromUploads: true, payload: quizCollection),
+                          lazy: false,
+                          builder: (context, _) => QuizUploaderWidget(),
+                        );
+                    break;
+                }
+                return new MaterialPageRoute(builder: _builder);
+              },
+            ),
           );
+      break;
+
+    default:
+      builder = (context) => Container(
+            child: Center(
+              child: Text('${settings.name} is not Implemented Yet'),
+            ),
+          );
+      break;
   }
 
   return new MaterialPageRoute(builder: builder);

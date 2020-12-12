@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/pages/lectures_pages/widgets/college_pdf_holding_widget.dart';
 import 'package:provider/provider.dart';
 
-
 import '../../../../../../core/platform/services/dialog_services/service_locator.dart';
+import '../../shared/accessory_widgets/load_more_widget_for_pagination.dart';
+import '../../shared/accessory_widgets/no_materials_yet_widget.dart';
+import '../../shared/material_holding_widgets/college/college_pdf_holding_widget.dart';
+import '../../shared/material_holding_widgets/school/school_pdf_holding_widget.dart';
 import '../../shared/single_page_display_widgets/failed_to_load_materials_widget.dart';
 import '../state/pdf_state_provider.dart';
-import '../widgets/school_pdf_holding_widget.dart';
 
 class DisplayHomePage extends StatelessWidget {
   const DisplayHomePage();
@@ -18,6 +19,11 @@ class DisplayHomePage extends StatelessWidget {
     PDFStateProvider pdfState = Provider.of<PDFStateProvider>(context, listen: false);
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: ()async{
+          print(pdfState.materials.last.id);
+        },
+      ),
       backgroundColor: Colors.grey.withOpacity(0.5),
       body: Selector<PDFStateProvider, List<bool>>(
           selector: (context, stateProvider) => [
@@ -35,37 +41,66 @@ class DisplayHomePage extends StatelessWidget {
             }
 
             if (data[2]) {
-              return FailedToLoadMaterialsWidget(isVideo: false);
+              return FailedToLoadMaterialsWidget(
+                onReload: pdfState.fetchInitialData,
+                message: 'Failed to Load lectures',
+              );
             }
 
             if (pdfState.materials.isEmpty) {
-              return RefreshIndicator(
-                onRefresh: () async {
-
-                  await locator<PDFStateProvider>().onRefresh();
-                },
-                child: Container(
-                  child: Center(
-                    child: Text('No PDF lectures to show'),
-                  ),
-                ),
+              return NoMaterialYetWidget(
+                materialName: 'Lectures',
+                onReload: pdfState.fetchInitialData,
               );
             }
-            return _buildLecturesList(context);
+            return _LecturesList();
           }),
     );
   }
 }
 
-Widget _buildLecturesList(BuildContext context) => RefreshIndicator(
-      onRefresh: () async {
+class _LecturesList extends StatelessWidget {
+  const _LecturesList();
 
+  @override
+  Widget build(BuildContext context) {
+    ScreenUtil.init(context);
+    PDFStateProvider pdfStateProvider = Provider.of<PDFStateProvider>(context, listen: false);
+    return RefreshIndicator(
+      onRefresh: () async {
         await locator<PDFStateProvider>().onRefresh();
       },
-      child: ListView.builder(
-        itemCount: locator<PDFStateProvider>().materials.length,
-        itemBuilder: (context, pos) => locator<PDFStateProvider>().isAcademic ? CollegePDFHoldingWidget(
-          pos: pos,
-        ) : SchoolPDFHoldingWidget(pos: pos),
+      child: Selector<PDFStateProvider, int>(
+        selector: (context, stateProvider) => stateProvider.materials.length,
+        builder: (context, count, _) => ListView.builder(
+          itemCount: count,
+          itemBuilder: (context, pos) {
+            if (pos == count - 1 && count >= 10) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  pdfStateProvider.isAcademic
+                      ? CollegePDFHoldingWidget<PDFStateProvider>(pos: pos)
+                      : SchoolPDFHoldingWidget<PDFStateProvider>(pos: pos),
+                  SizedBox(
+                    height: ScreenUtil().setHeight(30),
+                  ),
+                  LoadMoreWidget<PDFStateProvider>(
+                    onLoadMore: pdfStateProvider.fetchForPagination,
+                  ),
+                ],
+              );
+            }
+
+            return pdfStateProvider.isAcademic
+                ? CollegePDFHoldingWidget<PDFStateProvider>(
+                    pos: pos,
+                  )
+                : SchoolPDFHoldingWidget<PDFStateProvider>(pos: pos);
+          },
+        ),
       ),
     );
+  }
+}

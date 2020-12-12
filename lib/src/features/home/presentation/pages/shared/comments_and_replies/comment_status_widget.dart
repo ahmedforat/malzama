@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../core/general_models/customDate.dart';
 import 'state_providers/comment_state_provider.dart';
 
-class CommentStatusWidget extends StatelessWidget {
+class CommentStatusWidget<B extends MaterialStateRepository> extends StatelessWidget {
   final int commentPos;
   final withinReply;
   final replyPos;
@@ -23,8 +24,8 @@ class CommentStatusWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    CommentStateProvider commentStateProvider = Provider.of<CommentStateProvider>(context, listen: false);
-    return Selector<CommentStateProvider, CommentStatus>(
+    CommentStateProvider<B> commentStateProvider = Provider.of<CommentStateProvider<B>>(context, listen: false);
+    return Selector<CommentStateProvider<B>, CommentStatus>(
       selector: (context, stateProvider) => withinReply && !mainComment
           ? stateProvider.comments[commentPos].replies[replyPos].commentStatus
           : stateProvider.comments[commentPos].commentStatus,

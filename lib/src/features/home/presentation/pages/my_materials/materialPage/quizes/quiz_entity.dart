@@ -19,7 +19,7 @@ class QuizEntity {
 
   bool get hasAnswers => this.answers.length > 0;
 
-  QuizEntity.fromJSON(Map map)
+  QuizEntity.fromJSON(Map<String,dynamic> map)
       : this.id = map['_id'],
         this.question = map['question'],
         this.options = List<String>.from(map['options']),

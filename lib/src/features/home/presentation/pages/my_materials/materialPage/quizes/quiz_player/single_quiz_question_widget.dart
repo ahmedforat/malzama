@@ -135,27 +135,27 @@ class SingleQuizQuestionWidget extends StatelessWidget {
                           'edit',
                           style: TextStyle(decoration: TextDecoration.underline),
                         ),
-                        onTap: () {
-                          print('Editing a quiz item');
-                          userInfoStateProvider.setBottomNavBarVisibilityTo(false);
-                          showModalBottomSheet(
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            context: context,
-                            builder: (context) => EditOrDeleteOptionWidget(
-                              onEditText: 'Edit this question',
-                              onDeleteText: 'Delete this question',
-                              onDelete: () => playerStateProvider.deleteQuizItemAt(context, pos),
-                              onEdit: () {
-                                Navigator.of(context).pop();
-                                showQuizEditWidget();
-                              },
-                            ),
-                          ).whenComplete(() async {
-                            await Future.delayed(Duration(milliseconds: 200));
-                            userInfoStateProvider.setBottomNavBarVisibilityTo(true);
-                          });
-                        },
+                        // onTap: () {
+                        //   print('Editing a quiz item');
+                        //   userInfoStateProvider.setBottomNavBarVisibilityTo(false);
+                        //   showModalBottomSheet(
+                        //     isScrollControlled: true,
+                        //     backgroundColor: Colors.transparent,
+                        //     context: context,
+                        //     builder: (context) => EditOrDeleteOptionWidget(
+                        //       onEditText: 'Edit this question',
+                        //       onDeleteText: 'Delete this question',
+                        //       onDelete: () => playerStateProvider.deleteQuizItemAt(context, pos),
+                        //       onEdit: () {
+                        //         Navigator.of(context).pop();
+                        //         showQuizEditWidget();
+                        //       },
+                        //     ),
+                        //   ).whenComplete(() async {
+                        //     await Future.delayed(Duration(milliseconds: 200));
+                        //     userInfoStateProvider.setBottomNavBarVisibilityTo(true);
+                        //   });
+                        // },
                       ),
                   ],
                 ),

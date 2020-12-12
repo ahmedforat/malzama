@@ -4,11 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class CommentOptionsBottomSheet extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final bool isComment;
 
   CommentOptionsBottomSheet({
     @required this.onEdit,
     @required this.onDelete,
-  });
+    bool isComment,
+  })  : this.isComment = isComment ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +40,14 @@ class CommentOptionsBottomSheet extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.edit),
             title: Text(
-              'Edit comment',
+              'Edit ${isComment ? 'comment' : 'reply'}',
             ),
             onTap: onEdit,
           ),
           ListTile(
             leading: Icon(Icons.delete),
             title: Text(
-              'Delete comment',
+              'Delete ${isComment ? 'comment' : 'reply'}',
             ),
             onTap: onDelete,
           ),

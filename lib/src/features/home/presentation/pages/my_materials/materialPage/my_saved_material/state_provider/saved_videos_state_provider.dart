@@ -1,22 +1,17 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:malzama/src/core/api/api_client/clients/video_and_pdf_client.dart';
-import 'package:malzama/src/core/api/contract_response.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
-import 'package:malzama/src/features/home/models/materials/study_material.dart';
-import 'package:malzama/src/features/home/models/users/user.dart';
-import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
-import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 
-enum FetchingType {
-  INITIAL,
-  PAGINATION,
-}
+import '../../../../../../../../core/api/api_client/clients/video_and_pdf_client.dart';
+import '../../../../../../../../core/api/contract_response.dart';
+import '../../../../../../../../core/general_widgets/helper_functions.dart';
+import '../../../../../../../../core/platform/services/dialog_services/service_locator.dart';
+import '../../../../../../models/materials/study_material.dart';
+import '../../../../../../models/users/user.dart';
+import '../../../../../state_provider/user_info_provider.dart';
+import '../../../../lectures_pages/state/material_state_repo.dart';
+import '../../../../videos/videos_navigator/state/video_state_provider.dart';
 
-class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepository {
+class MySavedVideoStateProvider extends MaterialStateRepository with ChangeNotifier {
   User userData;
 
   MySavedVideoStateProvider() {
@@ -25,20 +20,12 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
   }
 
   // ==========================================================================================
+  @override
+  String get collectionName => isAcademic ? 'univideos' : 'schvideos';
 
-  bool _noData = false;
-
-  bool get noData => _noData;
-
-  setNoDataTo(bool update) {
-    _noData = update;
-    notifyMyListeners();
-  }
+  // ==========================================================================================
 
   /// videos
-  ///
-  ///
-  ///
 
   // Scaffold key to control the display of snackBar and other bottom sheet widgets
   GlobalKey<ScaffoldState> _scaffoldKey;
@@ -120,18 +107,19 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
   @override
   Future<void> fetchInitialData() async {
     _failedInitialFetch = null;
-    setIsFetchingTo(true);
+
     if (_savedVideosIds.isEmpty) {
-      _noData = true;
       _failedInitialFetch = false;
-      setIsFetchingTo(false);
+      notifyMyListeners();
       return;
     }
+    setIsFetchingTo(true);
+    List<String> idsList = _getFetchingParams();
 
-    List params = _getFetchingParams();
-
-    ContractResponse response =
-    await VideosAndPDFClient().fetchSavedMaterials(collection: params[0] as String, ids: params[1] as List<String>);
+    ContractResponse response = await VideosAndPDFClient().fetchSavedMaterials(
+      collection: collectionName,
+      ids: idsList,
+    );
 
     if (response is Success) {
       _onFetchSuccess(response, FetchingType.INITIAL);
@@ -148,9 +136,17 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
   Future<void> fetchForPagination() async {
     _failedPagination = null;
     setIsPaginatingTo(true);
-    List params = _getFetchingParams();
-    ContractResponse response =
-    await VideosAndPDFClient().fetchSavedMaterials(collection: params[0] as String, ids: params[1] as List<String>);
+    List<String> idsList = _getFetchingParams();
+    if (idsList.isEmpty) {
+      _failedPagination = false;
+      _endOfResults = true;
+      setIsPaginatingTo(false);
+      return;
+    }
+    ContractResponse response = await VideosAndPDFClient().fetchSavedMaterials(
+      collection: collectionName,
+      ids: idsList,
+    );
 
     if (response is Success) {
       _onFetchSuccess(response, FetchingType.PAGINATION);
@@ -169,19 +165,14 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
     } else {
       _failedPagination = false;
     }
-    Map<String, dynamic> data = json.decode(response.message);
 
-    if ((data['data'] as List<dynamic>).isNotEmpty) {
-      List<StudyMaterial> fetchcedLectures =
-      (data['data'] as List<dynamic>).map<StudyMaterial>((e) => new StudyMaterial.fromJSON(e)).toList();
-      _savedVideos.addAll(fetchcedLectures);
+    List<StudyMaterial> fetchedVideos = getFetchedMaterialsFromResponse(response);
+    if (_endOfResults || _savedVideos.isEmpty) {
+      _savedVideos = fetchedVideos;
     } else {
-      if (fetchingType == FetchingType.INITIAL) {
-        _noData = _savedVideos.isEmpty;
-      } else {
-        _endOfResults = true;
-      }
+      _savedVideos.addAll(fetchedVideos);
     }
+    _endOfResults = _savedVideos.length == _savedVideosIds.length || (fetchedVideos.isEmpty && fetchingType == FetchingType.PAGINATION);
   }
 
   // ===============================================================================================================
@@ -190,11 +181,11 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
   void _onFetchFailure(ContractResponse response, FetchingType fetchingType) {
     if (fetchingType == FetchingType.INITIAL) {
       _failedInitialFetch = true;
-      _handleFailureMessage(response);
-    } else {
-      _failedPagination = true;
-      _failureMessage = 'Failed to load more videos';
+      _failureMessage = HelperFucntions.getFailureMessage(response, 'videos', true);
+      return;
     }
+    _failedPagination = true;
+    _failureMessage = 'Failed to load more videos';
   }
 
   // ===============================================================================================================
@@ -202,36 +193,23 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
 
   bool get anymoreFetch => _savedVideosIds.isNotEmpty;
 
-  // ===============================================================================================================
-
-  /// this method set the failure message to the proper value
-  void _handleFailureMessage(ContractResponse response) {
-    if (response is NoInternetConnection) {
-      _failureMessage = 'Oops!! No Internet Connection\n make sure your device is connected to the internet and try again';
-    } else {
-      _failureMessage = 'Oops!!\n\nFailed to load saved videos\n'
-          'something went wrong \nor it might be the server is not responding\n';
-    }
-  }
-
 // ===============================================================================================================
 
   /// this method return the fetching params which are (collection , list of ids) respectivly
-  List<dynamic> _getFetchingParams({bool isRefreshing = false}) {
+  List<String> _getFetchingParams({bool isRefreshing = false}) {
     List<String> ids;
-    final String collection = userData.isAcademic ? 'unilectures' : 'schlectures';
 
     if (isRefreshing) {
-      final List<String> fetchedIds = _savedVideos.map<String>((lecture) => lecture.id).toList();
-      ids = _savedVideosIds.where((id) => !fetchedIds.contains(id));
-      return [collection, ids];
+      final List<String> fetchedIds = _savedVideos.map<String>((video) => video.id).toList();
+      ids = _savedVideosIds.where((id) => !fetchedIds.contains(id)).toList();
+      return ids;
     }
 
     final int unfetchedCount = _savedVideosIds.sublist(_savedVideos.length).length;
     final int endIndex = _savedVideos.length + (unfetchedCount > 7 ? 7 : unfetchedCount);
     ids = _savedVideosIds.sublist(_savedVideos.length, endIndex);
 
-    return [collection, ids];
+    return ids;
   }
 
   // ===============================================================================================================
@@ -271,6 +249,16 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
   }
 
   // ===============================================================================================================
+
+  @override
+  void appendToMaterialsOnRefreshFrom(List<StudyMaterial> data) {
+    if (data.isNotEmpty) {
+      _savedVideos.insertAll(0, data);
+      notifyMyListeners();
+    }
+  }
+
+  // ===============================================================================================================
   // to know whether the user is academic (uniteacher or unistudent) or not
   @override
   bool get isAcademic => userData.isAcademic;
@@ -299,7 +287,11 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
   Future<void> onMaterialSaving(int pos) async {
     String id = _savedVideos[pos].id;
     removeMaterialAt(pos);
-    locator<VideoStateProvider>().onMaterialSavingFromExternal(id);
+    await locator<VideoStateProvider>().onMaterialSavingFromExternal(id);
+    if (_savedVideos.isEmpty) {
+      fetchInitialData();
+      return;
+    }
   }
 
   // ===============================================================================================================
@@ -313,19 +305,25 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
   // ===============================================================================================================
   @override
   Future<void> onRefresh() async {
-    List<dynamic> params = _getFetchingParams(isRefreshing: true);
-    ContractResponse response =
-    await VideosAndPDFClient().fetchSavedMaterials(collection: params[0] as String, ids: params[1] as List<String>);
+    List<String> idsList = _getFetchingParams(isRefreshing: true);
+    print('video refresh');
+    if (idsList.isEmpty) {
+      print('video refresh');
+      showSnackBar('There are no more saved videos to load', seconds: 5);
+      return;
+    }
+    ContractResponse response = await VideosAndPDFClient().fetchSavedMaterials(
+      collection: collectionName,
+      ids: idsList,
+    );
 
     if (response is Success) {
-      Map<String, dynamic> data = json.decode(response.message);
-      List<StudyMaterial> fetchedData =
-      (data['data'] as List<dynamic>).map<StudyMaterial>((item) => new StudyMaterial.fromJSON(item)).toList();
-      appendToMaterialsFrom(fetchedData);
-    } else {
-      final String message = response is NoInternetConnection ? 'No internet connection' : 'Failed to refresh';
-      showSnackBar(message);
+      List<StudyMaterial> fetchedData = getFetchedMaterialsFromResponse(response);
+      appendToMaterialsOnRefreshFrom(fetchedData);
+      return;
     }
+    final String _message = response is NoInternetConnection ? 'No internet connection' : 'Failed to refresh!';
+    showSnackBar(_message, seconds: 5);
   }
 
   // ===============================================================================================================
@@ -334,35 +332,34 @@ class MySavedVideoStateProvider with ChangeNotifier implements MaterialStateRepo
 
   @override
   Future<void> showSnackBar(String message, {int seconds}) async {
-    if (!_isSnackBarVisible) {
-      _isSnackBarVisible = true;
-      _scaffoldKey.currentState
-          .showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: seconds ?? 3),
-        ),
-      )
-          .closed
-          .then((value) => _isSnackBarVisible = false);
+    if (_isSnackBarVisible) {
+      return;
     }
+    _isSnackBarVisible = true;
+    _scaffoldKey.currentState
+        .showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: Duration(seconds: seconds ?? 3),
+          ),
+        )
+        .closed
+        .then((value) => _isSnackBarVisible = false);
   }
 
   // ===============================================================================================================
   /// not Necessary
   @override
   void removeFromComments(String id, int pos) {
-    print('nothing');
+    _savedVideos[pos].comments.removeWhere((comment) => comment == id);
+    locator<VideoStateProvider>().removeFromComments(id, pos);
+    notifyMyListeners();
   }
 
 // ===============================================================================================================
   @override
   void removeMaterialAt(int pos) {
     _savedVideos.removeAt(pos);
-    if (_savedVideos.isEmpty) {
-      fetchInitialData();
-    } else {
-      notifyMyListeners();
-    }
+    notifyMyListeners();
   }
 }

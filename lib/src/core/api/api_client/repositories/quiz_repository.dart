@@ -34,12 +34,26 @@ abstract class QuizRepository {
     String idFactor,
   });
 
+  ///  [GET Request] <br>
+  /// [fetch quizes headers on Refresh] <br>
+  ///  [require] collection and idFactor as query string <br>
+  ///  [id factor is the newest one and can be get via materialsList.first.id]
+
+  Future<ContractResponse> fetchQuizHeadersOnRefresh({@required String collection, @required String idFactor});
+
   /// [Fetch questions of single quiz in pagination style 8 by 8]
   ///  [require] ( quizId,skipCount ) [as query string]
   ///  ................. [GET req ]
   Future<ContractResponse> fetchQuizQuestions({
     @required quizID,
     @required int skipCount,
+  });
+
+  /// [Fetch all questions of single quiz ]
+  ///  [require] ( quizId ) [as query string]
+  ///  ................. [GET req ]
+  Future<ContractResponse> fetchAllQuizQuestions({
+    @required quizID,
   });
 
   /// [Fetch questions of single quiz in pagination style 8 by 8]
@@ -49,4 +63,10 @@ abstract class QuizRepository {
   ///  [require] collection in addition list of ids as query string <br>
   ///  GET Request
   Future<ContractResponse> fetchSavedQuizesHeaders({@required String collection, @required List<String> ids});
+
+
+  /// [Edit entire quiz] <br>
+  ///  [require] Payload as Map<String,dynamic><br>
+  ///  POST Request
+  Future<ContractResponse> editEntireQuiz({@required Map<String, dynamic> payload});
 }

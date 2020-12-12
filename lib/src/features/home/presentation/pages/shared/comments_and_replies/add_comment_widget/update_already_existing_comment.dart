@@ -1,21 +1,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
 import 'package:provider/provider.dart';
 
 import '../state_providers/add_comment_widget_state_provider.dart';
 import '../state_providers/comment_state_provider.dart';
 import 'add_comment_text_field.dart';
 
-class UpdateAlreadyExistedCommentWidget extends StatelessWidget {
+class UpdateAlreadyExistedCommentWidget<B extends MaterialStateRepository> extends StatelessWidget {
   void onEditingAnExistingComment(
      BuildContext context,
   ) async {
-    CommentStateProvider commentStateProvider = Provider.of<CommentStateProvider>(context, listen: false);
+    CommentStateProvider<B> commentStateProvider = Provider.of<CommentStateProvider<B>>(context, listen: false);
 
     bool result = await commentStateProvider.editCommentOrReply(context: context);
     String message = result ? 'Comment Edited' : 'failed to edit comment';
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
+    commentStateProvider.commentsScaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -38,7 +39,7 @@ class UpdateAlreadyExistedCommentWidget extends StatelessWidget {
                 horizontal: ScreenUtil().setSp(35),
                 vertical: ScreenUtil().setSp(10),
               ),
-              child: AddCommentTextField(),
+              child: AddCommentTextField<B>(),
             ),
           ),
           Container(

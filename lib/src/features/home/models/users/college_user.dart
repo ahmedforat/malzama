@@ -67,6 +67,10 @@ class CollegeUser extends User {
       }..addAll(super.toJSON());
 
 
-  bool get isDental => new RegExp(r'سنان').hasMatch(this.college);
+  bool get isDental => new RegExp(r'سنان').hasMatch(college);
+  bool get isPharmacy => new RegExp(r'سنان').hasMatch(college);
+  bool get isAnalytical => new RegExp(r'مرضية').hasMatch(college);
+  bool get isMedical => !isDental && !isPharmacy && !isAnalytical;
+  bool get isPharmacyOrMedical => isPharmacy || isMedical;
 
 }

@@ -3,7 +3,6 @@ import 'package:get_it/get_it.dart';
 
 import '../../../../features/home/models/users/user.dart';
 import '../../../../features/home/presentation/pages/lectures_pages/state/pdf_state_provider.dart';
-import '../../../../features/home/presentation/pages/shared/college_material_details_pages/players/video_player/video_player_state_provider.dart';
 import '../../../../features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 import '../../../../features/home/presentation/state_provider/notifcation_state_provider.dart';
 import '../../../../features/home/presentation/state_provider/user_info_provider.dart';
@@ -18,5 +17,5 @@ void setup(User data)async{
   locator.registerLazySingleton(() => PDFStateProvider());
   locator.registerLazySingleton(() => VideoStateProvider());
   locator.registerLazySingleton(() => UserInfoStateProvider(data));
-  locator.registerLazySingleton(() => VideoPlayerStateProvider());
+
 }

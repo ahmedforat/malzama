@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:malzama/src/core/api/contract_response.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/core/platform/services/file_system_services.dart';
-import 'package:malzama/src/features/Signup/college_student_signup.dart';
 import 'package:malzama/src/features/home/models/users/college_student.dart';
 import 'package:malzama/src/features/home/models/users/college_teacher.dart';
 import 'package:malzama/src/features/home/models/users/college_user.dart';
@@ -14,18 +16,22 @@ import 'package:malzama/src/features/home/models/users/school_student.dart';
 import 'package:malzama/src/features/home/models/users/school_teacher.dart';
 import 'package:malzama/src/features/home/models/users/school_user.dart';
 import 'package:malzama/src/features/home/models/users/user.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_pdf_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_quizes_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/accessory_widgets/yes_or_no_alert_dialog.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+
+import 'helper_utils/edit_or_delete_options_widget.dart';
+
+enum FetchingType { INITIAL, PAGINATION }
 
 class HelperFucntions {
-  static bool isAcademic(String account_type) {
-    return account_type != 'schteachers' && account_type != 'schstudents';
-  }
+  static bool isAcademic(String accountType) => accountType != 'schteachers' && accountType != 'schstudents';
 
-  static bool isTeacher(String accountType) {
-    return accountType == 'uniteachers' || accountType == 'schteachers';
-  }
+  static bool isTeacher(String accountType) => accountType == 'uniteachers' || accountType == 'schteachers';
 
   static bool isPharmacyOrMedicine() {
     UserInfoStateProvider userInfoStateProvider = locator<UserInfoStateProvider>();
@@ -33,15 +39,10 @@ class HelperFucntions {
     if (!HelperFucntions.isAcademic(accountType)) {
       return false;
     }
-    RegExp pharmacyPattern = new RegExp(r'صيدلة');
-    RegExp dentistPattern = new RegExp(r'سنان');
-    RegExp analysisPattern = new RegExp(r'مرضية');
 
-    String college = (userInfoStateProvider.userData as CollegeUser).college;
+    CollegeUser collegeUser = (userInfoStateProvider.userData as CollegeUser);
 
-    bool isMedicine = !dentistPattern.hasMatch(college) && !analysisPattern.hasMatch(college) && !pharmacyPattern.hasMatch(college);
-
-    return (accountType == 'uniteachers' || accountType == 'unistudents') && (pharmacyPattern.hasMatch(college) || isMedicine);
+    return collegeUser.isPharmacy || collegeUser.isMedical;
   }
 
   static Future<Map<String, dynamic>> getAuthorPopulatedData() async {
@@ -66,48 +67,48 @@ class HelperFucntions {
   static Future<Map<String, dynamic>> getUserTags() async {
     User data = await FileSystemServices.getUserData();
 
-    Map<String, dynamic> tags;
+    Map<String, dynamic> tags = {
+      'type': data.accountType,
+      'uuid': data.uuid,
+    };
     if (data != null) {
       switch (data.accountType) {
         case 'schstudents':
           tags = {
-            'type': data.accountType,
+            ...tags,
             'sch': (data as SchoolStudent).school,
             'sec': (data as SchoolStudent).schoolSection,
             'stg': (data as SchoolStudent).stage,
-            'uuid': data.uuid
           };
           break;
 
         case 'schteachers':
           tags = {
-            'type': data.accountType,
+            ...tags,
             'sch': (data as SchoolTeacher).school,
             'speciality': (data as SchoolTeacher).speciality,
             'stgs': (data as SchoolTeacher).stages,
-            'uuid': data.uuid
           };
           break;
 
         case 'unistudents':
           tags = {
-            'type': data.accountType,
+            ...tags,
             'uni': (data as CollegeSutdent).university,
             'col': (data as CollegeSutdent).college,
             'stg': (data as CollegeSutdent).stage,
             'sec': (data as CollegeSutdent).section,
-            'uuid': data.uuid
           };
           break;
 
         case 'uniteachers':
           tags = {
-            'type': data.accountType,
+            ...tags,
             'uni': (data as CollegeTeacher).university,
             'col': (data as CollegeTeacher).college,
             'sec': (data as CollegeTeacher).section,
-            'uuid': data.uuid
           };
+
           break;
       }
     }
@@ -154,7 +155,6 @@ class HelperFucntions {
       final String college = collegeUser.college;
       final String university = collegeUser.university;
       return await getAcademicUUID(university: university, college: college);
-
     }
     SchoolUser schoolUser = userInfoProvider.userData;
     final String school = (userInfoProvider.userData as SchoolUser).school;
@@ -162,5 +162,53 @@ class HelperFucntions {
     return await getSchoolUUID(region: region, school: school);
   }
 
+  static Future<void> onPdforVideoSaving<T extends MaterialStateRepository>({BuildContext context, int pos}) async {
+    List<Type> _types = [MySavedVideoStateProvider, MySavedPDFStateProvider];
+    if (_types.contains(T)) {
+      bool val = Platform.isAndroid
+          ? await showDialog(context: context, useRootNavigator: true, builder: (context) => YesOrNoAlertDialog())
+          : await showCupertinoDialog(context: context, useRootNavigator: true, builder: (context) => YesOrNoAlertDialog());
+      if (val) {
+        Provider.of<T>(context, listen: false).onMaterialSaving(pos);
+      }
+    } else {
+      Provider.of<T>(context, listen: false).onMaterialSaving(pos);
+    }
+  }
 
+  static Future<void> onQuizSaving<T extends QuizStateRepository>({BuildContext context, int pos}) async {
+    if (T == MySavedQuizStateProvider) {
+      bool val = Platform.isAndroid
+          ? await showDialog(context: context, useRootNavigator: true, builder: (context) => YesOrNoAlertDialog())
+          : await showCupertinoDialog(context: context, useRootNavigator: true, builder: (context) => YesOrNoAlertDialog());
+      if (val) {
+        Provider.of<T>(context, listen: false).onMaterialSaving(pos);
+      }
+    } else {
+      Provider.of<T>(context, listen: false).onMaterialSaving(pos);
+    }
+  }
+
+  static String getFailureMessage(ContractResponse response, String materialName, bool forSaved) {
+    if (response is NoInternetConnection) {
+      return 'Oops!! No Internet Connection\n make sure your device is connected to the internet and try again';
+    } else {
+      return 'Oops!!\n\nFailed to load ${forSaved ? 'saved' : ''} $materialName\n'
+          'something went wrong \nor it might be the server is not responding\n';
+    }
+  }
+
+  static Future<String> showEditOrDeleteModalSheet({
+    @required BuildContext context,
+  }) async {
+    UserInfoStateProvider userInfoState = locator<UserInfoStateProvider>();
+    userInfoState.setBottomNavBarVisibilityTo(false);
+    return await showModalBottomSheet(
+        backgroundColor: Colors.transparent, context: context, builder: (context) => EditOrDeleteOptionWidget()).whenComplete(
+      () async {
+        await Future.delayed(Duration(milliseconds: 200));
+        userInfoState.setBottomNavBarVisibilityTo(true);
+      },
+    );
+  }
 }

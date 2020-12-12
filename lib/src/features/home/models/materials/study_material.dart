@@ -43,10 +43,10 @@ class StudyMaterial {
 
   bool _getIsSavedValue() {
     User userData = locator<UserInfoStateProvider>().userData;
-    if (this.size != null) {
+    if (materialType == 'lecture') {
       return userData.savedLectures.contains(this.id);
     }
-    if (this.src != null) {
+    if (materialType == 'video') {
       return userData.savedVideos.contains(this.id);
     }
     return userData.savedQuizes.contains(this.id);

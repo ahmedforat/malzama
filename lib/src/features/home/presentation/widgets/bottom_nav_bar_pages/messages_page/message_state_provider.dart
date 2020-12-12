@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
-import 'package:malzama/src/core/platform/local_database/access_objects/messages_access_object.dart';
-import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
-import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/messages_page/global_current_sender.dart';
-import 'package:malzama/src/features/home/presentation/widgets/bottom_nav_bar_pages/messages_page/sender_model.dart';
 
+import '../../../../../../core/platform/local_database/access_objects/messages_access_object.dart';
+import '../../../../../../core/platform/services/dialog_services/service_locator.dart';
+import 'global_current_sender.dart';
 import 'message_model.dart';
+import 'sender_model.dart';
 
 class MessagesStateProvider with ChangeNotifier {
 

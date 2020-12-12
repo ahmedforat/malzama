@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 class MessageItem {
   String content, sender, senderImage, senderID, senderOneSignalID;

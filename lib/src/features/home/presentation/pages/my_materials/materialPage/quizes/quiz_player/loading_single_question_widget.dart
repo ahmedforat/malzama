@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/single_page_display_widgets/failed_to_load_materials_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../quiz_list_displayer/quiz_list_displayer.dart';
@@ -58,9 +59,9 @@ class LoadingSingleQuestionWidget extends StatelessWidget {
                   return _LoadingWidgets();
                 }
                 return Center(
-                  child: FailedToLoadWidget(
+                  child: FailedToLoadMaterialsWidget(
                     onReload: playerStateProvider.fetchQuestions,
-                    message: playerStateProvider.failureMessage??'',
+                    message: 'Failed to load more questions',
                   ),
                 );
               },

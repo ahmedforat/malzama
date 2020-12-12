@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
 import 'package:provider/provider.dart';
 
 import '../../state_providers/add_comment_widget_state_provider.dart';
 import '../../state_providers/comment_state_provider.dart';
 
-class RepliesDisplayPageHeader extends StatelessWidget {
+class RepliesDisplayPageHeader<B extends MaterialStateRepository> extends StatelessWidget {
+  const RepliesDisplayPageHeader();
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    CommentStateProvider commentStateProvider = Provider.of<CommentStateProvider>(context,listen: false);
+    CommentStateProvider<B> commentStateProvider = Provider.of<CommentStateProvider<B>>(context, listen: false);
     return SafeArea(
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: ScreenUtil().setSp(30),horizontal: ScreenUtil().setSp(5)),
+        padding: EdgeInsets.symmetric(vertical: ScreenUtil().setSp(30), horizontal: ScreenUtil().setSp(5)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
               icon: Icon(Icons.arrow_back),
-              onPressed: (){
-                Provider.of<AddOrEditCommentWidgetStateProvider>(context,listen: false).resetWidget();
+              onPressed: () {
+                Provider.of<AddOrEditCommentWidgetStateProvider>(context, listen: false).resetWidget();
                 commentStateProvider.closeRepliesDisplayPage();
               },
             ),
@@ -34,7 +37,10 @@ class RepliesDisplayPageHeader extends StatelessWidget {
               ),
             ),
             RaisedButton(
-              child: Text('view lecture',style: TextStyle(color: Colors.white),),
+              child: Text(
+                'view lecture',
+                style: TextStyle(color: Colors.white),
+              ),
               color: Colors.blueAccent,
               onPressed: () {},
             )

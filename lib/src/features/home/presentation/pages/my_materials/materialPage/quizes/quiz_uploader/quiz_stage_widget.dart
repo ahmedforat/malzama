@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/quiz_uploader_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../../core/references/references.dart';
 import '../../../../../state_provider/profile_page_state_provider.dart';
-import '../../../../../state_provider/quiz_uploading_state_provider.dart';
 
 
 
@@ -12,11 +12,11 @@ class QuizStageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    QuizUploadingState uploadingState =
-    Provider.of<QuizUploadingState>(context, listen: false);
+    QuizUploaderState uploadingState =
+    Provider.of<QuizUploaderState>(context, listen: false);
 
     ProfilePageState profilePageState = Provider.of<ProfilePageState>(context,listen: false);
-    return Selector<QuizUploadingState, int>(
+    return Selector<QuizUploaderState, int>(
       selector: (context, stateProvider) =>stateProvider.stage,
       builder: (context, _, __) => Padding(
         padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setSp(70)),
