@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:malzama/src/features/home/presentation/pages/shared/comments_and_replies/state_providers/comment_state_provider.dart';
+import 'package:malzama/src/features/home/models/materials/college_material.dart';
+import 'package:malzama/src/features/home/models/materials/school_material.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/upper_uploading_banner/college_uploading_pages/college_lecture_uploading_form.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/upper_uploading_banner/college_uploading_pages/collge_video_uploading_form.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/upper_uploading_banner/school_uploading_widgets/school_lecture_uploading_form.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/upper_uploading_banner/school_uploading_widgets/school_video_uploading_form.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/upper_uploading_banner/state_providers/college_uploads_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/upper_uploading_banner/state_providers/school_uploads_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../core/Navigator/routes_names.dart';
@@ -21,17 +28,38 @@ Route<dynamic> videosOnGenerateRoutes(RouteSettings settings) {
       break;
 
     case RouteNames.VIEW_VIDEO_DETAILS:
+      print('Hello Videos');
       final int pos = settings.arguments;
       final Widget _child =
-          isAcademic ? CollegeVideoDetailsPage<VideoStateProvider>(pos: pos) : SchoolVideoDetailsPage<VideoStateProvider>(pos: pos);
-      builder = (context) => ChangeNotifierProvider<CommentStateProvider<VideoStateProvider>>(
-        lazy: false,
-        create: (context) => CommentStateProvider<VideoStateProvider>(
-          context: context,
-          materialPos: pos,
-        ),
-        builder: (context, _) => _child,
-      );
+          isAcademic 
+          ? CollegeVideoDetailsPage<VideoStateProvider>(pos: pos) 
+          : SchoolVideoDetailsPage<VideoStateProvider>(pos: pos);
+      builder = (context) => CommentStateChangeNotifierProvider<VideoStateProvider>(
+            child: _child,
+            pos: pos,
+          );
+      break;
+
+    case RouteNames.EDIT_COLLEGE_MATERIAL:
+      final Map<String, dynamic> args = settings.arguments;
+      final bool isVideo = args['isVideo'] as bool;
+      final CollegeMaterial payload = args['payload'] as CollegeMaterial;
+
+      builder = (context) => ChangeNotifierProvider<CollegeUploadingState>(
+            create: (context) => CollegeUploadingState(forEdit: true, data: payload),
+            builder: (context, _) => isVideo ? CollegeVideoUploadingFormWidget() : CollegeLectureUploadingFormWidget(),
+          );
+      break;
+
+    case RouteNames.EDIT_SCHOLL_MATERIAL:
+      final Map<String, dynamic> args = settings.arguments;
+      final bool isVideo = args['isVideo'] as bool;
+      final SchoolMaterial payload = args['payload'] as SchoolMaterial;
+
+      builder = (context) => ChangeNotifierProvider<SchoolUploadState>(
+            create: (context) => SchoolUploadState(),
+            builder: (context, _) => isVideo ? SchoolVideoUploadingFormWidget() : SchoolLectureUploadingFormWidget(),
+          );
       break;
   }
 

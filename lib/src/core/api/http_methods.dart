@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../platform/services/caching_services.dart';
@@ -46,10 +46,13 @@ class HttpMethods {
 
         case 500:
           return InternalServerError();
-
+          break;
         case 404:
           return NotFound();
-
+          break;
+        case 400:
+          return BadRequest(message: response.body);
+          break;
         default:
           return NewBugException(statusCode: response.statusCode, message: 'unHandled status code');
       }
@@ -83,10 +86,7 @@ class HttpMethods {
 
     http.Response response;
 
-    
-
     try {
-
       response = await http
           .post(
             Uri.encodeFull(url),
@@ -110,14 +110,16 @@ class HttpMethods {
 
         case 422:
           return InvalidData();
-
+          break;
+        case 400:
+          return BadRequest(message: response.body);
+          break;
         default:
           return InternalServerError(message: response.body);
       }
     } on TimeoutException {
       return ServerNotResponding();
     } catch (err) {
-
       print(err);
       return NewBugException(message: err.toString());
     }

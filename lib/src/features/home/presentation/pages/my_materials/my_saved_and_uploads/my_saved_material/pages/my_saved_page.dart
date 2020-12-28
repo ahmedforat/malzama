@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/my_saved_material/state_provider/saved_videos_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/sub_widgets/count_indicator_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../state_provider/my_saved_common_state_provider.dart';
@@ -66,7 +67,7 @@ class _MySavedMaterialPageState extends State<MySavedMaterialPage> with SingleTi
                       children: [
                         Selector<MySavedPDFStateProvider, int>(
                           selector: (context, statProvider) => statProvider.savedLectuersIds.length,
-                          builder: (context, lecturesCount, _) => CountIndicatorWidget(
+                          builder: (context, lecturesCount, _) => CountIndicatorWidget<SavedCommonState>(
                             text: 'lectures',
                             count: lecturesCount,
                             tabIndex: 0,
@@ -77,7 +78,7 @@ class _MySavedMaterialPageState extends State<MySavedMaterialPage> with SingleTi
                         ),
                         Selector<MySavedVideoStateProvider, int>(
                           selector: (context, statProvider) => statProvider.savedVideosIds.length,
-                          builder: (context, videosCount, _) => CountIndicatorWidget(
+                          builder: (context, videosCount, _) => CountIndicatorWidget<SavedCommonState>(
                             text: 'videos',
                             count: videosCount,
                             tabIndex: 1,
@@ -88,7 +89,7 @@ class _MySavedMaterialPageState extends State<MySavedMaterialPage> with SingleTi
                         ),
                         Selector<MySavedQuizStateProvider, int>(
                           selector: (context, statProvider) => statProvider.savedQuizesIds.length,
-                          builder: (context, quizesCount, _) => CountIndicatorWidget(
+                          builder: (context, quizesCount, _) => CountIndicatorWidget<SavedCommonState>(
                             text: 'quizes',
                             count: quizesCount,
                             tabIndex: 2,
@@ -134,48 +135,3 @@ class _MySavedMaterialPageState extends State<MySavedMaterialPage> with SingleTi
   }
 }
 
-class CountIndicatorWidget extends StatelessWidget {
-  final String text;
-  final int count;
-  final int tabIndex;
-
-  const CountIndicatorWidget({
-    @required this.text,
-    @required this.count,
-    @required this.tabIndex,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    ScreenUtil.init(context);
-    SavedCommonState mySavedStateProvider = Provider.of<SavedCommonState>(context, listen: false);
-    return Selector<SavedCommonState, int>(
-      selector: (context, stateProvider) => stateProvider.currentTabIndex,
-      builder: (context, index, _) => GestureDetector(
-        onTap: () async {
-          if (mySavedStateProvider.currentTabIndex != tabIndex) {
-            await mySavedStateProvider.animateToPage(tabIndex);
-          }
-        },
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 200),
-          curve: Curves.linearToEaseOut,
-          padding: EdgeInsets.all(ScreenUtil().setSp(tabIndex == index ? 20 : 15)),
-          decoration: BoxDecoration(
-            color: tabIndex == index ? Colors.redAccent : Colors.white,
-            borderRadius: BorderRadius.circular(ScreenUtil().setSp(20)),
-            border: Border.all(color: Colors.transparent),
-          ),
-          child: Text(
-            '$text: $count ',
-            style: TextStyle(
-              fontSize: ScreenUtil().setSp(40),
-              color: tabIndex == index ? Colors.white : Colors.black,
-              fontWeight: tabIndex == index ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

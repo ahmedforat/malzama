@@ -127,7 +127,7 @@ class UserInfoStateProvider with ChangeNotifier {
 
   // =============================================================================================
 
-  void refreshData() {
+  Future<void> refreshData() async{
     FileSystemServices.getUserData().then((value) {
       userData = value;
       notifyMyListeners();

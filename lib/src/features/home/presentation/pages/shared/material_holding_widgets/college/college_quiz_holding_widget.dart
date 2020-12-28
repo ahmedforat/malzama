@@ -1,8 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/api/api_client/clients/common_materials_client.dart';
+import 'package:malzama/src/core/api/contract_response.dart';
 import 'package:malzama/src/core/general_widgets/helper_functions.dart';
-import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
+import 'package:malzama/src/core/platform/local_database/access_objects/quiz_access_object.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/dialog_service.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../core/Navigator/routes_names.dart';
@@ -38,7 +43,8 @@ class CollegeQuizHoldingWidget<T extends QuizStateRepository> extends StatelessW
             children: [
               _HeaderWidget<T>(pos),
               _DescriptionWidget<T>(pos),
-              _FooterWidget<T>(pos),
+              Divider(),
+              _Footer<T>(pos: pos),
             ],
           ),
         ),
@@ -97,7 +103,26 @@ class _HeaderWidget<T extends QuizStateRepository> extends StatelessWidget {
     }
 
     void _onDeleteOption(BuildContext context) async {
-      print('Deleting');
+      locator<DialogService>().showDialogOfLoading(message: 'deleting ....');
+      final String id = quizStateProvider.materials[pos].id;
+      final String collectionName = quizStateProvider.isAcademic ? 'uniquizes' : 'schquizes';
+
+      ContractResponse response = await CommonMaterialClient().deleteMaterial(
+        materialId: id,
+        collectionName: collectionName,
+      );
+      print(response.runtimeType);
+      if (response is Success) {
+        print('inside success of response');
+        print(response.runtimeType);
+        quizStateProvider.removeMaterialAt(pos);
+        await QuizAccessObject().deleteUploadedMaterial(MyUploaded.QUIZES, id: id);
+        locator<DialogService>().completeAndCloseDialog(null);
+        quizStateProvider.showSnackBar('Done, collection is deleted', seconds: 4);
+      } else {
+        locator<DialogService>().completeAndCloseDialog(null);
+        quizStateProvider.showSnackBar('Failed to delete', seconds: 4);
+      }
     }
 
     return Container(
@@ -132,6 +157,7 @@ class _HeaderWidget<T extends QuizStateRepository> extends StatelessWidget {
                     }
                     if (action == 'edit') {
                       _onEditOption(context);
+                      return;
                     }
                     _onDeleteOption(context);
                   },
@@ -191,72 +217,103 @@ class _HeaderWidget<T extends QuizStateRepository> extends StatelessWidget {
   }
 }
 
-class _FooterWidget<T extends QuizStateRepository> extends StatelessWidget {
+class _Footer<B extends QuizStateRepository> extends StatelessWidget {
   final int pos;
 
-  const _FooterWidget(this.pos);
+  const _Footer({@required this.pos});
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context);
-    QuizStateRepository quizStateProvider = Provider.of<T>(context, listen: false);
-    return Container(
-      margin: EdgeInsets.only(top: ScreenUtil().setSp(20)),
-      padding: EdgeInsets.all(ScreenUtil().setSp(20)),
-      // color: Colors.red,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              Selector<T, List<String>>(
-                selector: (_, QuizStateRepository stateProvider) => [
-                  stateProvider.materials[pos].author.firstName,
-                  stateProvider.materials[pos].author.lastName,
-                ],
-                builder: (_, data, __) => Text(
-                  data.first + ' ' + data.last,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: ScreenUtil().setSp(30)),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                  top: ScreenUtil().setSp(5),
-                  left: ScreenUtil().setSp(30),
-                ),
-                child: Selector<T, List<String>>(
-                  selector: (_, QuizStateRepository stateProvider) => [
+    final String semester = Provider.of<B>(context, listen: false).materials[pos].credentials.semester.toString();
+
+    return Padding(
+      padding: EdgeInsets.all(ScreenUtil().setSp(15)),
+      child: Container(
+        constraints: BoxConstraints(maxHeight: ScreenUtil().setHeight(100)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Selector<B, List<String>>(
+                    selector: (context, stateProvider) => [
+                          stateProvider.materials[pos].author.firstName,
+                          stateProvider.materials[pos].author.lastName,
+                        ],
+                    builder: (context, names, _) {
+                      String text = names.first + ' ' + names.last + ' abdulKareem alsudanie';
+                      final int endIndex = text.length >= 40 ? 40 : text.length;
+                      text = text.substring(0, endIndex);
+                      return Text(
+                        text,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: ScreenUtil().setSp(30),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    }),
+                Selector<B, List<String>>(
+                  selector: (context, stateProvider) => [
                     stateProvider.materials[pos].author.college,
                     stateProvider.materials[pos].author.university,
                   ],
-                  builder: (_, data, __) => Text(
-                    data.first + ' \n ' + data.last,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: ScreenUtil().setSp(30)),
+                  builder: (context, names, _) {
+                    String text = names.first + ' / ' + names.last;
+                    final int endIndex = text.length >= 40 ? 40 : text.length;
+                    text = text.substring(0, endIndex);
+                    return Text(
+                      text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: ScreenUtil().setSp(30),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            Container(
+              color: Colors.grey,
+              width: ScreenUtil().setWidth(1),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: ScreenUtil().setSp(15)),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Selector<B, String>(
+                    selector: (context, stateProvider) => stateProvider.materials[pos].credentials.stage,
+                    builder: (context, stage, _) => Text(
+                      'Stage $stage',
+                      style: TextStyle(
+                        fontSize: ScreenUtil().setSp(30),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                  if (semester != 'unknown')
+                    Selector<B, String>(
+                      selector: (context, stateProvider) => stateProvider.materials[pos].credentials.semester,
+                      builder: (context, semester, _) => Text(
+                        'Semester $semester',
+                        style: TextStyle(
+                          fontSize: ScreenUtil().setSp(30),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ],
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Stage ' + quizStateProvider.materials[pos].credentials.stage),
-              if (quizStateProvider.materials[pos].credentials.semester != 'unknown')
-                SizedBox(
-                  height: ScreenUtil().setHeight(20),
-                ),
-              if (quizStateProvider.materials[pos].credentials.semester != 'unknown')
-                Selector<T, String>(
-                    selector: (_, QuizStateRepository stateProvider) => stateProvider.materials[pos].credentials.semester,
-                    builder: (_, semester, __) => Text('Semester $semester'))
-            ],
-          )
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

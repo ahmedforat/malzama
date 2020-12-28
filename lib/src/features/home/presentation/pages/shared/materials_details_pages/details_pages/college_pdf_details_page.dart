@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../../../../core/Navigator/routes_names.dart';
 import '../../../../../models/materials/college_material.dart';
-import '../../../lectures_pages/state/material_state_repo.dart';
+import '../../../my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 import '../college_material_details_widgets/author_widget.dart';
 import '../college_material_details_widgets/college_material_last_update_widget.dart';
 import '../college_material_details_widgets/college_material_published_in_widget.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../core/general_models/customDate.dart';

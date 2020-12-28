@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../core/platform/services/dialog_services/service_locator.dart';
@@ -19,9 +20,12 @@ class DisplayHomePage extends StatelessWidget {
     PDFStateProvider pdfState = Provider.of<PDFStateProvider>(context, listen: false);
 
     return Scaffold(
+      key: pdfState.scaffoldKey,
       floatingActionButton: FloatingActionButton(
-        onPressed: ()async{
-          print(pdfState.materials.last.id);
+        onPressed: () async {
+
+
+
         },
       ),
       backgroundColor: Colors.grey.withOpacity(0.5),

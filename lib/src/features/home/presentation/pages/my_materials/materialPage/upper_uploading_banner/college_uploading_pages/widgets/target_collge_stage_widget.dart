@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/models/users/college_user.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../../../core/references/references.dart';
@@ -14,7 +17,7 @@ class CollegeChooseStageWidget extends StatelessWidget {
 
   // get the stages list according the the college of the user
   List<String> _getItems(ProfilePageState profilePageState) {
-    String college = profilePageState.userData.college;
+    String college = (locator<UserInfoStateProvider>().userData as CollegeUser).college;
     List<String> _items = References.stagesMapper.values.toList().map((e) => e.toString()).toList();
 
     RegExp pharmacyPattern = new RegExp(r'صيدلة');
@@ -51,38 +54,38 @@ class CollegeChooseStageWidget extends StatelessWidget {
                   padding: EdgeInsets.all(ScreenUtil().setSp(10)),
                   child: DropdownButtonHideUnderline(
                       child: DropdownButtonFormField<int>(
-                        validator: (data) {
-                          if (data == null)
-                            return 'this field is required';
-                          else
-                            return null;
-                        },
-                        items: _getItems(profilePageState).map((String stage) {
-                          return DropdownMenuItem<int>(
+                    validator: (data) {
+                      if (data == null)
+                        return 'this field is required';
+                      else
+                        return null;
+                    },
+                    items: _getItems(profilePageState).map((String stage) {
+                      return DropdownMenuItem<int>(
+                        child: Text(
+                          '$stage  ',
+                          //style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        value: int.parse(References.stagesMapper.entries.firstWhere((item) => item.value == stage).key),
+                      );
+                    }).toList(),
+                    onChanged: (update) {
+                      print(update);
+                      collegeUploadingState.updateTargetStage(update);
+                    },
+                    value: collegeUploadingState.stage,
+                    hint: Align(alignment: Alignment.center, child: Text('Target stage')),
+                    selectedItemBuilder: (BuildContext context) {
+                      return _getItems(profilePageState).map<Widget>((String item) {
+                        return Align(
+                            alignment: Alignment.center,
                             child: Text(
-                              '$stage  ',
-                              //style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            value: int.parse(References.stagesMapper.entries.firstWhere((item) => item.value == stage).key),
-                          );
-                        }).toList(),
-                        onChanged: (update) {
-                          print(update);
-                          collegeUploadingState.updateTargetStage(update);
-                        },
-                        value: collegeUploadingState.stage,
-                        hint: Align(alignment: Alignment.center, child: Text('Target stage')),
-                        selectedItemBuilder: (BuildContext context) {
-                          return _getItems(profilePageState).map<Widget>((String item) {
-                            return Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  item + ' ',
-                                  textAlign: TextAlign.center,
-                                ));
-                          }).toList();
-                        },
-                      )),
+                              item + ' ',
+                              textAlign: TextAlign.center,
+                            ));
+                      }).toList();
+                    },
+                  )),
                 ),
               ),
             ],

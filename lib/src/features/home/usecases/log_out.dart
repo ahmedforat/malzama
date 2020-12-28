@@ -86,13 +86,23 @@ class AccessManager {
     }
 
     Response response;
-    Map<String, String> _headers = {'content-type': 'application/json', 'Accept': 'application/json'};
+    Map<String, String> _headers = {
+      'content-type': 'application/json',
+      'Accept': 'application/json',
+    };
 
-    Map<String, String> _body = {'email': email, 'password': password, 'account_type': accountType};
+    Map<String, String> _body = {
+      'email': email,
+      'password': password,
+      'account_type': accountType,
+    };
 
     try {
-      response =
-          await post(Uri.encodeFull(RegistrationRoutes.LOGIN_URL), headers: _headers, body: json.encode(_body)).timeout(References.timeout);
+      response = await post(
+        Uri.encodeFull(RegistrationRoutes.LOGIN_URL),
+        headers: _headers,
+        body: json.encode(_body),
+      ).timeout(References.timeout);
 
       switch (response.statusCode) {
         case 500:

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_entity.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 
 import '../../../../../../../../core/api/api_client/clients/common_materials_client.dart';
 import '../../../../../../../../core/api/api_client/clients/quiz_client.dart';
@@ -238,6 +239,21 @@ class QuizStateProvider extends QuizStateRepository with ChangeNotifier {
 
   // =========================================================================================
 
+  void updateMaterialAt(int pos, QuizCollection update) {
+    _quizCollections[pos] = new QuizCollection.fromJSON({...update.toJSON()});
+    notifyMyListeners();
+  }
+
+  void updateMaterialById(QuizCollection update) {
+    final int index = _quizCollections.indexWhere((element) => element.id == update.id);
+    if (index > 0) {
+      _quizCollections[index] = update;
+      notifyMyListeners();
+    }
+  }
+
+  // =========================================================================================
+
   @override
   void removeMaterialAt(int pos) {
     _quizCollections.removeAt(pos);
@@ -305,4 +321,11 @@ class QuizStateProvider extends QuizStateRepository with ChangeNotifier {
 
 // =========================================================================================
 
+  void updateQuizItemInCollection(String collectionId, int itemIndex, QuizEntity entity) {
+    final int index = _quizCollections.indexWhere((element) => element.id == collectionId);
+    if (index > 0) {
+      _quizCollections[index].quizItems[itemIndex] = _quizCollections[index].quizItems[itemIndex].copyWith(entity);
+      notifyMyListeners();
+    }
+  }
 }

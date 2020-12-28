@@ -92,7 +92,7 @@ class LoginPage extends StatelessWidget {
                                 Navigator.of(context).pushNamed('/validate-account-page');
                               }
                             } else if (response is Success) {
-                              locator<UserInfoStateProvider>().refreshData();
+                              await locator<UserInfoStateProvider>().refreshData();
                               Navigator.of(context).pushNamedAndRemoveUntil('/home-page', (_) => false);
                             } else {
                               DebugTools.showErrorMessageWidget(context: context, message: response.message);

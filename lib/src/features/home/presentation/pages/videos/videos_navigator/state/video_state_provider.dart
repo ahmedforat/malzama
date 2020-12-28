@@ -9,7 +9,7 @@ import '../../../../../../../core/general_widgets/helper_functions.dart';
 import '../../../../../../../core/platform/services/dialog_services/service_locator.dart';
 import '../../../../../../../features/home/models/materials/study_material.dart';
 import '../../../../state_provider/user_info_provider.dart';
-import '../../../lectures_pages/state/material_state_repo.dart';
+import '../../../my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 
 class VideoStateProvider extends MaterialStateRepository with ChangeNotifier {
   VideoStateProvider() {
@@ -292,6 +292,15 @@ class VideoStateProvider extends MaterialStateRepository with ChangeNotifier {
   void dispose() {
     _isDisposed = true;
     super.dispose();
+  }
+
+  @override
+  void replaceMaterialWith(StudyMaterial newMaterial) {
+    final int index = _videosList.indexWhere((element) => element.id == newMaterial.id);
+    if (index > -1) {
+      _videosList[index] = newMaterial;
+      notifyMyListeners();
+    }
   }
 
 // ==============================================================================================================

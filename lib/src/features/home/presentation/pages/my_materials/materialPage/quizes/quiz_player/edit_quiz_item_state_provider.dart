@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:malzama/src/core/api/api_client/clients/quiz_client.dart';
+import 'package:malzama/src/core/api/contract_response.dart';
 
 import '../../../../../../../../core/platform/services/dialog_services/dialog_service.dart';
 import '../../../../../../../../core/platform/services/dialog_services/service_locator.dart';
@@ -12,8 +14,6 @@ class EditQuizItemStateProvider with ChangeNotifier {
   String _optionCerrorMessage;
   String _optionDrrorMessage;
 
-
-
   String get questionErrorMessage => _questionErrorMessage;
 
   String get optionAerrorMessage => _optionAerrorMessage;
@@ -24,50 +24,15 @@ class EditQuizItemStateProvider with ChangeNotifier {
 
   String get optionDrrorMessage => _optionDrrorMessage;
 
-  // void setQuestionErrorMessageTo(String update) {
-  //   if (_questionErrorMessage != update) {
-  //     _questionErrorMessage = update;
-  //     notifyMyListeners();
-  //   }
-  // }
-  //
-  // void setOptionAerrorMessageTo(String update) {
-  //   if (_optionAerrorMessage != update) {
-  //     _optionAerrorMessage = update;
-  //     notifyMyListeners();
-  //   }
-  // }
-  //
-  // void setOptionBerrorMessageTo(String update) {
-  //   if (_optionBerrorMessage != update) {
-  //     _optionBerrorMessage = update;
-  //     notifyMyListeners();
-  //   }
-  // }
-  //
-  // void setOptionCerrorMessageTo(String update) {
-  //   if (_optionCerrorMessage != update) {
-  //     _optionCerrorMessage = update;
-  //     notifyMyListeners();
-  //   }
-  // }
-  //
-  // void setOptionDerrorMessageTo(String update) {
-  //   if (_optionDrrorMessage != update) {
-  //     _optionDrrorMessage = update;
-  //     notifyMyListeners();
-  //   }
-  // }
-
-
-  void setErrorMessageToNull(int pos){
-    if(_errorMessages[pos] != null){
+  void setErrorMessageToNull(int pos) {
+    if (_errorMessages[pos] != null) {
       _errorMessages[pos] = null;
       notifyMyListeners();
     }
   }
 
   List<String> _errorMessages;
+
   List<String> get errorMessages => _errorMessages;
 
   // form key
@@ -95,7 +60,12 @@ class EditQuizItemStateProvider with ChangeNotifier {
 
   List<TextEditingController> _controllers;
 
-  EditQuizItemStateProvider(QuizEntity quizEntity) {
+  QuizEntity _preEditQuizEntity;
+  String _quizCollectionId;
+
+  EditQuizItemStateProvider(QuizEntity quizEntity, this._quizCollectionId) {
+    _preEditQuizEntity = quizEntity.copy;
+
     _formKey = new GlobalKey<FormState>();
     _questionController = new TextEditingController()..text = quizEntity.question;
     _optionAcontroller = new TextEditingController()..text = quizEntity.options[0];
@@ -113,14 +83,6 @@ class EditQuizItemStateProvider with ChangeNotifier {
     ];
     _answers = parseAnswers(quizEntity.answers);
 
-    // _errorMessageSetters = [
-    //   setQuestionErrorMessageTo,
-    //   setOptionAerrorMessageTo,
-    //   setOptionBerrorMessageTo,
-    //   setOptionCerrorMessageTo,
-    //   setOptionDerrorMessageTo,
-    // ];
-
     _errorMessages = [
       _questionErrorMessage,
       _optionAerrorMessage,
@@ -128,6 +90,7 @@ class EditQuizItemStateProvider with ChangeNotifier {
       _optionCerrorMessage,
       _optionDrrorMessage,
     ];
+    print('new editQuizItemState has been created');
   }
 
   List<bool> _answers = [false, false, false, false];
@@ -160,7 +123,7 @@ class EditQuizItemStateProvider with ChangeNotifier {
     }
   }
 
-  void saveAndUpload() {
+  void saveAndUpload(BuildContext context) async {
     if (validateFields()) {
       print('all fields are valid');
       if (!validateAnswers()) {
@@ -175,7 +138,28 @@ class EditQuizItemStateProvider with ChangeNotifier {
           'answers': _answers.asMap().entries.where((element) => element.value).map((e) => e.key).toList(),
           'explain': _explainController.text.isEmpty ? null : _explainController.text
         };
-        print(payload);
+        final String preEditJson = (_preEditQuizEntity.toJSON()..remove('_id')..remove('inReviewMode')).toString();
+        if (preEditJson == payload.toString()) {
+          print('there are no changes at all');
+          Navigator.of(context).pop();
+        } else {
+          print('updating');
+
+          locator<DialogService>().showDialogOfLoading(message: 'updating ...');
+          ContractResponse response = await QuizClient().editQuizItem(
+            quizItemID: _preEditQuizEntity.id,
+            quizItem: new QuizEntity.fromJSON(payload)..id = _preEditQuizEntity.id,
+            quizCollectionID: _quizCollectionId,
+          );
+          locator<DialogService>().completeAndCloseDialog(null);
+          if (response is Success) {
+            QuizEntity updated = new QuizEntity.fromJSON(payload)..id = _preEditQuizEntity.id;
+            Navigator.of(context).pop(updated);
+            locator<DialogService>().showDialogOfSuccess(message: 'question updated ✔');
+          } else {
+            locator<DialogService>().showDialogOfFailure(message: 'Failed to update this question');
+          }
+        }
       }
     } else {
       print('all or some fields are not valid');

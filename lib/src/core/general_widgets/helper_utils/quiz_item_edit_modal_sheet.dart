@@ -58,14 +58,14 @@ class EditQuizItemModalSheetWidget extends StatelessWidget {
                         ),
                         InkWell(
                           child: Text(
-                            'Save Changes',
+                            'Save and update',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: ScreenUtil().setSp(45),
                               color: Colors.blueAccent,
                             ),
                           ),
-                          onTap: editStateProvider.saveAndUpload,
+                          onTap: () => editStateProvider.saveAndUpload(context),
                         ),
                         SizedBox(
                           width: ScreenUtil().setWidth(80),

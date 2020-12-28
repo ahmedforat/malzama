@@ -19,9 +19,7 @@ class DisplayVideosPage extends StatefulWidget {
 class _DisplayVideosPageState extends State<DisplayVideosPage> {
   @override
   Widget build(BuildContext context) {
-    final String accountType = Provider.of<UserInfoStateProvider>(context, listen: false).userData.accountType;
     VideoStateProvider videoStateProvider = Provider.of<VideoStateProvider>(context, listen: false);
-    final bool isAcademic = HelperFucntions.isAcademic(accountType);
     return Selector<VideoStateProvider, List<dynamic>>(
         selector: (context, stateProvider) => [
               stateProvider.isFetching,
@@ -59,8 +57,7 @@ class Materials extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     VideoStateProvider videoStateProvider = Provider.of<VideoStateProvider>(context, listen: false);
-    UserInfoStateProvider userInfo = Provider.of<UserInfoStateProvider>(context, listen: false);
-    bool isAcademic = userInfo.isAcademic;
+
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -69,35 +66,38 @@ class Materials extends StatelessWidget {
       },
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
-        child: Container(
-          padding: EdgeInsets.all(ScreenUtil().setSp(20)),
-          color: Colors.grey.withOpacity(0.3),
-          child: Selector<VideoStateProvider, int>(
-            selector: (context, stateProvider) => stateProvider.materials.length,
-            builder: (context, count, _) => ListView.builder(
-                itemCount: count,
-                itemBuilder: (context, pos) {
-                  if (pos == count - 1 && count >= 10) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        videoStateProvider.isAcademic
-                            ? CollegeVideoHoldingWidget<VideoStateProvider>(pos: pos)
-                            : SchoolVideoHoldingWidget<VideoStateProvider>(pos: pos),
-                        SizedBox(
-                          height: ScreenUtil().setHeight(30),
-                        ),
-                        LoadMoreWidget<VideoStateProvider>(
-                          onLoadMore: videoStateProvider.fetchForPagination,
-                        ),
-                      ],
-                    );
-                  }
-                  return videoStateProvider.isAcademic
-                      ? CollegeVideoHoldingWidget<VideoStateProvider>(pos: pos)
-                      : SchoolVideoHoldingWidget<VideoStateProvider>(pos: pos);
-                }),
+        child: Scaffold(
+          key: videoStateProvider.scaffoldKey,
+          body: Container(
+            padding: EdgeInsets.all(ScreenUtil().setSp(20)),
+            color: Colors.grey.withOpacity(0.3),
+            child: Selector<VideoStateProvider, int>(
+              selector: (context, stateProvider) => stateProvider.materials.length,
+              builder: (context, count, _) => ListView.builder(
+                  itemCount: count,
+                  itemBuilder: (context, pos) {
+                    if (pos == count - 1 && count >= 10) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          videoStateProvider.isAcademic
+                              ? CollegeVideoHoldingWidget<VideoStateProvider>(pos: pos)
+                              : SchoolVideoHoldingWidget<VideoStateProvider>(pos: pos),
+                          SizedBox(
+                            height: ScreenUtil().setHeight(30),
+                          ),
+                          LoadMoreWidget<VideoStateProvider>(
+                            onLoadMore: videoStateProvider.fetchForPagination,
+                          ),
+                        ],
+                      );
+                    }
+                    return videoStateProvider.isAcademic
+                        ? CollegeVideoHoldingWidget<VideoStateProvider>(pos: pos)
+                        : SchoolVideoHoldingWidget<VideoStateProvider>(pos: pos);
+                  }),
+            ),
           ),
         ),
       ),

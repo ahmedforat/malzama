@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_quizes_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/my_saved_material/state_provider/saved_quizes_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/accessory_widgets/load_more_widget_for_pagination.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/accessory_widgets/no_materials_yet_widget.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/material_holding_widgets/college/college_quiz_holding_widget.dart';

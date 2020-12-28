@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:malzama/src/features/home/models/materials/study_material.dart';
+import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/videos_player_state_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../../../lectures_pages/state/material_state_repo.dart';
+import '../../../my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 import '../college_material_details_widgets/author_widget.dart';
 import '../college_material_details_widgets/college_material_last_update_widget.dart';
 import '../college_material_details_widgets/college_material_published_in_widget.dart';
@@ -20,7 +22,6 @@ class CollegeVideoDetailsPage<B extends MaterialStateRepository> extends Statele
 
   @override
   Widget build(BuildContext context) {
-
     ScreenUtil.init(context);
     B pdfState = Provider.of<B>(context, listen: false);
     print('building Entire page widget');
@@ -34,7 +35,7 @@ class CollegeVideoDetailsPage<B extends MaterialStateRepository> extends Statele
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _UpperPart(pos),
+                _UpperPart<B>(pos),
                 SizedBox(
                   height: ScreenUtil().setHeight(50),
                 ),
@@ -85,7 +86,7 @@ class CollegeVideoDetailsPage<B extends MaterialStateRepository> extends Statele
   }
 }
 
-class _UpperPart extends StatelessWidget {
+class _UpperPart<B extends MaterialStateRepository> extends StatelessWidget {
   final int pos;
 
   const _UpperPart(this.pos);
@@ -93,6 +94,7 @@ class _UpperPart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('building Upper part widget');
+
     return GestureDetector(
       child: Container(
         padding: EdgeInsets.all(ScreenUtil().setSp(100)),
@@ -113,7 +115,13 @@ class _UpperPart extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => VideoPlayer(pos: pos)));
+        StudyMaterial studyMaterial = Provider.of<B>(context, listen: false).materials[pos];
+
+        WidgetBuilder builder = (context) => ChangeNotifierProvider<VideosPlayerStateProvider>(
+              create: (context) => VideosPlayerStateProvider(studyMaterial),
+              builder: (context, _) => VideoPlayer(),
+            );
+        Navigator.of(context, rootNavigator: true).push(new MaterialPageRoute(builder: builder));
       },
     );
   }

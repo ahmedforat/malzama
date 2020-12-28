@@ -8,7 +8,6 @@ import 'package:malzama/src/features/home/presentation/pages/shared/material_hol
 import 'package:malzama/src/features/home/presentation/pages/shared/single_page_display_widgets/failed_to_load_materials_widget.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../../../../core/Navigator/routes_names.dart';
 import '../../../../shared/material_holding_widgets/college/college_quiz_holding_widget.dart';
 
 class QuizListDisplayer extends StatelessWidget {
@@ -17,6 +16,7 @@ class QuizListDisplayer extends StatelessWidget {
     ScreenUtil.init(context);
     QuizStateProvider quizStateProvider = Provider.of<QuizStateProvider>(context, listen: false);
     return Scaffold(
+      key: quizStateProvider.scaffoldKey,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           //var dd = await QuizAccessObject().getUploadedMaterials(MyUploaded.QUIZES);

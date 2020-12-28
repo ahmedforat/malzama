@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
-
-import '../../../../models/materials/college_material.dart';
-import '../videos_navigator/state/video_state_provider.dart';
+import 'package:malzama/src/features/home/models/materials/study_material.dart';
 
 class CollegeVideoInfoOverlayWidget extends StatelessWidget {
-  final int pos;
+  final StudyMaterial studyMaterial;
 
-  CollegeVideoInfoOverlayWidget(this.pos);
+  CollegeVideoInfoOverlayWidget(this.studyMaterial);
 
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
     TextStyle _textStyle = TextStyle(fontSize: ScreenUtil().setSp(40), fontWeight: FontWeight.bold, color: Colors.white);
-    VideoStateProvider videoStateProvider = Provider.of<VideoStateProvider>(context, listen: false);
-    CollegeMaterial studyMaterial = videoStateProvider.materials[pos];
 
     return Container(
       height: ScreenUtil().setHeight(1500),

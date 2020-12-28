@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../../../../core/platform/services/dialog_services/service_locator.dart';
 import '../../../../../models/materials/college_material.dart';
-import '../../../lectures_pages/state/material_state_repo.dart';
+import '../../../my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 
 class SchoolMaterialDetailsAuthorWidget<B extends MaterialStateRepository> extends StatelessWidget {
   final int pos;

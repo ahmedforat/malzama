@@ -1,5 +1,3 @@
-
-
 class QuizEntity {
   String id;
   String question;
@@ -19,7 +17,7 @@ class QuizEntity {
 
   bool get hasAnswers => this.answers.length > 0;
 
-  QuizEntity.fromJSON(Map<String,dynamic> map)
+  QuizEntity.fromJSON(Map<String, dynamic> map)
       : this.id = map['_id'],
         this.question = map['question'],
         this.options = List<String>.from(map['options']),
@@ -36,5 +34,12 @@ class QuizEntity {
         'inReviewMode': this.inReviewMode,
       };
 
+  QuizEntity get copy => new QuizEntity.fromJSON(this.toJSON());
 
+  QuizEntity copyWith(QuizEntity entity) => new QuizEntity(
+      id: entity?.id ?? id,
+      question: entity?.question ?? question,
+      answers: entity?.answers ?? answers,
+      explanation: entity?.explain ?? explain,
+      options: entity?.options ?? options);
 }

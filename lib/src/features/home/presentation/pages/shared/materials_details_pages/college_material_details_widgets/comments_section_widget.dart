@@ -4,7 +4,7 @@ import 'package:malzama/src/features/home/presentation/pages/shared/comments_and
 import 'package:malzama/src/features/home/presentation/pages/shared/comments_and_replies/state_providers/add_comment_widget_state_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../../../lectures_pages/state/material_state_repo.dart';
+import '../../../my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 
 class CommentsSectionWidget<B extends MaterialStateRepository> extends StatelessWidget {
   final int pos;

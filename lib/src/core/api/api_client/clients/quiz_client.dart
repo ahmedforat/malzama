@@ -8,13 +8,18 @@ import 'package:malzama/src/features/home/presentation/pages/my_materials/materi
 class QuizClient implements QuizRepository {
   @override
   Future<ContractResponse> deleteQuizItem({String quizItemId, String quizCollectionId, int questionsCount}) async {
-    final String queryString = '?quizItemID=$quizItemId&quizCollectionID=$quizCollectionId&questionsCount=$questionsCount';
+    final String queryString = '?quizItemId=$quizItemId&quizCollectionId=$quizCollectionId&questionsCount=$questionsCount';
     return await HttpMethods.get(url: QuizRoutes.DELETE_QUIZ_ITEM, queryString: queryString);
   }
 
   @override
   Future<ContractResponse> editQuizItem({String quizItemID, String quizCollectionID, QuizEntity quizItem}) async {
-    Map<String, dynamic> body = {'quizItemID': quizItemID, 'quizCollectionID': quizCollectionID, 'quizItem': quizItem.toJSON()};
+
+    Map<String, dynamic> body = {
+      'quizItemId': quizItemID,
+      'quizCollectionId': quizCollectionID,
+      'quizItem': quizItem.toJSON(),
+    };
     return await HttpMethods.post(body: body, url: QuizRoutes.EDIT_QUIZ_ITEM);
   }
 

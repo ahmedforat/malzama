@@ -145,12 +145,12 @@ class References {
   ];
 
   static Map<int, String> stages = {
-    1: schoolStages[5],
+    1: schoolStages.last,
     2: schoolStages[4],
     3: schoolStages[3],
     4: schoolStages[2],
     5: schoolStages[1],
-    6: schoolStages[0]
+    6: schoolStages.first
   };
 
   static List<String> schoolSections = [

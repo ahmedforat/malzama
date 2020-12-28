@@ -1,0 +1,55 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/screenutil.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
+import 'package:provider/provider.dart';
+
+class ProfileCoverPictureWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ScreenUtil.init(context);
+    ProfilePageState profilePageState = Provider.of<ProfilePageState>(context, listen: false);
+    return InkWell(
+      onTap: () async {
+       var d = await HelperFucntions.showProfilePicturesModalSheet(context: context, pictureName: 'cover');
+       print(d);
+      },
+      child: SizedBox(
+        height: ScreenUtil().setHeight(400),
+        width: double.infinity,
+        child: Selector<ProfilePageState, File>(
+          selector: (context, stateProvider) => stateProvider.coverPicture,
+          builder: (context, coverPicture, _) => Container(
+              width: ScreenUtil().setWidth(300),
+              height: ScreenUtil().setHeight(300),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(ScreenUtil().setSp(15)),
+                image: DecorationImage(
+                  image: coverPicture == null ? AssetImage(profilePageState.defaultCoverPicture) : FileImage(coverPicture),
+                  fit: BoxFit.fill,
+                ),
+              ),
+              child: coverPicture == null
+                  ? Align(
+                      alignment: Alignment.topLeft,
+                      child: Container(
+                        width: ScreenUtil().setWidth(450),
+                        padding: EdgeInsets.all(ScreenUtil().setSp(20)),
+                        decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(ScreenUtil().setSp(20)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[Text('Add a cover photo'), Icon(Icons.add_a_photo)],
+                        ),
+                      ),
+                    )
+                  : null),
+        ),
+      ),
+    );
+  }
+}

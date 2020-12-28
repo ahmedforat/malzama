@@ -4,8 +4,12 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:malzama/src/core/Navigator/navigation_service.dart';
 import 'package:malzama/src/core/api/api_client/clients/common_materials_client.dart';
 import 'package:malzama/src/core/api/api_client/clients/quiz_client.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_list_displayer/quiz_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/my_uploads/state_provider/my_uploads_state_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/api/contract_response.dart';
 import '../../../../core/general_widgets/helper_functions.dart';
@@ -283,12 +287,12 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
     _formKey = new GlobalKey<FormState>();
 
     if (_fromDrafts || _fromUploaded) {
-      scrollController.addListener(_fabAppearanceListener);
       if (_fromDrafts) {
         await importFromDrafts(payload as QuizDraftEntity);
       } else {
         await importFromUploadedToBeEdit(payload as QuizCollection);
       }
+      scrollController.addListener(_fabAppearanceListener);
     }
     locator<DialogService>().quizUploadingState = this;
 
@@ -424,23 +428,28 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
     var payload = new Map<String, dynamic>();
     Map<String, dynamic> optimizedCredentials = {};
     List<QuizEntity> optimizedQuizItems = [];
-
+    bool isCredentialModified = false;
     if (isUpdating) {
       // for credentials
 
       print('we are updating');
       Map<String, dynamic> preEditCrdentialsMap = _preEditCredentials.toJSON();
+      if (preEditCrdentialsMap.toString() != credentials.toJSON().toString()) {
+        isCredentialModified = true;
+      }
+
       credentials.toJSON().entries.toList().forEach((item) {
         if (item.value.toString().trim() != preEditCrdentialsMap[item.key].toString().trim()) {
+          print(item.key + ' has been modified and the new value is ${item.value}');
           optimizedCredentials[item.key] = item.value;
         }
       });
 
       bool areItemsIdentical = true;
       if (_quizList.length == _preEditQuizItems.length) {
-        print('quiz items  and we are checking');
+        print('quiz items  and we are checking if there are items that has been modified');
         for (int i = 0; i < _quizList.length; i++) {
-          if (!compareTwoQuizItems(_quizList[i], _preEditQuizItems[i])) {
+          if (_quizList[i].toJSON().toString() != _preEditQuizItems[i].toJSON().toString()) {
             areItemsIdentical = false;
             break;
           }
@@ -448,6 +457,10 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
         if (!areItemsIdentical) {
           print('ther some updates in the questions alreadt exsits');
           optimizedQuizItems = _quizList;
+        } else {
+          if (!isCredentialModified) {
+            return null;
+          }
         }
       } else {
         print('there are additional questions added');
@@ -456,20 +469,20 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
         if (quizListItemsWithId.length == _preEditQuizItems.length) {
           print('there are no deletion in the already exisiting items and we are checking if the have been modified');
           for (int i = 0; i < _preEditQuizItems.length; i++) {
-            if (!compareTwoQuizItems(quizListItemsWithId[i], _preEditQuizItems[i])) {
+            if (quizListItemsWithId[i].toJSON().toString() != _preEditQuizItems[i].toJSON().toString()) {
               areItemsIdentical = false;
               break;
             }
           }
           if (areItemsIdentical) {
             print('there are no changes the already exisiting items but only newly added questions');
-
             optimizedQuizItems = _quizList.where((e) => e.id == null).toList();
           } else {
-            print('there are changes the already exisiting items in addition to newly added questions');
+            print('there are changes in the the already exisiting items in addition to newly added questions');
             optimizedQuizItems = _quizList;
           }
         } else {
+          print('some deletion occured');
           optimizedQuizItems = _quizList;
         }
       }
@@ -478,7 +491,11 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
       optimizedQuizItems = _quizList;
     }
 
-    payload.addAll(optimizedCredentials);
+    if (optimizedCredentials.isNotEmpty) {
+      print('optimized credentials are not empty');
+      payload.addAll(optimizedCredentials);
+    }
+
     payload['questions'] = optimizedQuizItems.isEmpty ? null : optimizedQuizItems.map((e) => e.toJSON()).toList();
     payload['questionsCount'] = optimizedQuizItems.isEmpty ? null : _quizList.length;
     payload['uuid'] = userData.uuid;
@@ -494,52 +511,14 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
       payload['_id'] = _quizCollectionID;
     }
 
-    print(payload['questions']);
     if (HelperFucntions.isTeacher(userData.accountType)) {
       payload['uuid'] = payload['uuid'] + _stage.toString();
     }
-    print('=' * 50);
-    print('=' * 50);
-    print('=' * 50);
-    print('payload just before uploading or updating');
-    print(payload);
-    print('=' * 50);
-    print('=' * 50);
-    print('=' * 50);
 
     return payload;
   }
 
   /// ===========================================================================================================================
-  bool compareTwoQuizItems(QuizEntity q1, QuizEntity q2) {
-    if (q1.question != q2.question) {
-      return false;
-    }
-
-    if (q1.explain != q2.explain) {
-      return false;
-    }
-
-    if (!compareTwoList<String>(q1.options, q2.options)) {
-      return false;
-    }
-    if (!compareTwoList<int>(q1.answers, q2.answers)) {
-      return false;
-    }
-    return true;
-  }
-
-  bool compareTwoList<T>(List<T> list1, List<T> list2) {
-    if (list1.length != list2.length) {
-      return false;
-    }
-    for (int i = 0; i < list1.length; i++) {
-      if (list1[i].toString().trim() != list2[i].toString().trim()) {
-        return false;
-      }
-    }
-    return true;
-  }
 
   /// ===========================================================================================================================
 
@@ -665,14 +644,17 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
     } else {
       _failureMessage = 'Failed to load quiz questions';
     }
-    _preEditCredentials = getCredentials();
-    _preEditQuizItems = [..._quizList];
+    _preEditCredentials = new QuizCredentials.fromJSON({...getCredentials().toJSON()});
+    _preEditQuizItems = [];
+    for (QuizEntity entity in _quizList) {
+      _preEditQuizItems.add(entity.copy);
+    }
   }
 
   /// ===========================================================================================================================
 
   Future<void> fetchAllQuestions() async {
-    QuizCollection temp = await QuizAccessObject().getUploadedMaterialById(MyUploaded.QUIZES, _quizCollectionID);
+    QuizCollection temp = await QuizAccessObject().getUploadedQuizById(MyUploaded.QUIZES, _quizCollectionID);
     if (temp != null) {
       print('Fetching done from local');
       _quizList = temp.quizItems;
@@ -801,27 +783,14 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
         await Future.delayed(Duration(milliseconds: 70));
         showSnackBar(text: 'You must provide answer(s) !!');
       } else {
-        // prepare for uploading to the server
-
         // save the credentials
         _formKey.currentState.save();
 
         // call the uploading method to the server;
 
         final bool res = await upload(context);
-        if (res) {
-          // MaterialStateProvider materialStateProvider =
-          //     Provider.of<MaterialStateProvider>(context, listen: false);
-          // // to update already saved uploaded quizes
-          // userInfoStateProvider.fetchUploadedMaterialsCount();
-          // materialStateProvider.fetchMyQuizesFromDB();
-          final bool isUpdating = fromUploaded != null;
-          final String text = isUpdating ? 'updated' : 'uploaded';
-          locator<DialogService>().showDialogOfSuccess(message: 'quiz $text Successfully');
-        } else {
-          final bool isUpdating = fromUploaded != null;
-          final String text = isUpdating ? 'update' : 'upload';
-          locator<DialogService>().showDialogOfFailure(message: 'Failed to $text quiz, try again');
+        if (!res) {
+          Navigator.of(context).pop();
         }
       }
     }
@@ -829,10 +798,20 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
 
 // upload new quiz
   Future<bool> upload(BuildContext context) async {
+    print('===' * 100);
     Map<String, dynamic> payload = getPayload();
-    ContractResponse contractResponse;
-    var accountType = userData.accountType;
 
+    print('===' * 100);
+    print('upload completed');
+
+    if (payload == null) {
+      print('there are no changes at all');
+      print('payload == $payload');
+      return false;
+    }
+
+    ContractResponse contractResponse;
+    final String materialName = MyUploaded.QUIZES;
     if (isUpdating) {
       print('updating quiz collection');
       locator<DialogService>().showDialogOfLoading(message: 'Updating');
@@ -848,43 +827,56 @@ class QuizUploaderState with ChangeNotifier implements AbstractStateProvider {
       Map<String, dynamic> responseBody = json.decode(contractResponse.message);
       Map<String, dynamic> data = responseBody['data'];
       List<dynamic> idsList = data['ids_list'] as List<dynamic>;
-
-      if (idsList.length == _quizList.length) {
+      if (idsList.isEmpty) {
+        print('do nothing');
+      } else if (idsList.length == _quizList.length) {
         for (int i = 0; i < idsList.length; i++) {
           _quizList[i].id = idsList[i].toString();
         }
-      }
-
-      if (idsList.length < _quizList.length) {
+      } else {
         final int diff = _quizList.length - idsList.length;
         for (int i = 0; i < idsList.length; i++) {
           _quizList[diff + i].id = idsList[i].toString();
         }
       }
-      payload['questions'] = _quizList.map((e) => e.toJSON()).toList();
-      payload['questionsCount'] = _quizList.length;
-      payload['author'] = await HelperFucntions.getAuthorPopulatedData();
-      if (payload.containsKey('updateType')) {
-        payload.remove('updateType');
-      }
 
-      if (!isUpdating) {
+      if (isUpdating) {
+        Map<String, dynamic> newPayload = _currentCollection.toJSON();
+        payload.remove('updateType');
+        payload.remove('questionsCount');
+        payload.remove('questions');
+        payload.remove('collectionName');
+        List<MapEntry> entries = payload.entries.toList();
+        if (entries.isNotEmpty) {
+          for (var entry in entries) {
+            newPayload[entry.key] = entry.value;
+          }
+        }
+        await QuizAccessObject().deleteUploadedMaterial(materialName, id: _quizCollectionID);
+
+        newPayload['questions'] = _quizList.map((e) => e.toJSON()).toList();
+        newPayload['questionsCount'] = _quizList.length;
+        payload = newPayload;
+      } else {
         payload['_id'] = data['_id'];
         payload['post_date'] = data['post_date'];
+        payload['author'] = await HelperFucntions.getAuthorPopulatedData();
+        payload['questions'] = _quizList.map((e) => e.toJSON()).toList();
+        payload['questionsCount'] = _quizList.length;
       }
 
       print('just before saving uploaded quiz to local database');
-      final String materialName = MyUploaded.QUIZES;
-      if (isUpdating) {
-        print('deleting');
-        await QuizAccessObject().deleteUploadedMaterial(materialName, id: _quizCollectionID);
+
+      if (isUpdating && NavigationService.getInstance().canWePopFromQuizesNavigator) {
+        QuizStateProvider quizStateProvider = Provider.of<QuizStateProvider>(context, listen: false);
+        quizStateProvider.updateMaterialById(new QuizCollection.fromJSON(payload));
       }
 
+      if (isUpdating && NavigationService.getInstance().canWePopFromMyUploads) {
+        MyUploadsStateProvider uploadsStateProvider = Provider.of<MyUploadsStateProvider>(context, listen: false);
+        uploadsStateProvider.updateQuizAtById(new QuizCollection.fromJSON(payload));
+      }
       await QuizAccessObject().saveUploadedMaterial(materialName, payload);
-      print('saved');
-      print(payload);
-      // await QuizAccessObject().saveQuizItemsToDrafts(payload['questions'].map<QuizEntity>((item) => QuizEntity.fromJSON(item)).toList(),
-      //     credentials.toJSON());
 
       if (_fromDrafts) {
         await QuizAccessObject().removeDrftAt(index: _draftStoreIndex);

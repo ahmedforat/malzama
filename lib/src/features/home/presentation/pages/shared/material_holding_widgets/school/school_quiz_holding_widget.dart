@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../../../../core/references/references.dart';
 import '../../../../../models/materials/school_material.dart';
-import '../../../lectures_pages/state/material_state_repo.dart';
+import '../../../my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 
 class SchoolQuizHoldingWidget<T extends QuizStateRepository> extends StatelessWidget {
   final int pos;

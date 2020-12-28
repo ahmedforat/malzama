@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:malzama/src/core/api/contract_response.dart';
+import 'package:malzama/src/core/general_widgets/helper_utils/profile_pictures_modal_sheet.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/core/platform/services/file_system_services.dart';
 import 'package:malzama/src/features/home/models/users/college_student.dart';
@@ -16,10 +18,11 @@ import 'package:malzama/src/features/home/models/users/school_student.dart';
 import 'package:malzama/src/features/home/models/users/school_teacher.dart';
 import 'package:malzama/src/features/home/models/users/school_user.dart';
 import 'package:malzama/src/features/home/models/users/user.dart';
-import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_pdf_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_quizes_state_provider.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/my_saved_material/state_provider/saved_pdf_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/my_saved_material/state_provider/saved_quizes_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/my_saved_material/state_provider/saved_videos_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/shared/accessory_widgets/bio_options_widget.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/accessory_widgets/yes_or_no_alert_dialog.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'package:provider/provider.dart';
@@ -60,6 +63,22 @@ class HelperFucntions {
       'notifications_repo': data.notificationsRepo,
       'uuid': data.uuid
     };
+
+    if (data.isAcademic) {
+      populatedData['college'] = (data as CollegeUser).college;
+      populatedData['university'] = (data as CollegeUser).university;
+      populatedData['section'] = (data as CollegeUser).section;
+
+      if (HelperFucntions.isTeacher(data.accountType)) {
+        populatedData['speciality'] = (data as CollegeTeacher).speciality;
+      }
+    } else {
+      populatedData['school'] = (data as SchoolUser).school;
+      populatedData['schoolSection'] = (data as SchoolUser).schoolSection;
+      if (HelperFucntions.isTeacher(data.accountType)) {
+        populatedData['speciality'] = (data as SchoolTeacher).speciality;
+      }
+    }
     return populatedData;
   }
 
@@ -202,13 +221,79 @@ class HelperFucntions {
     @required BuildContext context,
   }) async {
     UserInfoStateProvider userInfoState = locator<UserInfoStateProvider>();
+
+    final _editText = 'Edit';
+    final _deleteText = 'Delete';
     userInfoState.setBottomNavBarVisibilityTo(false);
+
+    final Widget _bodyWidget = EditOrDeleteOptionWidget(
+      onEditText: _editText,
+      onDeleteText: _deleteText,
+    );
     return await showModalBottomSheet(
-        backgroundColor: Colors.transparent, context: context, builder: (context) => EditOrDeleteOptionWidget()).whenComplete(
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (context) => _bodyWidget,
+    ).whenComplete(
       () async {
         await Future.delayed(Duration(milliseconds: 200));
         userInfoState.setBottomNavBarVisibilityTo(true);
       },
     );
+  }
+
+  static Future<String> showBioModalSheet({@required BuildContext context, forEdit = false}) async {
+    UserInfoStateProvider userInfoState = locator<UserInfoStateProvider>();
+    userInfoState.setBottomNavBarVisibilityTo(false);
+    return await showModalBottomSheet(
+      context: context,
+      builder: (_) => BioOptionsWidget(forEdit),
+      backgroundColor: Colors.transparent,
+    ).whenComplete(
+      () async {
+        await Future.delayed(Duration(milliseconds: 200));
+        userInfoState.setBottomNavBarVisibilityTo(true);
+      },
+    );
+  }
+
+  static Future<String> showProfilePicturesModalSheet({
+    @required BuildContext context,
+    @required String pictureName,
+  }) async {
+    UserInfoStateProvider userInfoState = locator<UserInfoStateProvider>();
+    UserInfoStateProvider userInfoStateProvider = Provider.of<UserInfoStateProvider>(context, listen: false);
+    final _editText = 'Upload new $pictureName Picture';
+    final _deleteText = 'Delete $pictureName picture';
+    final _viewText = 'View $pictureName picture';
+    userInfoState.setBottomNavBarVisibilityTo(false);
+
+    final Widget _bodyWidget =  ProfilePicturesModalSheet(
+      onEditText: _editText,
+      onDeleteText: _deleteText,
+      onViewText: _viewText,
+    );
+    return await showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (context) => _bodyWidget,
+    ).whenComplete(
+      () async {
+        await Future.delayed(Duration(milliseconds: 200));
+        userInfoState.setBottomNavBarVisibilityTo(true);
+      },
+    );
+  }
+
+  static Future<String> uploadPDFToCloud(File pdf) async {
+    FirebaseStorage storage = FirebaseStorage.instance;
+    String pdfName = 'pdf_' + DateTime.now().millisecondsSinceEpoch.toString();
+    StorageTaskSnapshot snapshot = await storage.ref().child('school_pdfs/$pdfName.pdf').putFile(pdf).onComplete.catchError((err) {
+      print(err);
+    });
+    print(snapshot.ref.getDownloadURL());
+    String downloadUrl = await snapshot.ref.getDownloadURL();
+
+    return downloadUrl == null || downloadUrl.isEmpty ? null : downloadUrl;
   }
 }

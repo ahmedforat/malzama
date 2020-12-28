@@ -68,8 +68,8 @@ class BottomNavigationBarWidget extends StatelessWidget {
                     ),
                     if (count > 0)
                       Positioned(
-                        left: ScreenUtil().setSp(95),
-                        bottom: ScreenUtil().setSp(80),
+                        left: ScreenUtil().setSp(70),
+                        bottom: ScreenUtil().setSp(45),
                         child: Container(
                           padding: EdgeInsets.all(ScreenUtil().setSp(10)),
                           alignment: Alignment.center,

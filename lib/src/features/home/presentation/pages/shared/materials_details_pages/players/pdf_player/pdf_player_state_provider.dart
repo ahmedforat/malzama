@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/my_uploads/state_provider/my_uploads_state_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../../../../core/platform/services/dialog_services/service_locator.dart';
 import '../../../../../../../../core/platform/services/file_system_services.dart';
@@ -75,8 +77,16 @@ class PDFPlayerStateProvider with ChangeNotifier {
   // ======================================================================================
 
   // constructor
-  PDFPlayerStateProvider(int pos) {
-    _studyMaterial = locator<PDFStateProvider>().materials[pos];
+  PDFPlayerStateProvider(BuildContext context,int pos, {bool isUploaded = false}) {
+
+    if(!isUploaded){
+      print('T is PDFStateProvider}');
+      _studyMaterial = Provider.of<PDFStateProvider>(context,listen: false).materials[pos];
+    }else{
+      print('T is MyUploadsStateProvider');
+      _studyMaterial = Provider.of<MyUploadsStateProvider>(context,listen: false).uploadedLectures[pos];
+    }
+
     print('inside constuctor===============================================================');
     print('\n\n\n\n\n\n\n\n');
     print(_studyMaterial.toJSON());
@@ -93,15 +103,18 @@ class PDFPlayerStateProvider with ChangeNotifier {
     String tempPath = await getCachedFilePath();
     if(tempPath != null){
       _path = tempPath;
+      print('opening from the cached file path');
       setIsLoadingTo(false);
       return;
     }
     tempPath = await getMyLocalPath();
     if(tempPath != null){
       _path = tempPath;
+      print('opening from the local file path');
       setIsLoadingTo(false);
       return;
     }
+    print('fetching from the cloud');
     fetchFileFromCloud();
 
   }

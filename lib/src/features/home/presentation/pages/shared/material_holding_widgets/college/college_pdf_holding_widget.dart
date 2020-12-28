@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/models/materials/college_material.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../core/Navigator/routes_names.dart';
-import '../../../../../models/materials/study_material.dart';
-import '../../../lectures_pages/state/material_state_repo.dart';
+import '../../../my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 
 class CollegePDFHoldingWidget<T extends MaterialStateRepository> extends StatelessWidget {
   final int pos;
@@ -86,8 +86,8 @@ class CollegePDFHoldingWidget<T extends MaterialStateRepository> extends Statele
                       SizedBox(
                         height: ScreenUtil().setHeight(20),
                       ),
-
-                      Footer<T>(pos: pos)
+                      Divider(),
+                      _Footer<T>(pos: pos)
                     ],
                   ),
                 ),
@@ -139,10 +139,10 @@ class Header<T extends MaterialStateRepository> extends StatelessWidget {
               ),
               Selector<T, String>(
                 selector: (context, T stateProvider) => stateProvider.materials[pos].lastUpdate,
-                builder: (context, lastUpdate, _) => lastUpdate != null
+                builder: (context, lastUpdate, _) => lastUpdate == null
                     ? Container()
                     : Text(
-                        'Last update: ${postDate}',
+                        'Last update: ${lastUpdate.substring(0,10)}',
                         style: TextStyle(
                           //fontWeight: FontWeight.bold,
                           decoration: TextDecoration.underline,
@@ -168,8 +168,21 @@ class Header<T extends MaterialStateRepository> extends StatelessWidget {
           ),
           if (isMyMaterial)
             FlatButton(
-              onPressed: () {
-                HelperFucntions.showEditOrDeleteModalSheet(context: context);
+              onPressed: () async {
+                final String val = await HelperFucntions.showEditOrDeleteModalSheet(context: context);
+                if (val == null) return;
+
+                if (val == 'edit') {
+                  Map<String, dynamic> args = {
+                    'isVideo': false,
+                    'payload': pdfStateProvider.materials[pos],
+                  };
+                  Navigator.of(context).pushNamed(
+                    RouteNames.EDIT_COLLEGE_MATERIAL,
+                    arguments: args,
+                  );
+                } else
+                  pdfStateProvider.deleteMaterialById(pos);
               },
               child: Icon(Icons.edit),
             ),
@@ -190,70 +203,103 @@ class Header<T extends MaterialStateRepository> extends StatelessWidget {
   }
 }
 
-class Footer<T extends MaterialStateRepository> extends StatelessWidget {
+class _Footer<B extends MaterialStateRepository> extends StatelessWidget {
   final int pos;
 
-  const Footer({@required this.pos});
+  const _Footer({@required this.pos});
 
   @override
   Widget build(BuildContext context) {
-    StudyMaterial myState = Provider.of<T>(context, listen: false).materials[pos];
+    final String semester = (Provider.of<B>(context, listen: false).materials[pos] as CollegeMaterial).semester.toString();
+
     return Padding(
       padding: EdgeInsets.all(ScreenUtil().setSp(15)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Selector<T, List<String>>(
-                selector: (context, stateProvider) => [
-                  stateProvider.materials[pos].author.firstName,
-                  stateProvider.materials[pos].author.lastName,
-                ],
-                builder: (context, names, _) => Text(
-                  names[0] + ' ' + names[1],
-                  style: TextStyle(fontSize: ScreenUtil().setSp(30)),
-                ),
-              ),
-              Selector<T, List<String>>(
-                selector: (context, stateProvider) => [
-                  stateProvider.materials[pos].author.college,
-                  stateProvider.materials[pos].author.university,
-                ],
-                builder: (context, names, _) => Text(
-                  names[0] + ' / ' + names[1],
-                  style: TextStyle(fontSize: ScreenUtil().setSp(30)),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: ScreenUtil().setSp(15)),
-            child: Column(
+      child: Container(
+        constraints: BoxConstraints(maxHeight: ScreenUtil().setHeight(100)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Selector<T, String>(
-                  selector: (context, stateProvider) => stateProvider.materials[pos].postDate,
-                  builder: (context, postDate, _) => Text(
-                    postDate.substring(0, 10),
-                    style: TextStyle(fontSize: ScreenUtil().setSp(35)),
-                  ),
-                ),
-                Selector<T, int>(
-                  selector: (context, stateProvider) => stateProvider.materials[pos].stage,
-                  builder: (context, stage, _) => Text(
-                    'Stage' + stage.toString(),
-                    style: TextStyle(
-                      fontSize: ScreenUtil().setSp(35),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                Selector<B, List<String>>(
+                    selector: (context, stateProvider) => [
+                          stateProvider.materials[pos].author.firstName,
+                          stateProvider.materials[pos].author.lastName,
+                        ],
+                    builder: (context, names, _) {
+                      String text = names.first + ' ' + names.last + ' abdulKareem alsudanie';
+                      final int endIndex = text.length >= 40 ? 40 : text.length;
+                      text = text.substring(0, endIndex);
+                      return Text(
+                        text,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: ScreenUtil().setSp(30),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    }),
+                Selector<B, List<String>>(
+                  selector: (context, stateProvider) => [
+                    stateProvider.materials[pos].author.college,
+                    stateProvider.materials[pos].author.university,
+                  ],
+                  builder: (context, names, _) {
+                    String text = names.first + ' / ' + names.last;
+                    final int endIndex = text.length >= 40 ? 40 : text.length;
+                    text = text.substring(0, endIndex);
+                    return Text(
+                      text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: ScreenUtil().setSp(30),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
-          ),
-        ],
+            Container(
+              color: Colors.grey,
+              width: ScreenUtil().setWidth(1),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: ScreenUtil().setSp(15)),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Selector<B, int>(
+                    selector: (context, stateProvider) => stateProvider.materials[pos].stage,
+                    builder: (context, stage, _) => Text(
+                      'Stage $stage',
+                      style: TextStyle(
+                        fontSize: ScreenUtil().setSp(30),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (semester != 'unknown')
+                    Selector<B, int>(
+                      selector: (context, stateProvider) => (stateProvider.materials[pos] as CollegeMaterial).semester,
+                      builder: (context, semester, _) => Text(
+                        'Semester $semester',
+                        style: TextStyle(
+                          fontSize: ScreenUtil().setSp(30),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -4,10 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:malzama/src/core/api/api_client/repositories/registration_repo.dart';
 import 'package:malzama/src/core/api/api_routes/registration_routes.dart';
-
 import 'package:malzama/src/core/api/contract_response.dart';
 import 'package:malzama/src/core/api/http_methods.dart';
-
 import 'package:malzama/src/core/platform/local_database/local_caches/cached_user_info.dart';
 import 'package:malzama/src/core/platform/services/caching_services.dart';
 import 'package:malzama/src/core/platform/services/file_system_services.dart';
@@ -48,8 +46,11 @@ class RegistrationClient implements RegistrationRepository {
   }
 
   @override
-  Future<ContractResponse> sendMeAuthCodeAgain({String id, String accounType}) async {
-    final String query = '?id=$id&accountType=$accounType';
+  Future<ContractResponse> sendMeAuthCodeAgain({String id, String accounType, String email}) async {
+    String query = '?id=$id&accountType=$accounType';
+    if (email != null) {
+      query += '&email=$email';
+    }
     return await HttpMethods.get(url: RegistrationRoutes.SEND_ANOTHER_AUTH_CODE_URL, queryString: query);
   }
 
@@ -63,8 +64,7 @@ class RegistrationClient implements RegistrationRepository {
   Future<ContractResponse> verifyAccount({int authCode, Map<String, String> verificationData}) async {
     Map<String, dynamic> body = {
       'authCode': authCode,
-    }
-      ..addAll(verificationData);
+    }..addAll(verificationData);
 
     Map<String, String> payload = {};
     body.forEach((key, value) {

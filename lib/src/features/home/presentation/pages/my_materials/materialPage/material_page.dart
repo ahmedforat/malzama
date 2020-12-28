@@ -30,27 +30,34 @@ class MyMaterialPage extends StatelessWidget {
       builder: (context, data, child) => Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            print(locator<UserInfoStateProvider>().userData.savedVideos);
-            //Navigator.of(context).push(MaterialPageRoute(builder: (context) => CollegePDFDetailsPage(pos: pos,)));
+            //var d = await QuizAccessObject().deleteUploadedMaterial(MyUploaded.QUIZES);
+            var d = 'Hello';
+            print(d);
           },
         ),
         body: data == null
             ? Center(
                 child: CircularProgressIndicator(),
               )
-            : Container(
-                padding: EdgeInsets.only(
-                  top: ScreenUtil().setSp(50),
-                  left: ScreenUtil().setSp(30),
-                  right: ScreenUtil().setSp(30),
-                ),
-                margin: EdgeInsets.only(top: ScreenUtil().setHeight(100)),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      if (data.accountType != 'schstudents') ..._contentCreators,
-                      MySavedMaterialsIcon(),
-                    ],
+            : RefreshIndicator(
+                onRefresh: () async {
+                  locator<UserInfoStateProvider>().fetchUploadedMaterialsCount();
+                  locator<UserInfoStateProvider>().updateQuizDraftsCount();
+                },
+                child: Container(
+                  padding: EdgeInsets.only(
+                    top: ScreenUtil().setSp(50),
+                    left: ScreenUtil().setSp(30),
+                    right: ScreenUtil().setSp(30),
+                  ),
+                  margin: EdgeInsets.only(top: ScreenUtil().setHeight(100)),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: <Widget>[
+                        if (data.accountType != 'schstudents') ..._contentCreators,
+                        MySavedMaterialsIcon(),
+                      ],
+                    ),
                   ),
                 ),
               ),

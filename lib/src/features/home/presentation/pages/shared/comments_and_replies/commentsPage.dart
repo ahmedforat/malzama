@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/comments_and_replies/add_comment_widget/add_comment_bottom_sheet_widget.dart';
 import 'package:provider/provider.dart';
 

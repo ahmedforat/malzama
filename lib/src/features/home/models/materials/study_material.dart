@@ -78,7 +78,7 @@ class StudyMaterial {
         'topic': topic,
         'post_date': postDate,
         'last_update': lastUpdate,
-        'author': author,
+        'author': author.toJSON(),
         'material_collection': materialCollection,
         'material_type': materialType,
         'comments': comments,

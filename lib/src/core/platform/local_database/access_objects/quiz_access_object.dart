@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
+import 'package:malzama/src/features/home/models/materials/study_material.dart';
 import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_collection_model.dart';
 import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_draft_model.dart';
 import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_entity.dart';
@@ -30,27 +33,7 @@ class QuizAccessObject {
 
   static const String _AVAILABLE_STORES_INDEXES = 'available_stores_indexes';
 
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS = 'my_quiz_uploads_drafts';
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS1 = 'my_quiz_uploads_drafts1';
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS2 = 'my_quiz_uploads_drafts2';
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS3 = 'my_quiz_uploads_drafts3';
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS4 = 'my_quiz_uploads_drafts4';
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS5 = 'my_quiz_uploads_drafts5';
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS6 = 'my_quiz_uploads_drafts6';
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS7 = 'my_quiz_uploads_drafts7';
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS8 = 'my_quiz_uploads_drafts8';
-//  static const String _MY_QUIZ_UPLOADS_DRAFTS9 = 'my_quiz_uploads_drafts9';
-//
-//  final myQuizDrafts = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS);
-//  final myQuizDrafts1 = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS1);
-//  final myQuizDrafts2 = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS2);
-//  final myQuizDrafts3 = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS3);
-//  final myQuizDrafts4 = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS4);
-//  final myQuizDrafts5 = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS5);
-//  final myQuizDrafts6 = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS6);
-//  final myQuizDrafts7 = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS7);
-//  final myQuizDrafts8 = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS8);
-//  final myQuizDrafts9 = intMapStoreFactory.store(_MY_QUIZ_UPLOADS_DRAFTS9);
+
 
   List<StoreRef<int, Map<String, dynamic>>> _refs;
   List<int> _availableStoresIndexes;
@@ -205,19 +188,68 @@ class QuizAccessObject {
 
   // get uploaded materials
   Future<List<Map<String, dynamic>>> getUploadedMaterials(String storeName) async {
+    Map<String, dynamic> myDataAsAuthor = await HelperFucntions.getAuthorPopulatedData();
     var res = await intMapStoreFactory.store(storeName).find(await this.database);
-    List<Map<String, dynamic>> payload = res.map((item) => item.value).toList();
+    List<Map<String, dynamic>> payload = res.map<Map<String, dynamic>>((item) {
+      Map<String, dynamic> newItem = {...item.value};
+      if (newItem['author'].runtimeType.toString() == 'String') {
+        newItem['author'] = myDataAsAuthor;
+      }
+      return newItem;
+    }).toList();
+
     return payload ?? <Map<String, dynamic>>[];
   }
 
   // get single uploaded material by id
-  Future<QuizCollection> getUploadedMaterialById(String storeName, String id) async {
-    var res = await intMapStoreFactory.store(storeName).findFirst(await this.database, finder: Finder(filter: Filter.equals('_id', id)));
+  Future<QuizCollection> getUploadedQuizById(String storeName, String id) async {
+    var res = await intMapStoreFactory.store(storeName).findFirst(
+          await this.database,
+          finder: Finder(
+            filter: Filter.equals('_id', id),
+          ),
+        );
     if (res != null) {
-      Map<String, dynamic> record = res.value;
+      Map<String, dynamic> record = {...res.value};
+      if (record != null && record['author'].runtimeType.toString() == 'String') {
+        record['author'] = await HelperFucntions.getAuthorPopulatedData();
+      }
       return record == null ? null : new QuizCollection.fromJSON(record);
     } else {
       return null;
+    }
+  }
+
+  Future<StudyMaterial> getUploadedVideoOrPdfById({@required String storeName, @required String id}) async {
+    var res = await intMapStoreFactory.store(storeName).findFirst(
+          await this.database,
+          finder: Finder(
+            filter: Filter.equals('_id', id),
+          ),
+        );
+    if (res != null) {
+      Map<String, dynamic> record = {...res.value};
+      if (record != null && record['author'].runtimeType.toString() == 'String') {
+        record['author'] = await HelperFucntions.getAuthorPopulatedData();
+      }
+      print('record == $record');
+      return record == null ? null : new StudyMaterial.fromJSON(record);
+    }
+    return null;
+  }
+
+  Future<bool> findOneAndUpdateById({@required String id, @required Map<String, dynamic> value, @required String storeName}) async {
+    try {
+      await intMapStoreFactory.store(storeName).update(
+            await this.database,
+            value,
+            finder: Finder(
+              filter: Filter.equals('_id', id),
+            ),
+          );
+      return true;
+    } catch (err) {
+      return false;
     }
   }
 

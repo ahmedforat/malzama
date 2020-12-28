@@ -1,21 +1,18 @@
-import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:malzama/src/core/general_models/notification.dart';
-import 'package:malzama/src/core/general_widgets/helper_functions.dart';
-import 'package:malzama/src/core/platform/services/caching_services.dart';
-import 'package:malzama/src/core/platform/services/file_system_services.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
+import '../../../../features/home/presentation/state_provider/notifcation_state_provider.dart';
+import '../../../general_models/notification.dart';
+import '../../../general_widgets/helper_functions.dart';
+import '../caching_services.dart';
 import '../dialog_services/service_locator.dart';
 import 'local_notification_service.dart';
 
 class NotificationService {
   // private constructor
   NotificationService._();
-
+  final String _comExampleMalzamaId = 'd3c01a50-9fb6-483b-aff7-6c06991e39e1';
+  final String _malzamaPlatformId = '50c8ad6e-b20b-4f8e-a71a-219c4f4ce74e';
   static int _channelID = -1;
   bool _isInitialized = false;
 
@@ -39,12 +36,13 @@ class NotificationService {
     OneSignal.shared.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
 
     OneSignal.shared.init(
-      "50c8ad6e-b20b-4f8e-a71a-219c4f4ce74e",
+      _malzamaPlatformId,
       iOSSettings: {OSiOSSettings.autoPrompt: false, OSiOSSettings.inAppLaunchUrl: false},
     );
-    OneSignal.shared.setInFocusDisplayType(OSNotificationDisplayType.none);
+    OneSignal.shared.setInFocusDisplayType(OSNotificationDisplayType.notification);
 
-// The promptForPushNotificationsWithUserResponse function will show the iOS push notification prompt. We recommend removing the following code and instead using an In-App Message to prompt for notification permission
+// The promptForPushNotificationsWithUserResponse function will show the iOS push notification prompt.
+// We recommend removing the following code and instead using an In-App Message to prompt for notification permission
     await OneSignal.shared.promptUserForPushNotificationPermission(fallbackToSettings: true);
 
     // this will spawn an Isolate so in order not to block the main isolate
@@ -65,20 +63,21 @@ class NotificationService {
         print(notification.payload.subtitle);
         print('*******************************************************************');
 
-//        print(++_channelID);
-//        NotificationStateProvider notificationStateProvider = locator.get<NotificationStateProvider>();
-//        var receivedNotification;
-//        try {
-//          receivedNotification = new NotificationInstance(
-//            title: notification.payload.title,
-//            body: notification.payload.body,
-//            id: notification.payload.notificationId,
-//            sentAt: DateTime.fromMillisecondsSinceEpoch(notification.payload.rawPayload['google.sent_time']),
-//          );
-//          notificationStateProvider.addToNotificationsList(receivedNotification);
-//        } catch (err) {
-//          throw err;
-//        }
+       print(++_channelID);
+       NotificationStateProvider notificationStateProvider = locator.get<NotificationStateProvider>();
+       var receivedNotification;
+       try {
+         receivedNotification = new NotificationInstance(
+           title: notification.payload.title,
+           body: notification.payload.body,
+           id: notification.payload.notificationId,
+           sentAt: DateTime.fromMillisecondsSinceEpoch(notification.payload.rawPayload['google.sent_time']),
+         );
+         notificationStateProvider.addToNotificationsList(receivedNotification);
+
+       } catch (err) {
+         throw err;
+       }
       },
     );
     _isInitialized = true;

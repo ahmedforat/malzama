@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 
 import '../../../../../../../../core/api/api_client/clients/video_and_pdf_client.dart';
 import '../../../../../../../../core/api/contract_response.dart';
@@ -8,11 +9,12 @@ import '../../../../../../../../core/platform/services/dialog_services/service_l
 import '../../../../../../models/materials/study_material.dart';
 import '../../../../../../models/users/user.dart';
 import '../../../../../state_provider/user_info_provider.dart';
-import '../../../../lectures_pages/state/material_state_repo.dart';
+
 import '../../../../lectures_pages/state/pdf_state_provider.dart';
 
 class MySavedPDFStateProvider extends MaterialStateRepository with ChangeNotifier {
   User userData;
+
 
   MySavedPDFStateProvider() {
     loadCredentialData();
@@ -366,5 +368,14 @@ class MySavedPDFStateProvider extends MaterialStateRepository with ChangeNotifie
   void removeMaterialAt(int pos) {
     _savedLectures.removeAt(pos);
     notifyMyListeners();
+  }
+
+  @override
+  void replaceMaterialWith(StudyMaterial newMaterial) {
+    final int index = _savedLectures.indexWhere((element) => element.id == newMaterial.id);
+    if (index > -1) {
+      _savedLectures[index] = newMaterial;
+      notifyMyListeners();
+    }
   }
 }

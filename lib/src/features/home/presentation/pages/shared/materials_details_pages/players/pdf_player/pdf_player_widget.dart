@@ -18,6 +18,7 @@ class PDFPlayerWidget extends StatelessWidget {
         stateProvider.failedToLoad,
       ],
       builder: (context, data, child) {
+        print('building');
         if (data[0] != null) {
           return PDFViewerScaffold(
             path: data[0],

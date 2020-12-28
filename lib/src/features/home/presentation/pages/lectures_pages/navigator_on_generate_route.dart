@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../core/Navigator/routes_names.dart';
 import '../../../../../core/general_widgets/comment_state_change_notifier.dart';
 import '../../../../../core/platform/services/dialog_services/service_locator.dart';
+import '../../../models/materials/college_material.dart';
 import '../../state_provider/user_info_provider.dart';
+import '../my_materials/materialPage/upper_uploading_banner/college_uploading_pages/college_lecture_uploading_form.dart';
+import '../my_materials/materialPage/upper_uploading_banner/college_uploading_pages/collge_video_uploading_form.dart';
+import '../my_materials/materialPage/upper_uploading_banner/school_uploading_widgets/school_lecture_uploading_form.dart';
+import '../my_materials/materialPage/upper_uploading_banner/school_uploading_widgets/school_video_uploading_form.dart';
+import '../my_materials/materialPage/upper_uploading_banner/state_providers/college_uploads_state_provider.dart';
+import '../my_materials/materialPage/upper_uploading_banner/state_providers/school_uploads_state_provider.dart';
 import '../shared/materials_details_pages/details_pages/college_pdf_details_page.dart';
 import '../shared/materials_details_pages/details_pages/school_pdf_details_page.dart';
 import 'pages/pdfs_page.dart';
@@ -26,57 +34,38 @@ Route<dynamic> homeOnGenerateRoutes(RouteSettings settings) {
           );
       break;
 
-    // case RouteNames.DISPLAY_COMMENT_RATORS:
-    //   print('we are naving to rators page from within home page');
-    //   print(settings.arguments);
-    //   builder = (context) => DisplayRatorsPage(ratingsList: settings.arguments);
-    //   break;
-    // display a lecture in a single page
-
     // view lecture details page
     case RouteNames.VIEW_LECTURE_DETAILS:
       final int pos = settings.arguments;
+      print('Hello Navigator of lectures');
       final Widget _child =
           isAcademic ? CollegePDFDetailsPage<PDFStateProvider>(pos: pos) : SchoolPDFDetailsPage<PDFStateProvider>(pos: pos);
       builder = (context) => CommentStateChangeNotifierProvider<PDFStateProvider>(
             child: _child,
             pos: pos,
           );
-
       break;
 
-    // display a quiz in a single page
-    // case RouteNames.VIEW_QUIZ:
-    //   builder = (context) => throw UnimplementedError();
-    //   break;
+    case RouteNames.EDIT_COLLEGE_MATERIAL:
+      final Map<String, dynamic> args = settings.arguments;
+      final bool isVideo = args['isVideo'] as bool;
+      final CollegeMaterial payload = args['payload'] as CollegeMaterial;
 
-//    case RouteNames.VIEW_COMMENTS_PAGE:
-//      final Map<String,dynamic> args = settings.arguments as Map<String, dynamic>;
-//      builder = (context) => ChangeNotifierProvider<AddOrEditCommentWidgetStateProvider>(
-//        create:(context) => AddOrEditCommentWidgetStateProvider(),
-//        child: CommentsPage(
-//          isVideo: args['isVideo'],
-//          pos: args['pos'],
-//        ),
-//      );
-//      break;
-    // display a lecture with someone comment in a single page
-    case RouteNames.VIEW_COMMENT_ON_LECTURE:
-      builder = (context) => throw UnimplementedError();
-      break;
-    // display a vieo with someone comment in a single page
-    case RouteNames.VIEW_COMMENT_ON_VIDEO:
-      builder = (context) => throw UnimplementedError();
+      builder = (context) => ChangeNotifierProvider<CollegeUploadingState>(
+            create: (context) => CollegeUploadingState(forEdit: true, data: payload),
+            builder: (context, _) => isVideo ? CollegeVideoUploadingFormWidget() : CollegeLectureUploadingFormWidget(),
+          );
       break;
 
-    // display user own profile page
-    case RouteNames.VIEW_MY_PROFILE_PAGE:
-      builder = (context) => throw UnimplementedError();
-      break;
+    case RouteNames.EDIT_SCHOLL_MATERIAL:
+      final Map<String, dynamic> args = settings.arguments;
+      final bool isVideo = args['isVideo'] as bool;
+      final Map<String, dynamic> payload = args['payload'];
 
-    // display any other user profile page
-    case RouteNames.VIEW_USER_PROFILE_PAGE:
-      builder = (context) => throw UnimplementedError();
+      builder = (context) => ChangeNotifierProvider<SchoolUploadState>(
+            create: (context) => SchoolUploadState(),
+            builder: (context, _) => isVideo ? SchoolVideoUploadingFormWidget() : SchoolLectureUploadingFormWidget(),
+          );
       break;
   }
 

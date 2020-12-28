@@ -11,8 +11,6 @@ import '../../../core/api/contract_response.dart';
 import '../../../core/debugging/debugging_widgets.dart';
 import '../../../core/platform/services/file_system_services.dart';
 
-import '../usecases/send_auth_code.dart';
-
 int authCode;
 User _user;
 
@@ -103,7 +101,11 @@ class _ValidateYourAccountMessageWidgetState extends State<ValidateYourAccountMe
                       alignment: Alignment.topLeft,
                       child: Text(
                         'Verify your email address',
-                        style: TextStyle(fontSize: ScreenUtil().setSp(80), fontWeight: FontWeight.bold, color: Colors.black),
+                        style: TextStyle(
+                          fontSize: ScreenUtil().setSp(80),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                     SizedBox(height: ScreenUtil().setHeight(50)),
@@ -247,12 +249,10 @@ class _ValidateYourAccountMessageWidgetState extends State<ValidateYourAccountMe
       return;
     }
 
-
-
     state.setLoadingStateTo(true);
     ContractResponse response;
-    response = await RegistrationClient().verifyAccount(authCode: authCode,verificationData: _user.verifitionData);
-   print(response.statusCode);
+    response = await RegistrationClient().verifyAccount(authCode: authCode, verificationData: _user.verifitionData);
+    print(response.statusCode);
     state.setLoadingStateTo(false);
     print('after sending');
     if (response is SnackBarException) {
@@ -269,7 +269,6 @@ class _ValidateYourAccountMessageWidgetState extends State<ValidateYourAccountMe
     } else {
       DebugTools.showErrorMessageWidget(context: context, message: response.message);
     }
-
   }
 }
 

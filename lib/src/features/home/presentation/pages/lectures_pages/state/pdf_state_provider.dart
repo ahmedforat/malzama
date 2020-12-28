@@ -6,10 +6,10 @@ import '../../../../../../core/api/api_client/clients/video_and_pdf_client.dart'
 import '../../../../../../core/api/contract_response.dart';
 import '../../../../../../core/general_widgets/helper_functions.dart';
 import '../../../../../../core/platform/services/dialog_services/service_locator.dart';
-import '../../../../../../features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
 import '../../../../../../features/home/presentation/state_provider/user_info_provider.dart';
 import '../../../../models/materials/study_material.dart';
 import '../../../../models/users/user.dart';
+import '../../my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 
 class PDFStateProvider extends MaterialStateRepository with ChangeNotifier {
   PDFStateProvider() {
@@ -300,6 +300,15 @@ class PDFStateProvider extends MaterialStateRepository with ChangeNotifier {
   void dispose() {
     _isDisposed = true;
     super.dispose();
+  }
+
+  @override
+  void replaceMaterialWith(StudyMaterial newMaterial) {
+    final int index = _pdfList.indexWhere((element) => element.id == newMaterial.id);
+    if (index > -1) {
+      _pdfList[index] = newMaterial;
+      notifyMyListeners();
+    }
   }
 
 // ===============================================================================================================

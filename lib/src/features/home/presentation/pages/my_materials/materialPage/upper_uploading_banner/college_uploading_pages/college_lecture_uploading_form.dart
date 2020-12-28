@@ -49,140 +49,141 @@ class _CollegeLectureUploadingFormState extends State<CollegeLectureUploadingFor
     print(collegeUploadingState);
     print('building uploading page of collge lectures');
     return Scaffold(
-        key:collegeUploadingState.scaffoldKey,
-        body: Padding(
-          padding: EdgeInsets.only(top: ScreenUtil().setSp(65)),
-          child: GestureDetector(
-            onTap: () {
-              titleFocusNode.unfocus();
-              descriptionFocusNode.unfocus();
-              FocusScope.of(context).unfocus();
-            },
-            child: Container(
-              color: Colors.white,
-              padding: EdgeInsets.only(left: ScreenUtil().setSp(70), right: ScreenUtil().setSp(70)),
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      SizedBox(height: ScreenUtil().setHeight(20)),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Upload new lecture',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: ScreenUtil().setSp(60),
+      key: collegeUploadingState.scaffoldKey,
+      body: Padding(
+        padding: EdgeInsets.only(top: ScreenUtil().setSp(65)),
+        child: GestureDetector(
+          onTap: () {
+            titleFocusNode.unfocus();
+            descriptionFocusNode.unfocus();
+            FocusScope.of(context).unfocus();
+          },
+          child: Container(
+            color: Colors.white,
+            padding: EdgeInsets.only(left: ScreenUtil().setSp(70), right: ScreenUtil().setSp(70)),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    SizedBox(height: ScreenUtil().setHeight(20)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Upload new lecture',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: ScreenUtil().setSp(60),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: ScreenUtil().setHeight(50)),
+                    TextFormField(
+                      controller: collegeUploadingState.titleController,
+                      focusNode: titleFocusNode,
+                      maxLength: 40,
+                      decoration: InputDecoration(
+                        labelText: 'title',
+                      ),
+                      validator: (val) {
+                        if (val.trim().isEmpty) {
+                          return 'this field is required';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(
+                      height: ScreenUtil().setHeight(20),
+                    ),
+                    TextFormField(
+                      controller: collegeUploadingState.descriptionController,
+                      focusNode: descriptionFocusNode,
+                      decoration: InputDecoration(
+                        labelText: 'description',
+                      ),
+                      maxLines: null,
+                      maxLength: 300,
+                      validator: (val) {
+                        if (val.trim().isEmpty) {
+                          return 'this field is required';
+                        }
+                        return null;
+                      },
+                    ),
+                    if (locator<UserInfoStateProvider>().userData.accountType == 'uniteachers')
+                      CollegeChooseStageWidget(
+                        focusNodes: [titleFocusNode, descriptionFocusNode],
+                      ),
+                    if (locator<UserInfoStateProvider>().userData.accountType == 'uniteachers')
+                      SizedBox(
+                        height: ScreenUtil().setHeight(30),
+                      ),
+                    if (HelperFucntions.isPharmacyOrMedicine()) QuizSemesterWidget<CollegeUploadingState>(),
+                    if (HelperFucntions.isPharmacyOrMedicine())
+                      SizedBox(
+                        height: ScreenUtil().setHeight(50),
+                      ),
+                    CollegeChooseTopicWidget(),
+                    SizedBox(
+                      height: ScreenUtil().setHeight(80),
+                    ),
+                    if (collegeUploadingState.forEdit) KeepTheSameUploadedPdfFileWidget(),
+                    Selector<CollegeUploadingState, List<bool>>(
+                      selector: (context, state) => [
+                        state.forEdit,
+                        state.keepTheSameUploadedLecture,
+                      ],
+                      builder: (context, data, _) => RaisedButton(
+                        color: Colors.amber,
+                        onPressed: data[0] && data[1]
+                            ? null
+                            : () async {
+                                String message = await collegeUploadingState.pickLectureFile(context);
+                                if (message != null && message.isNotEmpty) {
+                                  collegeUploadingState.showSnackBar(message);
+                                }
+                              },
+                        child: Selector<CollegeUploadingState, String>(
+                          selector: (context, stateObject) => stateObject.uploadButtonText,
+                          builder: (context, buttonText, child) => Text(
+                            buttonText,
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
-                      SizedBox(height: ScreenUtil().setHeight(50)),
-                      TextFormField(
-                        focusNode: titleFocusNode,
-                        maxLength: 40,
-                        decoration: InputDecoration(
-                          labelText: 'title',
+                    ),
+                    SizedBox(
+                      height: ScreenUtil().setHeight(100),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        RaisedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text('Cancel'),
                         ),
-                        validator: (val) {
-                          if (val.trim().isEmpty) {
-                            return 'this field is required';
-                          }
-                          return null;
-                        },
-                        onSaved: (val) => collegeUploadingState.updateTitle(val),
-                      ),
-                      SizedBox(
-                        height: ScreenUtil().setHeight(20),
-                      ),
-                      TextFormField(
-                        focusNode: descriptionFocusNode,
-                        decoration: InputDecoration(
-                          labelText: 'description',
-                        ),
-                        maxLines: null,
-                        maxLength: 300,
-                        validator: (val) {
-                          if (val.trim().isEmpty) {
-                            return 'this field is required';
-                          }
-                          return null;
-                        },
-                        onSaved: (val) => collegeUploadingState.updateDescription(val),
-                      ),
-                      if (locator<UserInfoStateProvider>().userData.accountType == 'uniteachers')
-                        CollegeChooseStageWidget(
-                          focusNodes: [titleFocusNode, descriptionFocusNode],
-                        ),
-                      if (locator<UserInfoStateProvider>().userData.accountType == 'uniteachers')
                         SizedBox(
-                          height: ScreenUtil().setHeight(30),
+                          width: ScreenUtil().setWidth(50),
                         ),
-                      if (HelperFucntions.isPharmacyOrMedicine()) QuizSemesterWidget<CollegeUploadingState>(),
-                      if (HelperFucntions.isPharmacyOrMedicine())
-                        SizedBox(
-                          height: ScreenUtil().setHeight(50),
-                        ),
-                      CollegeChooseTopicWidget(),
-                      SizedBox(
-                        height: ScreenUtil().setHeight(80),
-                      ),
-                      if (collegeUploadingState.forEdit) KeepTheSameUploadedPdfFileWidget(),
-                      Selector<CollegeUploadingState, List<bool>>(
-                        selector: (context, state) => [
-                          state.forEdit,
-                          state.keepTheSameUploadedLecture,
-                        ],
-                        builder: (context, data, _) => RaisedButton(
-                          color: Colors.amber,
-                          onPressed: data[0] && data[1]
-                              ? null
-                              : () async {
-                                  String message = await collegeUploadingState.pickLectureFile(context);
-                                  if (message != null && message.isNotEmpty) {
-                                    collegeUploadingState.showSnackBar(message);
-                                  }
-                                },
-                          child: Selector<CollegeUploadingState, String>(
-                            selector: (context, stateObject) => stateObject.uploadButtonText,
-                            builder: (context, buttonText, child) => Text(
-                              buttonText,
-                              textAlign: TextAlign.center,
-                            ),
+                        RaisedButton(
+                          color: Colors.blueAccent,
+                          onPressed: () => _handleOnPressed(collegeUploadingState),
+                          child: Text(
+                            collegeUploadingState.forEdit ? 'update' :'upload',
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: ScreenUtil().setHeight(100),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          RaisedButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text('Cancel'),
-                          ),
-                          SizedBox(
-                            width: ScreenUtil().setWidth(50),
-                          ),
-                          RaisedButton(
-                            color: Colors.blueAccent,
-                            onPressed: () => _handleOnPressed(collegeUploadingState),
-                            child: Text(
-                              'upload',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
+                      ],
+                    )
+                  ],
                 ),
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   // get called when the user hit the upload button
@@ -194,10 +195,14 @@ class _CollegeLectureUploadingFormState extends State<CollegeLectureUploadingFor
       FocusScope.of(context).unfocus();
       _formKey.currentState.save();
 
-      if (stateProvider.lectureToUpload == null) {
-        stateProvider.showSnackBar('You must provide the lecture file');
+      if (stateProvider.lectureToUpload == null && !stateProvider.keepTheSameUploadedLecture) {
+        stateProvider.showSnackBar('You must either provide a new lecture file or keep the same uploaded one');
       } else {
-        await stateProvider.upload();
+        if (stateProvider.forEdit) {
+          stateProvider.update(context);
+        } else {
+          await stateProvider.upload(context);
+        }
       }
     } else {
       print('invalid data');

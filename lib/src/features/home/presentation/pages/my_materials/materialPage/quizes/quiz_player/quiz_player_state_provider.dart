@@ -2,6 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:malzama/src/core/Navigator/navigation_service.dart';
+import 'package:malzama/src/core/general_widgets/helper_utils/quiz_item_edit_modal_sheet.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/quizes/quiz_list_displayer/quiz_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/my_uploads/state_provider/my_uploads_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../../../../core/api/api_client/clients/quiz_client.dart';
 import '../../../../../../../../core/api/contract_response.dart';
@@ -12,6 +18,7 @@ import '../../../../../../models/material_author.dart';
 import '../quiz_collection_model.dart';
 import '../quiz_draft_model.dart';
 import '../quiz_entity.dart';
+import 'edit_quiz_item_state_provider.dart';
 
 class QuizPlayerOption {
   String text;
@@ -29,6 +36,10 @@ class PlayerQuizEntity extends QuizEntity {
 
   PlayerQuizEntity.fromJSON(Map<String, dynamic> json) : super.fromJSON(json) {
     this.playerOptions = this.options.map<QuizPlayerOption>((option) => new QuizPlayerOption(text: option)).toList();
+  }
+
+  PlayerQuizEntity copyWith(QuizEntity entity) {
+    return new PlayerQuizEntity.fromJSON(entity.toJSON());
   }
 
   bool checkAnswer() {
@@ -296,7 +307,7 @@ class QuizPlayerStateProvider with ChangeNotifier {
   Future<void> fetchQuestions() async {
     print('fetching');
 
-    if (_quizItems.length == _quizCollection.questionsCount || fromLocal) {
+    if ((_quizItems.length == _quizCollection.questionsCount) || fromLocal) {
       _failureMessage = null;
       print('ending fetching');
       return;
@@ -439,8 +450,96 @@ class QuizPlayerStateProvider with ChangeNotifier {
     }
   }
 
-  Future<void> editQuizItem() async {
-    // TODO: implement later on
+  Future<void> onQuizItemEditing(BuildContext context, int pos) async {
+    UserInfoStateProvider userInfoStateProvider = locator<UserInfoStateProvider>();
+    await Future.delayed(Duration(milliseconds: 240));
+    userInfoStateProvider.setBottomNavBarVisibilityTo(false);
+    QuizEntity entity = await showModalBottomSheet(
+      context: context,
+      builder: (_) => ChangeNotifierProvider<EditQuizItemStateProvider>(
+        create: (context) => EditQuizItemStateProvider(
+          _quizItems[pos].copy,
+          _quizID,
+        ),
+        builder: (context, _) => EditQuizItemModalSheetWidget(),
+      ),
+      isDismissible: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+    if (entity == null) {
+      return;
+    }
+    await Future.delayed(Duration(milliseconds: 200));
+    userInfoStateProvider.setBottomNavBarVisibilityTo(true);
+    print('inside onPOSTEditQuizItem');
+    _quizItems[pos] = _quizItems[pos].copyWith(entity);
+    this._quizCollection.quizItems = _quizItems.map<QuizEntity>((e) => e).toList();
+    if (NavigationService.getInstance().canWePopFromQuizesNavigator) {
+      QuizStateProvider quizStateProvider = Provider.of<QuizStateProvider>(context, listen: false);
+      quizStateProvider.updateQuizItemInCollection(_quizID, pos, entity);
+    }
+
+    if (NavigationService.getInstance().canWePopFromMyUploads) {
+      MyUploadsStateProvider uploadsStateProvider = Provider.of<MyUploadsStateProvider>(context, listen: false);
+      uploadsStateProvider.updateQuizItemAtCollection(_quizID, pos, entity);
+    }
+
+    notifyMyListeners();
+    QuizCollection localCopy = await QuizAccessObject().getUploadedQuizById(MyUploaded.QUIZES, _quizCollection.id);
+    print('before editing ${localCopy.quizItems.length}');
+    localCopy.quizItems[pos] = localCopy.quizItems[pos].copyWith(entity);
+    print('after editing and just before saving ${localCopy.quizItems.length}');
+    await QuizAccessObject().findOneAndUpdateById(id: localCopy.id, value: localCopy.toJSON(), storeName: MyUploaded.QUIZES);
+
+    print('local update done');
+  }
+
+  Future<void> onQuizItemDelete(BuildContext context, int pos) async {
+    if (_quizCollection.questionsCount == 10) {
+      final String _message = 'you can not delete any more questions\n the minimum questions count per collection is 10';
+      locator<DialogService>().showDialogOfFailure(message: _message);
+      return;
+    }
+
+    locator<DialogService>().showDialogOfLoading(message: 'deleting ....');
+    ContractResponse response = await QuizClient().deleteQuizItem(
+      questionsCount: _quizCollection.questionsCount - 1,
+      quizCollectionId: _quizID,
+      quizItemId: _quizItems[pos].id,
+    );
+
+    if (response is Success) {
+      _quizItems.removeAt(pos);
+      _quizCollection.questionsCount = _quizCollection.questionsCount - 1;
+      notifyMyListeners();
+      QuizCollection localCopy = await QuizAccessObject().getUploadedQuizById(MyUploaded.QUIZES, _quizCollection.id);
+      if (localCopy != null) {
+        localCopy.questionsCount = _quizCollection.questionsCount;
+        localCopy.quizItems.removeAt(pos);
+        await QuizAccessObject().findOneAndUpdateById(id: localCopy.id, value: localCopy.toJSON(), storeName: MyUploaded.QUIZES);
+      }
+      if (NavigationService.getInstance().canWePopFromQuizesNavigator) {
+        QuizStateProvider quizStateProvider = Provider.of<QuizStateProvider>(context, listen: false);
+        QuizCollection upperCollection = quizStateProvider.materials.firstWhere((element) => element.id == _quizID, orElse: () => null);
+        if (upperCollection != null) {
+          upperCollection.questionsCount = _quizCollection.questionsCount;
+          if (upperCollection.quizItems.length - 1 >= pos) {
+            upperCollection.quizItems.removeAt(pos);
+          }
+          quizStateProvider.notifyMyListeners();
+        }
+      } else {
+        print('inside updating the upper uploads state Provider');
+        MyUploadsStateProvider uploadsStateProvider = Provider.of<MyUploadsStateProvider>(context, listen: false);
+        uploadsStateProvider.fetchQuizes();
+      }
+      locator<DialogService>().completeAndCloseDialog(null);
+      locator<DialogService>().showDialogOfSuccess(message: 'Question deleted');
+    } else {
+      locator<DialogService>().completeAndCloseDialog(null);
+      locator<DialogService>().showDialogOfFailure(message: 'Failed to delete question');
+    }
   }
 
   @override

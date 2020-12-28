@@ -30,7 +30,9 @@ class NavigationService {
   static final GlobalKey<NavigatorState> _profilePageNavigatorKey = new GlobalKey<NavigatorState>(debugLabel: '_profilePageNavigatorKey');
   static final GlobalKey<NavigatorState> _mySaveMaterialNavigatorKey =
       new GlobalKey<NavigatorState>(debugLabel: '_mySaveMaterialNavigatorKey');
-
+  static final GlobalKey<NavigatorState> _myUploadedMaterialNavigatorKey =
+  new GlobalKey<NavigatorState>(debugLabel: '_myUploadedMaterialNavigatorKey');
+  static final GlobalKey<NavigatorState> _quizesNavigatorKey = new GlobalKey<NavigatorState>(debugLabel: 'quizesNavigaorKey');
   static List<GlobalKey<NavigatorState>> get navigationKeys => [
         _homePageNavigatorKey,
         _materialNavigatorKey,
@@ -54,6 +56,10 @@ class NavigationService {
 
   static GlobalKey<NavigatorState> get mySavedMaterialNavigatorKey => _mySaveMaterialNavigatorKey;
 
+  static GlobalKey<NavigatorState> get myUploadedMaterialNavigatorKey => _myUploadedMaterialNavigatorKey;
+
+  static GlobalKey<NavigatorState> get quizesNavigatorKey => _quizesNavigatorKey;
+
   static NavigatorState get homePageNavigator => _homePageNavigatorKey.currentState;
 
   static NavigatorState get materialNavigator => _materialNavigatorKey.currentState;
@@ -63,4 +69,24 @@ class NavigationService {
   static NavigatorState get messagesNavigator => _messagesNavigatorKey.currentState;
 
   static NavigatorState get profilePageNavigator => _profilePageNavigatorKey.currentState;
+
+
+    bool get  canWePopFromMySaved => this.currentIndex == 1 &&
+      _mySaveMaterialNavigatorKey.currentState != null &&
+        _mySaveMaterialNavigatorKey.currentState.canPop();
+
+    bool get canWePopFromMyUploads => this.currentIndex == 1 &&
+        _myUploadedMaterialNavigatorKey.currentState != null &&
+        _myUploadedMaterialNavigatorKey.currentState.canPop();
+
+    bool get canWePopFromQuizesNavigator => this.currentIndex == 1 &&
+        _quizesNavigatorKey.currentState != null &&
+        _quizesNavigatorKey.currentState.canPop();
+
+    void popFromMySaved() => _mySaveMaterialNavigatorKey.currentState.pop();
+    void popFromMyUploads () => _myUploadedMaterialNavigatorKey.currentState.pop();
+    void popFromQuizesNavigator() => _quizesNavigatorKey.currentState.pop();
+
+
+
 }

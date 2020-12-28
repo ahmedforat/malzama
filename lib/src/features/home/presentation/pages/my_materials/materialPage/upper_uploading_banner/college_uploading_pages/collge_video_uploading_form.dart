@@ -11,12 +11,6 @@ import '../state_providers/college_uploads_state_provider.dart';
 import 'widgets/college_uploading_choose_topic.dart';
 import 'widgets/target_collge_stage_widget.dart';
 
-
-
-
-
-
-
 class CollegeVideoUploadingFormWidget extends StatefulWidget {
   @override
   _CollegeVideoUploadingFormState createState() => _CollegeVideoUploadingFormState();
@@ -26,7 +20,6 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
   GlobalKey<FormState> _formKey;
   GlobalKey<ScaffoldState> _scaffoldKey;
   String title, description, videoId;
-
 
   FocusNode titleFocusNode;
   FocusNode descriptionFocusNode;
@@ -40,7 +33,6 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
     descriptionFocusNode = new FocusNode();
     videoLinkFocusNode = new FocusNode();
     _formKey = new GlobalKey<FormState>();
-
   }
 
   @override
@@ -86,6 +78,7 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
                       ),
                       SizedBox(height: ScreenUtil().setHeight(20)),
                       TextFormField(
+                        controller: collegeUploadingState.titleController,
                         maxLength: 40,
                         focusNode: titleFocusNode,
                         decoration: InputDecoration(labelText: 'title'),
@@ -95,7 +88,6 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
                           }
                           return null;
                         },
-                        onSaved: (val) => collegeUploadingState.updateTitle(val),
                         onTap: () {
                           if (descriptionFocusNode.hasFocus) {
                             descriptionFocusNode.unfocus();
@@ -106,6 +98,7 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
                         },
                       ),
                       TextFormField(
+                        controller: collegeUploadingState.descriptionController,
                         maxLength: 300,
                         maxLines: null,
                         focusNode: descriptionFocusNode,
@@ -116,7 +109,6 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
                           }
                           return null;
                         },
-                        onSaved: (val) => collegeUploadingState.updateDescription(val),
                         onTap: () {
                           if (titleFocusNode.hasFocus) {
                             titleFocusNode.unfocus();
@@ -132,8 +124,7 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
                       if (locator<UserInfoStateProvider>().userData.accountType != 'unistudents')
                         CollegeChooseStageWidget(focusNodes: [titleFocusNode, descriptionFocusNode, videoLinkFocusNode]),
                       if (HelperFucntions.isPharmacyOrMedicine()) QuizSemesterWidget<CollegeUploadingState>(),
-                      if (HelperFucntions.isPharmacyOrMedicine() ||
-                          locator<UserInfoStateProvider>().userData.accountType != 'unistudents')
+                      if (HelperFucntions.isPharmacyOrMedicine() || locator<UserInfoStateProvider>().userData.accountType != 'unistudents')
                         SizedBox(
                           height: ScreenUtil().setHeight(80),
                         ),
@@ -142,11 +133,11 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
                         height: ScreenUtil().setHeight(80),
                       ),
                       TextFormField(
+                        controller: collegeUploadingState.videoIdController,
                         focusNode: videoLinkFocusNode,
                         decoration: InputDecoration(labelText: 'video link from youTube'),
                         keyboardType: TextInputType.url,
                         validator: (link) => References.validateYoutubeLink(link),
-                        onSaved: (link) => collegeUploadingState.updateVideoId(References.getVideoIDFrom(youTubeLink: link)),
                         onTap: () {
                           // make sure that all fields that have focus will be unfocused
                           if (titleFocusNode.hasFocus) titleFocusNode.unfocus();
@@ -166,7 +157,7 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
                             color: Colors.blueAccent,
                             onPressed: () => _handleOnPressed(collegeUploadingState),
                             child: Text(
-                              'upload',
+                              collegeUploadingState.forEdit ? 'update' : 'upload',
                               style: TextStyle(color: Colors.white),
                             ),
                           ),
@@ -193,11 +184,11 @@ class _CollegeVideoUploadingFormState extends State<CollegeVideoUploadingFormWid
       /// the form fields (all or some) are not valid
       print('Enter a valid data');
     } else {
-      print('the form is valid and the data will be send to the server');
-
-      /// save the fields of the form
-      _formKey.currentState.save();
-      await collegeUploadingState.upload();
+      if (collegeUploadingState.forEdit) {
+        collegeUploadingState.update(context);
+        return;
+      }
+      await collegeUploadingState.upload(context);
     }
   }
 }

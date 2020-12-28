@@ -56,7 +56,7 @@ class MyUploadedMaterials extends StatelessWidget {
       trailing: RaisedButton(
         color: Colors.blueAccent,
         onPressed: () {
-          Navigator.of(context).pushNamed(RouteNames.EXPLORE_MY_MATERIALS);
+          Navigator.of(context).pushNamed(RouteNames.VIEW_MY_UPLOADS);
         },
         child: Text(
           'Explore',

@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/state_provider_contracts/my_saved_and_uploads_contract.dart';
 
-class SavedCommonState with ChangeNotifier {
+class SavedCommonState extends MySavedAndUploadsCommonState with ChangeNotifier {
   SavedCommonState() {
     _pageController = new PageController();
   }
@@ -30,12 +31,6 @@ class SavedCommonState with ChangeNotifier {
   }
 
   // ==========================================================================
-
-  Future<void> animateToPage(int index) {
-    _pageController.animateToPage(index, duration: Duration(milliseconds: 250), curve: Curves.easeInOut);
-  }
-
-// ==========================================================================
 
   bool _isDisposed = false;
 

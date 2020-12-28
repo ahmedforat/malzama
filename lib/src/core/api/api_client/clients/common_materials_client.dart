@@ -5,6 +5,7 @@ import 'package:malzama/src/core/api/api_client/repositories/common_materials_re
 import 'package:malzama/src/core/api/api_routes/common_routes.dart';
 import 'package:malzama/src/core/api/contract_response.dart';
 import 'package:malzama/src/core/api/http_methods.dart';
+import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 
 class CommonMaterialClient implements CommonMaterialsRepository {
   @override
@@ -32,7 +33,7 @@ class CommonMaterialClient implements CommonMaterialsRepository {
   Future<ContractResponse> uploadNewMaterial({String uploadType, Map<String, dynamic> payload}) async {
     String downloadUrl;
     if (uploadType == 'lectures') {
-      downloadUrl = await _uploadPDFToCloud(payload['src']);
+      downloadUrl = await HelperFucntions.uploadPDFToCloud(payload['src']);
       if (downloadUrl == null) {
         return InternalServerError(message: 'an error occured while uploading, try again');
       } else {
@@ -47,15 +48,4 @@ class CommonMaterialClient implements CommonMaterialsRepository {
   }
 
   // upload pdf at first to the cloud ie Firabase for testing and digitalOcean for production
-  static Future<String> _uploadPDFToCloud(File pdf) async {
-    FirebaseStorage storage = FirebaseStorage.instance;
-    String pdfName = 'pdf_' + DateTime.now().millisecondsSinceEpoch.toString();
-    StorageTaskSnapshot snapshot = await storage.ref().child('school_pdfs/$pdfName.pdf').putFile(pdf).onComplete.catchError((err) {
-      print(err);
-    });
-    print(snapshot.ref.getDownloadURL());
-    String downloadUrl = await snapshot.ref.getDownloadURL();
-
-    return downloadUrl == null || downloadUrl.isEmpty ? null : downloadUrl;
-  }
 }

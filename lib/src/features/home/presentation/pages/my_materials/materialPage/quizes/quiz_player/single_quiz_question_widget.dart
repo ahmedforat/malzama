@@ -4,10 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../../core/general_widgets/helper_utils/edit_or_delete_options_widget.dart';
-import '../../../../../../../../core/general_widgets/helper_utils/quiz_item_edit_modal_sheet.dart';
 import '../../../../../../../../core/platform/services/dialog_services/service_locator.dart';
 import '../../../../../state_provider/user_info_provider.dart';
-import 'edit_quiz_item_state_provider.dart';
 import 'quiz_player_state_provider.dart';
 
 class SingleQuizQuestionWidget extends StatelessWidget {
@@ -81,26 +79,9 @@ class SingleQuizQuestionWidget extends StatelessWidget {
 
     UserInfoStateProvider userInfoStateProvider = locator<UserInfoStateProvider>();
 
-
     final bool isMyQuiz = playerStateProvider.quizCollection.author.id == playerStateProvider.quizCollection.author.id;
 
-    showQuizEditWidget() async {
-      await Future.delayed(Duration(milliseconds: 240));
-      userInfoStateProvider.setBottomNavBarVisibilityTo(false);
-      showModalBottomSheet(
-              context: context,
-              builder: (_) => ChangeNotifierProvider<EditQuizItemStateProvider>(
-                    create: (context) => EditQuizItemStateProvider(playerStateProvider.quizItems[pos]),
-                    builder: (context, _) => EditQuizItemModalSheetWidget(),
-                  ),
-              isDismissible: false,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent)
-          .whenComplete(() async {
-        await Future.delayed(Duration(milliseconds: 200));
-        userInfoStateProvider.setBottomNavBarVisibilityTo(true);
-      });
-    }
+    Future<void> showQuizEditWidget(BuildContext context) async {}
 
     return Container(
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(ScreenUtil().setSp(30))),
@@ -135,27 +116,30 @@ class SingleQuizQuestionWidget extends StatelessWidget {
                           'edit',
                           style: TextStyle(decoration: TextDecoration.underline),
                         ),
-                        // onTap: () {
-                        //   print('Editing a quiz item');
-                        //   userInfoStateProvider.setBottomNavBarVisibilityTo(false);
-                        //   showModalBottomSheet(
-                        //     isScrollControlled: true,
-                        //     backgroundColor: Colors.transparent,
-                        //     context: context,
-                        //     builder: (context) => EditOrDeleteOptionWidget(
-                        //       onEditText: 'Edit this question',
-                        //       onDeleteText: 'Delete this question',
-                        //       onDelete: () => playerStateProvider.deleteQuizItemAt(context, pos),
-                        //       onEdit: () {
-                        //         Navigator.of(context).pop();
-                        //         showQuizEditWidget();
-                        //       },
-                        //     ),
-                        //   ).whenComplete(() async {
-                        //     await Future.delayed(Duration(milliseconds: 200));
-                        //     userInfoStateProvider.setBottomNavBarVisibilityTo(true);
-                        //   });
-                        // },
+                        onTap: () async {
+                          print('Editing a quiz item');
+                          userInfoStateProvider.setBottomNavBarVisibilityTo(false);
+                          final String value = await showModalBottomSheet(
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            context: context,
+                            builder: (context) => EditOrDeleteOptionWidget(
+                              onEditText: 'Edit this question',
+                              onDeleteText: 'Delete this question',
+                            ),
+                          ).whenComplete(() async {
+                            await Future.delayed(Duration(milliseconds: 200));
+                            userInfoStateProvider.setBottomNavBarVisibilityTo(true);
+                          });
+                          if (value == null) {
+                            return;
+                          }
+                          if (value == 'edit') {
+                            playerStateProvider.onQuizItemEditing(context, pos);
+                            return;
+                          }
+                          playerStateProvider.onQuizItemDelete(context, pos);
+                        },
                       ),
                   ],
                 ),
@@ -199,9 +183,12 @@ class SingleQuizQuestionWidget extends StatelessWidget {
           SizedBox(
             height: ScreenUtil().setHeight(50),
           ),
-          Padding(
-            padding: EdgeInsets.only(left: ScreenUtil().setSp(60)),
-            child: Text(playerStateProvider.quizItems[pos].question),
+          Selector<QuizPlayerStateProvider, String>(
+            selector: (context, stateProvider) => stateProvider.quizItems[pos].question,
+            builder: (context, question, _) => Padding(
+              padding: EdgeInsets.only(left: ScreenUtil().setSp(60)),
+              child: Text(question),
+            ),
           ),
           SizedBox(
             height: ScreenUtil().setHeight(60),

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/Navigator/navigation_service.dart';
@@ -98,11 +101,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               print('above is context');
               print(_pagesNavigators.last.currentState == null);
               print('above is context');
-              if (navigationService.currentIndex == 1 &&
-                  _pagesNavigators.last.currentState != null &&
-                  _pagesNavigators.last.currentState.canPop()) {
-                print('mySavedNavigator can pop');
-                _pagesNavigators.last.currentState.pop();
+
+              if (navigationService.canWePopFromQuizesNavigator) {
+                navigationService.popFromQuizesNavigator();
+                return Future.value(false);
+              } else if (navigationService.canWePopFromMySaved) {
+                navigationService.popFromMySaved();
+                return Future.value(false);
+              } else if (navigationService.canWePopFromMyUploads) {
+                navigationService.popFromMyUploads();
                 return Future.value(false);
               } else if (_pagesNavigators[tabController.index].currentState.canPop()) {
                 print('original one');

@@ -4,22 +4,21 @@ class RouteNames {
 
   static const String PLAY_VIDEO = '/play-video';
   static const String OPEN_LECTURE_FILE = '/open-file';
+
   //static const String VIEW_QUIZ = '/view-quiz';
 
   static const String VIEW_COMMENT_ON_LECTURE = '/view-comment-on-lecture';
   static const String VIEW_COMMENT_ON_VIDEO = '/view-comment-on-video';
 
-
   static const String VIEW_USER_PROFILE_PAGE = 'view-user-profile-page';
   static const String VIEW_MY_PROFILE_PAGE = 'view-my-profile-page';
 
   // Profile Routes
-  static const String EXPLORE_MY_MATERIALS = '/explore-my-materials';
+  static const String VIEW_MY_UPLOADS = '/view-my-uploads';
   static const String EXPLORE_MY_DRAFTS = '/explore-my-drafts';
 
   static const String VIEW_COMMENTS_PAGE = '/view-comments-page';
   static const String VIEW_MY_SAVED_MATERIALS = '/view-my-saved-materials';
-
 
   // uplaoding
 
@@ -32,9 +31,13 @@ class RouteNames {
   static const String EDIT_UPLOADED_QUIZ = '/edit-uploaded-quiz';
 
   // display comment rators
-static const String DISPLAY_COMMENT_RATORS = '/display-comment-rators';
-static const String VIEW_QUIZ_DISPLAYER =  '/view-quiz-displayer';
-  static const String TAKE_QUIZ_EXAM =  '/take-quiz-exam';
+  static const String DISPLAY_COMMENT_RATORS = '/display-comment-rators';
+  static const String VIEW_QUIZ_DISPLAYER = '/view-quiz-displayer';
+  static const String TAKE_QUIZ_EXAM = '/take-quiz-exam';
+  static const String EDIT_UPLOADED_MATERIAL = '/edit-uploaded-material';
 
-  
+
+  static const String EDIT_COLLEGE_MATERIAL = '/edit--college-material';
+  static const String EDIT_SCHOLL_MATERIAL = '/edit-school-material';
+  static const String VERIFY_NEW_EMAIL = '/verify-new-email';
 }

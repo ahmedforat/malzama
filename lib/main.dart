@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:malzama/demos/io_state_provider_demo.dart';
 import 'package:malzama/src/core/Navigator/routes_names.dart';
 import 'package:malzama/src/core/general_widgets/helper_functions.dart';
 import 'package:malzama/src/core/platform/local_database/local_caches/cached_user_info.dart';
@@ -11,14 +10,16 @@ import 'package:malzama/src/features/Signup/presentation/state_provider/executio
 import 'package:malzama/src/features/Signup/presentation/state_provider/temp_provider.dart';
 import 'package:malzama/src/features/home/models/users/user.dart';
 import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/pdf_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/profile/state_provider/verify_new_email_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/profile/widgets/verify_email_by_auth_code.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/players/pdf_player/pdf_player_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/players/pdf_player/pdf_player_widget.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/players/video_player/video_player_state_provider.dart';
-
 import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
 import 'package:provider/provider.dart';
 
+import './src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'src/core/debugging/form-submit.dart';
 import 'src/core/platform/services/dialog_services/dialog_manger.dart';
 import 'src/core/platform/services/dialog_services/service_locator.dart';
@@ -31,11 +32,9 @@ import 'src/features/login/presentation/pages/login_page.dart';
 import 'src/features/signup/presentation/pages/college_post_signup.dart';
 import 'src/features/signup/presentation/pages/school_student_post_signup.dart';
 import 'src/features/signup/presentation/state_provider/college_post_signup_state.dart';
-
 import 'src/features/signup/presentation/state_provider/school_student_state_provider.dart';
 import 'src/features/specify_user_type/specify_user_type.dart';
 import 'src/features/verify_your_email/presentation/validate_your_account_msg.dart';
-import './src/features/home/presentation/state_provider/user_info_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,10 +59,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<IOStateProvider>(
-          create: (context) => IOStateProvider(),
-          lazy: false,
-        ),
+
         ChangeNotifierProvider<UserInfoStateProvider>(
           create: (context) => locator<UserInfoStateProvider>(),
           lazy: false,
@@ -97,8 +93,8 @@ class MyApp extends StatelessWidget {
         //home: IOStateProviderDemo() //ChangeNotifierProvider(
         //  create: (context) => QuizUploadingState(),
         //   child: QuizUploaderWidget())
-         initialRoute: '/',
-         onGenerateRoute: _onGenerateRoute,
+        initialRoute: '/',
+        onGenerateRoute: _onGenerateRoute,
       ),
     );
   }
@@ -246,19 +242,26 @@ Route<dynamic> _onGenerateRoute(RouteSettings settings) {
       }
       break;
 
-
-
     case RouteNames.OPEN_LECTURE_FILE:
-     final int pos = settings.arguments;
+      final int pos = settings.arguments;
+      print('Hello Native Navigator');
       return MaterialPageRoute(
         builder: (context) => ChangeNotifierProvider<PDFPlayerStateProvider>(
-          create: (context) => new PDFPlayerStateProvider(pos),
-          builder: (context,_) => PDFPlayerWidget(),
+          create: (context) => new PDFPlayerStateProvider(context, pos),
+          builder: (context, _) => PDFPlayerWidget(),
         ),
       );
-
       break;
 
+    case RouteNames.VERIFY_NEW_EMAIL:
+      final Map<String, dynamic> data = settings.arguments;
+      return new MaterialPageRoute<Map<String, dynamic>>(
+        builder: (context) => ChangeNotifierProvider<VerifyNewStateProvider>(
+          create: (context) => VerifyNewStateProvider(data),
+          builder: (context, _) => VerifyEmailByAuthCodePage(),
+        ),
+      );
+      break;
 
     default:
       return MaterialPageRoute(

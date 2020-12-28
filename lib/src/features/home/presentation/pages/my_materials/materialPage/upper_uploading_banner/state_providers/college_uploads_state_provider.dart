@@ -4,6 +4,11 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:malzama/src/core/platform/services/file_system_services.dart';
+import 'package:malzama/src/features/home/models/materials/college_material.dart';
+import 'package:malzama/src/features/home/models/materials/study_material.dart';
+import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/pdf_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../../../../../core/api/api_client/clients/common_materials_client.dart';
@@ -19,6 +24,8 @@ import '../../../../../state_provider/quiz_uploader_state_provider.dart';
 import '../../../../../state_provider/user_info_provider.dart';
 
 class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
+  CollegeMaterial _collegeMaterial;
+
   // scaffold key of the uploading form
   GlobalKey<ScaffoldState> _scaffoldKey;
 
@@ -40,21 +47,16 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
     notifyMylisteners();
   }
 
-  void parseDataToBeEdit(Map<String, dynamic> data) {
-    _title = data['title'];
-    _description = data['description'];
-    _stage = int.parse(data['stage'].toString());
-    _semester = data['semester'] == null ? null : int.parse(data['semester']);
-    _topic = data['topic'];
-    if (data['material_type'] == 'video') {
-      _videoId = References.getFullYouTubeUrl(data['src']);
-    } else {
-      File file = new File(data['localPath']);
-      if (file.existsSync()) {
-        _lectureToUpload = file;
-      } else {
-        _keepTheSameUploadedLecture = true;
-      }
+  void parseDataToBeEdit(CollegeMaterial data) {
+    _collegeMaterial = new CollegeMaterial.fromJSON({...data.toJSON()});
+
+    _titleController.text = _collegeMaterial.title;
+    _descriptionController.text = _collegeMaterial.description;
+    _stage = _collegeMaterial.stage;
+    _semester = data.semester.toString() == 'unknown' ? null : _collegeMaterial.semester;
+    _topic = _collegeMaterial.topic;
+    if (data.materialType == 'video') {
+      _videoIdController.text = References.getFullYouTubeUrl(_collegeMaterial.src);
     }
   }
 
@@ -70,8 +72,16 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
   // ========================================================================================
 
   // =========  form fields  ===============
-  String _title;
-  String _description;
+  TextEditingController _titleController;
+  TextEditingController _descriptionController;
+  TextEditingController _videoIdController;
+
+  TextEditingController get titleController => _titleController;
+
+  TextEditingController get videoIdController => _videoIdController;
+
+  TextEditingController get descriptionController => _descriptionController;
+
   int _stage;
   int _semester;
   String _topic;
@@ -81,9 +91,6 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
   List<String> _topicList;
 
   // ========= Fields Getters =============
-  String get title => _title;
-
-  String get description => _description;
 
   int get stage => _stage;
 
@@ -102,12 +109,15 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
 
   // =========== Constructor ======================
 
-  CollegeUploadingState({bool forEdit = false, Map<String, dynamic> data}) {
+  CollegeUploadingState({bool forEdit = false, CollegeMaterial data}) {
+    _titleController = new TextEditingController();
+    _descriptionController = new TextEditingController();
+    _videoIdController = new TextEditingController();
+
     _scaffoldKey = new GlobalKey<ScaffoldState>();
     _forEditing = forEdit;
     if (_forEditing) {
       parseDataToBeEdit(data);
-      notifyMylisteners();
     }
     print('initializing college uploading state');
     // initialize the stage if the user is a college student
@@ -127,6 +137,10 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
     }
 
     print('End of state Constructor');
+    if (_forEditing) {
+      _updateTopicList();
+      notifyMylisteners();
+    }
   }
 
   // ========= Update Topic List Method =========================
@@ -150,27 +164,6 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
         _updateTopicList();
       }
       notifyMylisteners();
-    }
-  }
-
-  // update title
-  void updateTitle(String update) {
-    if (update != null) {
-      _title = update;
-    }
-  }
-
-  // update description
-  void updateDescription(String update) {
-    if (update != null) {
-      _description = update;
-    }
-  }
-
-  // update VideoID
-  void updateVideoId(String update) {
-    if (update != null) {
-      _videoId = update;
     }
   }
 
@@ -229,7 +222,7 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
                 ? 'You must ensure app access to your device files\n'
                     'go to settings -> privacy ->  Manager -> Files and media -> malzama\n'
                     'and allow access to media '
-                : 'this app require to access your files, allow it manually from your device settings';
+                : 'this app require to access your files, Please allow it manually from your device settings';
             return AlertDialog(
               content: Text(text),
               actions: [
@@ -259,20 +252,27 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
   // get material data
   // this method is called when a call to the API
   Future<Map<String, dynamic>> _getMaterialData() async {
-    var data = {
-      'title': this._title,
-      'description': this._description,
+    Map<String, dynamic> data = {
+      'title': this._titleController.text,
+      'description': this._descriptionController.text,
       'stage': this._stage.toString(),
       'topic': this._topic,
       'university': userData.university,
       'college': userData.college,
       'section': userData.section,
-      'src': _lectureToUpload ?? _videoId,
     };
+
+    if (keepTheSameUploadedLecture) {
+      data['src'] = _collegeMaterial.src;
+    } else if (_lectureToUpload != null) {
+      data['src'] = _lectureToUpload;
+    } else {
+      data['src'] = References.getVideoIDFrom(youTubeLink: _videoIdController.text);
+    }
 
     // if the user is pharmacy or medicine
     if (!(new RegExp(r'سنان').hasMatch(userData.college))) {
-      data['semester'] = _semester;
+      data['semester'] = _semester ?? 'unknown';
     }
     final bool isTeacher = HelperFucntions.isTeacher(accountType);
     data['uuid'] = userData.uuid;
@@ -284,7 +284,7 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
   }
 
   /// [upload to the API]
-  Future<void> upload() async {
+  Future<void> upload(BuildContext context) async {
     final String uploadType = _lectureToUpload == null ? 'videos' : 'lectures';
 
     Map<String, dynamic> payload = await _getMaterialData();
@@ -309,10 +309,72 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
       await QuizAccessObject().saveUploadedMaterial(storeName, data);
 
       locator<DialogService>().completeAndCloseDialog(null);
+      Navigator.of(context).pop();
       locator<DialogService>().showDialogOfSuccess(message: 'Your $text is uploaded successfully');
     } else {
       locator<DialogService>().completeAndCloseDialog(null);
       locator<DialogService>().showDialogOfFailure(message: response.message ?? 'Failed to upload, try again');
+    }
+  }
+
+  Future<void> update(BuildContext context) async {
+    locator<DialogService>().showDialogOfLoading(message: 'updating ....');
+
+    Map<String, dynamic> payload = await _getMaterialData();
+    print(payload['src']);
+
+    if (_collegeMaterial.materialType == 'lecture' && !keepTheSameUploadedLecture) {
+      payload['localPath'] = _lectureToUpload.path;
+      final String downloadUrl = await HelperFucntions.uploadPDFToCloud(_lectureToUpload);
+      if (downloadUrl == null) {
+        locator<DialogService>().completeAndCloseDialog(null);
+        locator<DialogService>().showDialogOfFailure(message: 'Failed to update, try again');
+        return;
+      }
+      print('===================================== after saving to cloud =====================================');
+      print(downloadUrl);
+      print('===================================== after saving to cloud =====================================');
+
+      payload['src'] = downloadUrl;
+      payload['size'] = _lectureToUpload.lengthSync();
+    }
+
+    payload['last_update'] = DateTime.now().toIso8601String();
+
+    ContractResponse response = await CommonMaterialClient().editMaterial(
+      payload: payload,
+      collectionName: _collegeMaterial.materialCollection,
+      id: _collegeMaterial.id,
+    );
+
+    if (response is Success) {
+      if (keepTheSameUploadedLecture || _lectureToUpload != null) {
+        await FileSystemServices.deleteCachedFileById(_collegeMaterial.id);
+      }
+      print('this is the src of new video' + payload['src']);
+      Map<String, dynamic> newPayload = _collegeMaterial.toJSON()..addAll(payload);
+      final String storeName = _collegeMaterial.materialType == 'video' ? MyUploaded.VIDEOS : MyUploaded.LECTURES;
+
+      StudyMaterial studyMaterial = await QuizAccessObject().getUploadedVideoOrPdfById(storeName: storeName, id: _collegeMaterial.id);
+      if (studyMaterial == null) {
+        QuizAccessObject().saveUploadedMaterial(storeName, newPayload);
+      } else {
+        await QuizAccessObject().findOneAndUpdateById(id: _collegeMaterial.id, value: newPayload, storeName: storeName);
+      }
+
+      if (_collegeMaterial.materialType == 'video') {
+        locator<VideoStateProvider>().replaceMaterialWith(new CollegeMaterial.fromJSON({...newPayload}));
+      } else {
+        locator<PDFStateProvider>().replaceMaterialWith(new CollegeMaterial.fromJSON({...newPayload}));
+      }
+
+      locator<DialogService>().completeAndCloseDialog(null);
+      Navigator.of(context).pop();
+      locator<DialogService>().showDialogOfSuccess(message: 'Material updated');
+    } else {
+      locator<DialogService>().completeAndCloseDialog(null);
+      locator<DialogService>().showDialogOfFailure(message: 'Failed to update, try again');
+      return;
     }
   }
 
@@ -344,6 +406,9 @@ class CollegeUploadingState extends AbstractStateProvider with ChangeNotifier {
   void dispose() {
     _isDisposed = true;
     print('college uploading state has been disposed');
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _videoIdController?.dispose();
     super.dispose();
   }
 }

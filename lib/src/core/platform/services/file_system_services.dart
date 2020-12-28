@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:malzama/src/core/references/references.dart';
 import 'package:malzama/src/features/home/models/users/user.dart';
@@ -80,5 +81,26 @@ class FileSystemServices {
     Directory dir = await getApplicationDocumentsDirectory();
     final String filePath = dir.path + '/cached_files/$id.$ext';
     return locator<UserInfoStateProvider>().cachedFiles.contains(filePath) ? filePath : null;
+  }
+
+  static Future<bool>deleteCachedFileById(String id) async {
+    try{
+      final String cacheDirPath = await createCachedFilesDirectory();
+      final String filePath = '$cacheDirPath/$id.pdf';
+      File file = new File(filePath);
+      file.deleteSync();
+      locator<UserInfoStateProvider>().cachedFiles.remove(filePath);
+      return true;
+    }catch(err){
+      print('do nothing');
+      return false;
+    }
+  }
+
+  static Future<String> createCachedFilesDirectory() async {
+    Directory dir = await getApplicationDocumentsDirectory();
+    final String cachDirPath = '${dir.path}/cached_files';
+    Directory(cachDirPath).createSync();
+    return cachDirPath;
   }
 }

@@ -1,38 +1,32 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
 
-import '../../../../../../../../core/api/api_client/clients/common_materials_client.dart';
-import '../../../../../../../../core/api/api_client/clients/quiz_client.dart';
 import '../../../../../../../../core/api/api_client/clients/video_and_pdf_client.dart';
 import '../../../../../../../../core/api/contract_response.dart';
 import '../../../../../../../../core/general_widgets/helper_functions.dart';
 import '../../../../../../../../core/platform/services/dialog_services/service_locator.dart';
+import '../../../../../../models/materials/study_material.dart';
 import '../../../../../../models/users/user.dart';
 import '../../../../../state_provider/user_info_provider.dart';
-import '../../../../lectures_pages/state/material_state_repo.dart';
-import '../../quizes/quiz_collection_model.dart';
 
-class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
+import '../../../../videos/videos_navigator/state/video_state_provider.dart';
+
+class MySavedVideoStateProvider extends MaterialStateRepository with ChangeNotifier {
   User userData;
 
-  MySavedQuizStateProvider() {
+  MySavedVideoStateProvider() {
     loadCredentialData();
     fetchInitialData();
   }
 
   // ==========================================================================================
-  String get collectionName => isAcademic ? 'uniquizes' : 'schquizes';
-
-  // ==========================================================================================
-
-  bool _hasQuizes = false;
-
   @override
-  bool get hasQuizes => _hasQuizes;
+  String get collectionName => isAcademic ? 'univideos' : 'schvideos';
 
   // ==========================================================================================
 
-  /// Quizes
+  /// videos
 
   // Scaffold key to control the display of snackBar and other bottom sheet widgets
   GlobalKey<ScaffoldState> _scaffoldKey;
@@ -66,23 +60,23 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
 
   /// Indicator of Failure of Pagination process
 
-  bool _isPaginationFailed = false;
+  bool _failedPagination = false;
 
-  bool get isPaginationFailed => _isPaginationFailed;
-
-  // ===============================================================================================================
-
-  /// List of  Saved Quizes Ids that we get from the UserInfoStateProvider
-  List<String> _savedQuizesIds;
-
-  List<String> get savedQuizesIds => _savedQuizesIds;
+  bool get isPagintaionFailed => _failedPagination;
 
   // ===============================================================================================================
 
-  /// List of already fetched saved Quizes
-  List<QuizCollection> _savedQuizes = [];
+  /// List of  Saved videos Ids that we get from the UserInfoStateProvider
+  List<String> _savedVideosIds;
 
-  List<QuizCollection> get savedQuizes => _savedQuizes;
+  List<String> get savedVideosIds => _savedVideosIds;
+
+  // ===============================================================================================================
+
+  /// List of already fetched saved Videos
+  List<StudyMaterial> _savedVideos = [];
+
+  List<StudyMaterial> get savedVideos => _savedVideos;
 
   // ===============================================================================================================
 
@@ -110,22 +104,20 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
 
   // ===============================================================================================================
 
-  /// this method is for Initial Fetching of Saved quizes
+  /// this method is for Initial Fetching of Saved videos
   @override
   Future<void> fetchInitialData() async {
-    _savedQuizes = [];
     _failedInitialFetch = null;
-    setIsFetchingTo(true);
-    if (_savedQuizesIds.isEmpty) {
+
+    if (_savedVideosIds.isEmpty) {
       _failedInitialFetch = false;
-      _hasQuizes = false;
-      setIsFetchingTo(false);
+      notifyMyListeners();
       return;
     }
-
+    setIsFetchingTo(true);
     List<String> idsList = _getFetchingParams();
 
-    ContractResponse response = await QuizClient().fetchSavedQuizesHeaders(
+    ContractResponse response = await VideosAndPDFClient().fetchSavedMaterials(
       collection: collectionName,
       ids: idsList,
     );
@@ -140,18 +132,19 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
 
   // ===============================================================================================================
 
-  // this method is for Pagination Fetching of Saved Quizes
+  // this method is for Pagination Fetching of Saved videos
   @override
   Future<void> fetchForPagination() async {
-    _isPaginationFailed = null;
+    _failedPagination = null;
     setIsPaginatingTo(true);
     List<String> idsList = _getFetchingParams();
     if (idsList.isEmpty) {
-      _isPaginationFailed = false;
+      _failedPagination = false;
       _endOfResults = true;
       setIsPaginatingTo(false);
+      return;
     }
-    ContractResponse response = await QuizClient().fetchSavedQuizesHeaders(
+    ContractResponse response = await VideosAndPDFClient().fetchSavedMaterials(
       collection: collectionName,
       ids: idsList,
     );
@@ -171,16 +164,16 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
     if (fetchingType == FetchingType.INITIAL) {
       _failedInitialFetch = false;
     } else {
-      _isPaginationFailed = false;
+      _failedPagination = false;
     }
-    List<QuizCollection> fetchedQuizes = getFetchedDataFromResponse(response);
-    if (_endOfResults || _savedQuizes.isEmpty) {
-      _savedQuizes = fetchedQuizes;
+
+    List<StudyMaterial> fetchedVideos = getFetchedMaterialsFromResponse(response);
+    if (_endOfResults || _savedVideos.isEmpty) {
+      _savedVideos = fetchedVideos;
     } else {
-      _savedQuizes.addAll(fetchedQuizes);
+      _savedVideos.addAll(fetchedVideos);
     }
-    _hasQuizes = _savedQuizes.isNotEmpty;
-    _endOfResults = _savedQuizes.length == _savedQuizesIds.length || (fetchedQuizes.isEmpty && fetchingType == FetchingType.PAGINATION);
+    _endOfResults = _savedVideos.length == _savedVideosIds.length || (fetchedVideos.isEmpty && fetchingType == FetchingType.PAGINATION);
   }
 
   // ===============================================================================================================
@@ -189,17 +182,17 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
   void _onFetchFailure(ContractResponse response, FetchingType fetchingType) {
     if (fetchingType == FetchingType.INITIAL) {
       _failedInitialFetch = true;
-      _failureMessage = HelperFucntions.getFailureMessage(response, 'quizes', true);
+      _failureMessage = HelperFucntions.getFailureMessage(response, 'videos', true);
       return;
     }
-    _isPaginationFailed = true;
-    _failureMessage = 'Failed to load more quizes';
+    _failedPagination = true;
+    _failureMessage = 'Failed to load more videos';
   }
 
   // ===============================================================================================================
   /// to know whether we have  ids that are not fetched yet
 
-  bool get anymoreFetch => _savedQuizesIds.isNotEmpty;
+  bool get anymoreFetch => _savedVideosIds.isNotEmpty;
 
 // ===============================================================================================================
 
@@ -208,14 +201,14 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
     List<String> ids;
 
     if (isRefreshing) {
-      final List<String> fetchedIds = _savedQuizes.map<String>((quiz) => quiz.id).toList();
-      ids = _savedQuizesIds.where((id) => !fetchedIds.contains(id)).toList();
+      final List<String> fetchedIds = _savedVideos.map<String>((video) => video.id).toList();
+      ids = _savedVideosIds.where((id) => !fetchedIds.contains(id)).toList();
       return ids;
     }
 
-    final int unfetchedCount = _savedQuizesIds.sublist(_savedQuizes.length).length;
-    final int endIndex = _savedQuizes.length + (unfetchedCount > 7 ? 7 : unfetchedCount);
-    ids = _savedQuizesIds.sublist(_savedQuizes.length, endIndex);
+    final int unfetchedCount = _savedVideosIds.sublist(_savedVideos.length).length;
+    final int endIndex = _savedVideos.length + (unfetchedCount > 7 ? 7 : unfetchedCount);
+    ids = _savedVideosIds.sublist(_savedVideos.length, endIndex);
 
     return ids;
   }
@@ -242,16 +235,16 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
   /// not necessary here because it is implemented due the abstract class MaterialStateRepo
   @override
   void appendToComments(String id, int pos) {
-    print('nothing');
+    print('do nothing');
   }
 
   // ===============================================================================================================
 
   /// append To Materials from list of studyMaterial
   @override
-  void appendToMaterialsFrom(List<QuizCollection> data) {
+  void appendToMaterialsFrom(List<StudyMaterial> data) {
     if (data.isNotEmpty) {
-      _savedQuizes.addAll(data);
+      _savedVideos.addAll(data);
       notifyMyListeners();
     }
   }
@@ -259,9 +252,9 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
   // ===============================================================================================================
 
   @override
-  void appendToMaterialsOnRefreshFrom(List<QuizCollection> data) {
+  void appendToMaterialsOnRefreshFrom(List<StudyMaterial> data) {
     if (data.isNotEmpty) {
-      _savedQuizes.insertAll(0, data);
+      _savedVideos.insertAll(0, data);
       notifyMyListeners();
     }
   }
@@ -279,13 +272,13 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
     print('mySavedState Provider has been initialized');
     _scaffoldKey = new GlobalKey<ScaffoldState>();
     userData = locator<UserInfoStateProvider>().userData;
-    _savedQuizesIds = userData.savedQuizes ?? [];
+    _savedVideosIds = userData.savedVideos ?? [];
   }
 
   // ===============================================================================================================
-  /// getter of fetched Quizes
+  /// getter of fetched videos
   @override
-  List<QuizCollection> get materials => _savedQuizes;
+  List<StudyMaterial> get materials => _savedVideos;
 
   // ===============================================================================================================
 
@@ -293,26 +286,13 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
   /// and not appear in the saved list
   @override
   Future<void> onMaterialSaving(int pos) async {
-    String id = _savedQuizes[pos].id;
+    String id = _savedVideos[pos].id;
     removeMaterialAt(pos);
-    _savedQuizesIds.remove(id);
-
-    ContractResponse response = await CommonMaterialClient().saveMaterial(
-      id: id,
-      fieldName: 'saved_quizes',
-      indicator: 'pull',
-    );
-
-    if (response is Success) {
-      showSnackBar('removed from saved items');
-      locator<UserInfoStateProvider>().userData.savedQuizes.remove(id);
-      locator<UserInfoStateProvider>().notifyMyListeners();
-      if (_savedQuizes.isEmpty) {
-        _savedQuizesIds = locator<UserInfoStateProvider>().userData.savedQuizes;
-        fetchInitialData();
-      }
+    await locator<VideoStateProvider>().onMaterialSavingFromExternal(id);
+    if (_savedVideos.isEmpty) {
+      fetchInitialData();
+      return;
     }
-    // locator<Q>().onMaterialSavingFromExternal(id);
   }
 
   // ===============================================================================================================
@@ -327,18 +307,24 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
   @override
   Future<void> onRefresh() async {
     List<String> idsList = _getFetchingParams(isRefreshing: true);
+    print('video refresh');
+    if (idsList.isEmpty) {
+      print('video refresh');
+      showSnackBar('There are no more saved videos to load', seconds: 5);
+      return;
+    }
     ContractResponse response = await VideosAndPDFClient().fetchSavedMaterials(
       collection: collectionName,
       ids: idsList,
     );
 
     if (response is Success) {
-      List<QuizCollection> fetchedData = getFetchedDataFromResponse(response);
-      appendToMaterialsFrom(fetchedData);
+      List<StudyMaterial> fetchedData = getFetchedMaterialsFromResponse(response);
+      appendToMaterialsOnRefreshFrom(fetchedData);
       return;
     }
-    final String message = response is NoInternetConnection ? 'No internet connection' : 'Failed to load quizes';
-    showSnackBar(message, seconds: 5);
+    final String _message = response is NoInternetConnection ? 'No internet connection' : 'Failed to refresh!';
+    showSnackBar(_message, seconds: 5);
   }
 
   // ===============================================================================================================
@@ -347,7 +333,7 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
 
   @override
   Future<void> showSnackBar(String message, {int seconds}) async {
-    if (_isSnackBarVisible || _isDisposed) {
+    if (_isSnackBarVisible) {
       return;
     }
     _isSnackBarVisible = true;
@@ -366,13 +352,24 @@ class MySavedQuizStateProvider extends QuizStateRepository with ChangeNotifier {
   /// not Necessary
   @override
   void removeFromComments(String id, int pos) {
-    print('nothing');
+    _savedVideos[pos].comments.removeWhere((comment) => comment == id);
+    locator<VideoStateProvider>().removeFromComments(id, pos);
+    notifyMyListeners();
   }
 
 // ===============================================================================================================
   @override
   void removeMaterialAt(int pos) {
-    _savedQuizes.removeAt(pos);
+    _savedVideos.removeAt(pos);
     notifyMyListeners();
+  }
+
+  @override
+  void replaceMaterialWith(StudyMaterial newMaterial) {
+    final int index = _savedVideos.indexWhere((element) => element.id == newMaterial.id);
+    if (index > -1) {
+      _savedVideos[index] = newMaterial;
+      notifyMyListeners();
+    }
   }
 }

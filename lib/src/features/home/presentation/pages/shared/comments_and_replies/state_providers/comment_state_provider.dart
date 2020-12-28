@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:malzama/src/features/home/presentation/pages/lectures_pages/state/material_state_repo.dart';
-import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/my_saved_material/state_provider/saved_videos_state_provider.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/materialPage/state_provider_contracts/material_state_repo.dart';
+import 'package:malzama/src/features/home/presentation/pages/my_materials/my_saved_and_uploads/my_saved_material/state_provider/saved_videos_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../../core/api/api_client/clients/comments_client.dart';
@@ -77,12 +77,12 @@ class CommentStateProvider<T extends MaterialStateRepository> with ChangeNotifie
     _commentsScaffoldKey = GlobalKey<ScaffoldState>();
     print('commentsScaffoldKey created');
     this._currentMaterialPos = materialPos;
-    print('قبل لتخرب بثواني');
+
     this.state = Provider.of<T>(context, listen: false).materials[materialPos];
-    print('همزين ما خربت');
+
     pageController = new PageController();
     _context = context;
-    print('new comment state provider of type ${T} has been created');
+    print('new comment state provider of type $T has been created');
     setIsFetchingTo(true);
     fetchComments();
   }
@@ -334,8 +334,6 @@ class CommentStateProvider<T extends MaterialStateRepository> with ChangeNotifie
     }
   }
 
-  void _onReplyRelevantCommentPostDeletion() {}
-
 // ================================================================================================
   Future<void> uploadNewReply({@required String content, @required BuildContext context}) async {
     CommentReply newReply = new CommentReply(
@@ -375,7 +373,7 @@ class CommentStateProvider<T extends MaterialStateRepository> with ChangeNotifie
   }
 
 // ================================================================================================
-  Future<bool> editCommentOrReply({@required BuildContext context}) async {
+  Future<dynamic> editCommentOrReply({@required BuildContext context}) async {
     AddOrEditCommentWidgetStateProvider addOrEditCommentWidgetStateProvider =
         Provider.of<AddOrEditCommentWidgetStateProvider>(context, listen: false);
 
@@ -406,8 +404,6 @@ class CommentStateProvider<T extends MaterialStateRepository> with ChangeNotifie
 
     if (contractResponse is Success) {
       addOrEditCommentWidgetStateProvider.resetWidget();
-
-      final Map<String, dynamic> data = json.decode(contractResponse.message);
 
       if (replyIdToBeUpdated != null) {
         _comments[repliesRelevantCommentPos].replies.firstWhere((reply) => reply.id == replyIdToBeUpdated)
@@ -496,17 +492,7 @@ class CommentStateProvider<T extends MaterialStateRepository> with ChangeNotifie
 
     notifyMyListeners();
 
-    final body = {
-      'comments_collection': comment.collectionName,
-      'comment_id': comment.id,
-      'newRating': rating,
-      'rating_id': myRating == null ? null : myRating.id,
-      'material_id': state.id,
-      'material_collection': state.materialCollection,
-      'author_id': state.author.id,
-      'author_notifications_repo': state.author.notificationsRepo,
-      'author_one_signal_id': state.author.oneSignalID
-    };
+
 
     ContractResponse response = await CommentsClient().rateComment(
       commentId: comment.id,
