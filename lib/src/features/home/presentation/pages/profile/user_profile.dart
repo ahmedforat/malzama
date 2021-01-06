@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:malzama/src/core/platform/services/dialog_services/service_locator.dart';
 import 'package:malzama/src/features/home/presentation/pages/profile/widgets/bio_widget.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/profile_page_state_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/users/user.dart';
@@ -19,7 +23,7 @@ class UserProfilePage extends StatelessWidget {
     ScreenUtil.init(context);
 
     return Scaffold(
-      key: Provider.of<ProfilePageState>(context,listen: false).scaffoldKey,
+      key: Provider.of<ProfilePageState>(context, listen: false).scaffoldKey,
       body: Selector<UserInfoStateProvider, User>(
         selector: (context, stateProvider) => stateProvider.userData,
         builder: (context, info, _) => info == null
@@ -31,6 +35,13 @@ class UserProfilePage extends StatelessWidget {
               )
             : Scaffold(
                 backgroundColor: Colors.grey[200],
+                // floatingActionButton: FloatingActionButton(
+                //   heroTag: 'dasd',
+                //   onPressed: ()async {
+                //     ProfilePageState profilePageState = Provider.of<ProfilePageState>(context, listen: false);
+                //     Navigator.of(context,rootNavigator: true).pushNamed('/dasd');
+                //   },
+                // ),
                 body: Padding(
                   padding: EdgeInsets.all(ScreenUtil().setSp(10)),
                   child: ListView(

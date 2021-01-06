@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:malzama/src/core/Navigator/routes_names.dart';
@@ -17,13 +19,13 @@ import 'package:malzama/src/features/home/presentation/pages/shared/materials_de
 import 'package:malzama/src/features/home/presentation/pages/shared/materials_details_pages/players/video_player/video_player_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/pages/videos/videos_navigator/state/video_state_provider.dart';
 import 'package:malzama/src/features/home/presentation/state_provider/notifcation_state_provider.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 
 import './src/features/home/presentation/state_provider/user_info_provider.dart';
 import 'src/core/debugging/form-submit.dart';
 import 'src/core/platform/services/dialog_services/dialog_manger.dart';
 import 'src/core/platform/services/dialog_services/service_locator.dart';
-import 'src/features/home/presentation/pages/cover_picture_viewer.dart';
 import 'src/features/home/presentation/pages/home_page.dart';
 import 'src/features/home/presentation/pages/profile_picture_viewer.dart';
 import 'src/features/home/presentation/state_provider/profile_page_state_provider.dart';
@@ -59,7 +61,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-
         ChangeNotifierProvider<UserInfoStateProvider>(
           create: (context) => locator<UserInfoStateProvider>(),
           lazy: false,
@@ -99,22 +100,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// onGenerateRoutesTest(settings) {
-//           if (settings.name == '/target')
-//             return MaterialPageRoute(
-//                 builder: (context) =>
-//                     ChangeNotifierProvider<CounterState>.value(
-//                         value: CounterState.instance(), child: Target()));
-//           else if (settings.name == '/')
-//             return MaterialPageRoute(
-//                 builder: (context) => ChangeNotifierProvider<CounterState>(
-//                       create: (context) => CounterState.instance(),
-//                       child: InitialPage(),
-//                     ));
-//           else
-//             return MaterialPageRoute(builder: (context) => Hello());
-//         }
 
 class UnknownRoute extends StatelessWidget {
   final String routeName;
@@ -232,14 +217,14 @@ Route<dynamic> _onGenerateRoute(RouteSettings settings) {
         builder: (context) => ProfilePictureViewer(),
       );
       break;
-    case '/view-cover-picture':
-      try {
-        return MaterialPageRoute(
-          builder: (context) => CoverPictureViewer(),
-        );
-      } catch (err) {
-        throw err;
-      }
+    case '/view-picture':
+      File image = settings.arguments;
+      return MaterialPageRoute(
+        builder: (context) => PhotoView(
+          imageProvider: FileImage(image),
+        ),
+      );
+
       break;
 
     case RouteNames.OPEN_LECTURE_FILE:

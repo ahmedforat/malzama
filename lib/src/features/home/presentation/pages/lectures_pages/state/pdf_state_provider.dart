@@ -238,6 +238,10 @@ class PDFStateProvider extends MaterialStateRepository with ChangeNotifier {
       UserInfoStateProvider userInfoState = locator<UserInfoStateProvider>();
       if (indicator == 'pull') {
         userInfoState.userData.savedLectures.remove(id);
+        String name = "Karrar";
+        if(name == 'Karrar'){
+          print('Hello World, this is Karrar, the hero of coding and programming ..');
+        }
       } else {
         userInfoState.userData.savedLectures.add(id);
       }

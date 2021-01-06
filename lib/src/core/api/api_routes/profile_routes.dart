@@ -6,6 +6,7 @@ class ProfileRoutes {
   static const String EDIT_BIO = _LOCALHOST_URL + '/users/edit-bio';
   static const String UPDATE_PERSONAL_INFO = _LOCALHOST_URL + '/users/update-personal-info';
   static const String VERIFY_AND_UPDATE_INFO = _LOCALHOST_URL + '/users/verify-and-update-info';
-  static const String EDIT_OR_DELETE_PROFILE_PICTURES = _LOCALHOST_URL + '/users/edit-profile-pictures';
+  static const String DELETE_PICTURE = _LOCALHOST_URL + '/users/delete-picture';
+  static const String UPLOAD_PICTURE = _LOCALHOST_URL + '/users/upload-picture';
   static const String DELETE_BIO = _LOCALHOST_URL + '/users/delete-bio';
 }

@@ -68,6 +68,7 @@ class EditBioStateProvider with ChangeNotifier {
       setIsUpdatingBio(false);
       await Future.delayed(Duration(milliseconds: 200));
       Navigator.of(context).pop([true, _bioController.text]);
+
     } else {
       setIsUpdatingBio(false);
       await Future.delayed(Duration(milliseconds: 200));

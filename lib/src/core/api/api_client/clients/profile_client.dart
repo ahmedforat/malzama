@@ -13,9 +13,14 @@ class ProfileClient {
     return await HttpMethods.get(url: ProfileRoutes.DELETE_BIO);
   }
 
-  Future<ContractResponse> editOrDeleteProfilePicture(bool edit, String url, String fieldName) async {
-    final String query = '?edit=$edit&picUrl=$url&fieldName=$fieldName';
-    return await HttpMethods.get(url: ProfileRoutes.EDIT_OR_DELETE_PROFILE_PICTURES, queryString: query);
+  Future<ContractResponse> deletePicture(String fieldName,String oldUrl) async {
+    final String query = '?picUrl=null&fieldName=$fieldName&oldUrl=$oldUrl';
+    return await HttpMethods.get(url: ProfileRoutes.DELETE_PICTURE, queryString: query);
+  }
+
+  Future<ContractResponse> uploadPicture(String url, String fieldName, {String oldUrl}) async {
+    String query = '?picUrl=$url&fieldName=$fieldName&oldUrl=$oldUrl';
+    return await HttpMethods.get(url: ProfileRoutes.UPLOAD_PICTURE, queryString: query);
   }
 
   Future<ContractResponse> updatePersonalInfo({@required bool isEmailModified, @required Map<String, dynamic> info}) async {

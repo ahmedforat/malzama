@@ -52,7 +52,7 @@ class UserProfileHeader2 extends StatelessWidget {
             ),
             Positioned(
               child: PersonalInfoWidget(),
-              top: ScreenUtil().setHeight(470),
+              top: ScreenUtil().setHeight(490),
               left: ScreenUtil().setWidth(30),
             ),
           

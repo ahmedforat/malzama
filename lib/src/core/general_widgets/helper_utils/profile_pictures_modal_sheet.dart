@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/accessory_widgets/image_resource_widget.dart';
 import 'package:malzama/src/features/home/presentation/pages/shared/accessory_widgets/modal_sheet_top_holder_widget.dart';
-import 'package:malzama/src/features/home/presentation/state_provider/user_info_provider.dart';
-import 'package:provider/provider.dart';
 
 class ProfilePicturesModalSheet extends StatefulWidget {
   final String onEditText;
   final String onDeleteText;
   final String onViewText;
+  final deleteEnabled;
 
-  ProfilePicturesModalSheet({String onEditText, String onDeleteText, String onViewText})
+  ProfilePicturesModalSheet({String onEditText, String onDeleteText, String onViewText, bool deleteEnabled = false})
       : this.onEditText = onEditText ?? 'Edit',
         this.onDeleteText = onDeleteText ?? 'Delete',
-        this.onViewText = onViewText ?? 'View';
+        this.onViewText = onViewText ?? 'View',
+        this.deleteEnabled = deleteEnabled;
 
   @override
   _ProfilePicturesModalSheetState createState() => _ProfilePicturesModalSheetState();
@@ -21,6 +21,7 @@ class ProfilePicturesModalSheet extends StatefulWidget {
 
 class _ProfilePicturesModalSheetState extends State<ProfilePicturesModalSheet> {
   PageController _pageController;
+  bool isShowingImageSources = false;
 
   @override
   void initState() {
@@ -36,7 +37,6 @@ class _ProfilePicturesModalSheetState extends State<ProfilePicturesModalSheet> {
 
   @override
   Widget build(BuildContext context) {
-    UserInfoStateProvider userInfoStateProvider = Provider.of<UserInfoStateProvider>(context, listen: false);
     ScreenUtil.init(context);
     List<Widget> optionsWidgets = [
       SizedBox(
@@ -46,12 +46,14 @@ class _ProfilePicturesModalSheetState extends State<ProfilePicturesModalSheet> {
       SizedBox(
         height: ScreenUtil().setHeight(30),
       ),
-      ListTile(
-        leading: Icon(Icons.remove_red_eye),
-        title: Text(widget.onViewText),
-        onTap: () => Navigator.of(context).pop('view'),
-      ),
-      Divider(),
+      if (widget.deleteEnabled) ...[
+        ListTile(
+          leading: Icon(Icons.remove_red_eye),
+          title: Text(widget.onViewText),
+          onTap: () => Navigator.of(context).pop('view'),
+        ),
+        Divider(),
+      ],
       ListTile(
         leading: Icon(Icons.upload_outlined),
         title: Text(widget.onEditText),
@@ -61,12 +63,14 @@ class _ProfilePicturesModalSheetState extends State<ProfilePicturesModalSheet> {
           curve: Curves.easeInOut,
         ),
       ),
-      Divider(),
-      ListTile(
-        leading: Icon(Icons.delete),
-        title: Text(widget.onDeleteText),
-        onTap: () => Navigator.of(context).pop('delete'),
-      ),
+      if (widget.deleteEnabled) ...[
+        Divider(),
+        ListTile(
+          leading: Icon(Icons.delete),
+          title: Text(widget.onDeleteText),
+          onTap: () => Navigator.of(context).pop('delete'),
+        ),
+      ],
       Divider(),
       ListTile(
         leading: Icon(Icons.cancel),
@@ -75,25 +79,34 @@ class _ProfilePicturesModalSheetState extends State<ProfilePicturesModalSheet> {
       ),
     ];
 
-    return Container(
-        padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setSp(50)),
-        height: ScreenUtil().setHeight(950),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(ScreenUtil().setSp(60)),
-            topLeft: Radius.circular(ScreenUtil().setSp(60)),
-          ),
+    print(widget.deleteEnabled);
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setSp(50)),
+      height: ScreenUtil().setHeight(widget.deleteEnabled || isShowingImageSources ? 890 : 470),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(ScreenUtil().setSp(60)),
+          topLeft: Radius.circular(ScreenUtil().setSp(60)),
         ),
-        child: PageView(
-          controller: _pageController,
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            Column(
-              children: optionsWidgets,
-            ),
-            ImageResourceWidget(_pageController),
-          ],
-        ));
+      ),
+      child: PageView(
+        onPageChanged: (pos) {
+          setState(() {
+            isShowingImageSources = pos == 1;
+          });
+        },
+        controller: _pageController,
+        physics: NeverScrollableScrollPhysics(),
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: optionsWidgets,
+          ),
+          ImageResourceWidget(_pageController),
+        ],
+      ),
+    );
   }
 }

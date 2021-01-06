@@ -257,26 +257,33 @@ class HelperFucntions {
     );
   }
 
+  /// [return the following values] <br>
+  /// [view ==> for viewing picture ]<br>
+  /// [delete ===> for deleting picture]<br>
+  /// [camera ===> for uploading from camera]<br>
+  /// [gallery ===> for uploading form gallery]<br>
   static Future<String> showProfilePicturesModalSheet({
     @required BuildContext context,
     @required String pictureName,
+    bool enableDelete = false,
   }) async {
     UserInfoStateProvider userInfoState = locator<UserInfoStateProvider>();
-    UserInfoStateProvider userInfoStateProvider = Provider.of<UserInfoStateProvider>(context, listen: false);
     final _editText = 'Upload new $pictureName Picture';
     final _deleteText = 'Delete $pictureName picture';
     final _viewText = 'View $pictureName picture';
     userInfoState.setBottomNavBarVisibilityTo(false);
 
-    final Widget _bodyWidget =  ProfilePicturesModalSheet(
+    final Widget _bodyWidget = ProfilePicturesModalSheet(
       onEditText: _editText,
       onDeleteText: _deleteText,
       onViewText: _viewText,
+      deleteEnabled: enableDelete,
     );
     return await showModalBottomSheet(
       backgroundColor: Colors.transparent,
       context: context,
       builder: (context) => _bodyWidget,
+      isScrollControlled: true,
     ).whenComplete(
       () async {
         await Future.delayed(Duration(milliseconds: 200));
@@ -289,11 +296,12 @@ class HelperFucntions {
     FirebaseStorage storage = FirebaseStorage.instance;
     String pdfName = 'pdf_' + DateTime.now().millisecondsSinceEpoch.toString();
     StorageTaskSnapshot snapshot = await storage.ref().child('school_pdfs/$pdfName.pdf').putFile(pdf).onComplete.catchError((err) {
+      print('error');
       print(err);
+      print('error');
     });
     print(snapshot.ref.getDownloadURL());
     String downloadUrl = await snapshot.ref.getDownloadURL();
-
     return downloadUrl == null || downloadUrl.isEmpty ? null : downloadUrl;
   }
 }
